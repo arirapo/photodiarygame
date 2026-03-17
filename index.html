@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Photodiary Game – iPad Firebase test</title>
+  <style>
+    :root{
+      --bg:#0d0f14;--panel:#171b22;--text:#f2f4f8;--muted:#b7becc;--line:rgba(255,255,255,.09);
+      --accent:#d6c7a8;--ok:#9be39b;--err:#ff8585;--radius:18px;
+    }
+    *{box-sizing:border-box} html,body{margin:0;padding:0;background:radial-gradient(circle at top,#1b1f27 0%,var(--bg) 46%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif}
+    body{min-height:100vh}
+    .shell{width:min(920px,calc(100vw - 28px));margin:0 auto;padding:20px 0 56px}
+    .hero{padding:12px 0 10px}
+    .eyebrow{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    h1{font-size:clamp(2rem,7vw,4rem);line-height:.95;letter-spacing:-.04em;margin:0 0 12px}
+    h2{margin:0 0 10px;font-size:1.1rem}
+    p{margin:0 0 12px}
+    .lead{color:var(--muted);line-height:1.6;max-width:62ch}
+    .grid{display:grid;gap:16px}
+    @media (min-width:860px){.grid.two{grid-template-columns:1.08fr .92fr;align-items:start}}
+    .card{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(8px)}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .button{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);border-radius:999px;padding:12px 18px;min-height:46px;cursor:pointer}
+    .button.primary{background:var(--accent);color:#111;border-color:transparent;font-weight:700}
+    .button:disabled{opacity:.5;cursor:wait}
+    .dropzone{border:1px dashed rgba(255,255,255,.18);border-radius:16px;padding:18px;text-align:center}
+    .dropzone p{color:var(--muted)}
+    .preview{overflow:hidden;border-radius:16px;border:1px solid var(--line);background:#111}
+    .preview img{display:block;width:100%;max-height:460px;object-fit:cover}
+    .hidden{display:none!important}
+    .poem{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.12rem,2.6vw,1.42rem);line-height:1.7;white-space:pre-line}
+    .meta{display:grid;gap:8px;color:var(--muted);font-size:.95rem}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:.85rem}
+    .notice{color:var(--muted);min-height:1.4em}
+    .success{color:var(--ok)} .error{color:var(--err)}
+    #qrCanvas{background:#fff;padding:12px;border-radius:14px;display:block;margin:auto}
+    .small{font-size:.9rem;color:var(--muted);word-break:break-word}
+    .parent-image{overflow:hidden;border-radius:16px;border:1px solid var(--line)}
+    .parent-image img{display:block;width:100%;filter:blur(10px) saturate(.9);opacity:.85;transform:scale(1.05)}
+    .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+    .divider{height:1px;background:var(--line);margin:8px 0}
+    a{color:var(--accent)}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <section class="hero">
+    <div class="eyebrow">Photodiary Game / iPad + Firebase</div>
+    <h1>Image → poem → Firebase → QR</h1>
+    <p class="lead">
+      Tämä versio tallentaa uuden jäljen oikeasti Firebaseen. Kuva menee Storageen, runo ja metadata Firestoreen, ja QR-linkki avaa seuraavalle pelaajalle tallennetun ketjun.
+    </p>
+  </section>
+
+  <section class="grid two">
+    <div class="grid">
+      <div class="card hidden" id="promptCard">
+        <div class="eyebrow">Current prompt</div>
+        <div class="poem" id="incomingPoem"></div>
+        <div class="parent-image hidden" id="parentImageWrap">
+          <img id="parentImage" alt="Previous trace image">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="dropzone">
+          <p>Valitse kuva iPadilta tai avaa kamera.</p>
+          <input id="fileInput" type="file" accept="image/*" capture="environment">
+        </div>
+
+        <div class="preview hidden" id="previewWrap" style="margin-top:14px;">
+          <img id="previewImage" alt="Preview">
+        </div>
+
+        <div class="actions" style="margin-top:14px;">
+          <button class="button primary" id="generateBtn" disabled>Generate poem</button>
+          <button class="button primary" id="saveBtn" disabled>Save to Firebase</button>
+          <button class="button" id="resetBtn">Reset</button>
+        </div>
+
+        <p class="notice" id="status"></p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="eyebrow">Output</div>
+        <div class="poem" id="poemOutput">Poem appears here.</div>
+        <div class="meta" id="metaOutput" style="margin-top:14px;">
+          <div class="small">No analysis yet.</div>
+        </div>
+      </div>
+
+      <div class="card hidden" id="qrCard">
+        <div class="eyebrow">QR for the next player</div>
+        <canvas id="qrCanvas"></canvas>
+        <div class="small" id="shareLink" style="margin-top:12px;"></div>
+        <div class="actions" style="margin-top:12px;justify-content:center;">
+          <button class="button" id="copyBtn">Copy link</button>
+          <button class="button" id="openBtn">Open link</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">
+    Huom: tämä on edelleen testiversio. Se käyttää avoimia Firebase-sääntöjä, jos jätit ne testitilaan. Julkiseksi julkaistaessa säännöt pitää kiristää.
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script>
+(() => {
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+    authDomain: "photodiarygame.firebaseapp.com",
+    projectId: "photodiarygame",
+    storageBucket: "photodiarygame.firebasestorage.app",
+    messagingSenderId: "745003978989",
+    appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+    measurementId: "G-1T7CBFRP55"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+
+  const $ = (sel) => document.querySelector(sel);
+  const state = {
+    file: null,
+    previewUrl: null,
+    parentTrace: null,
+    analysis: null,
+    poem: null,
+    shareUrl: null,
+    lastTraceId: null
+  };
+
+  function esc(str='') {
+    return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  }
+
+  function getTraceId() {
+    return new URLSearchParams(location.search).get('id');
+  }
+
+  function getBaseUrl() {
+    return location.origin === 'null' ? location.href.split('?')[0] : (location.origin + location.pathname);
+  }
+
+  async function loadParentTrace() {
+    const id = getTraceId();
+    if (!id) return;
+
+    $('#status').textContent = 'Loading trace from Firebase…';
+    try {
+      const snap = await db.collection('traces').doc(id).get();
+      if (!snap.exists) {
+        $('#status').textContent = 'Trace not found.';
+        $('#status').className = 'notice error';
+        return;
+      }
+
+      state.parentTrace = snap.data();
+      $('#promptCard').classList.remove('hidden');
+      $('#incomingPoem').textContent = state.parentTrace.poem || '';
+
+      if (state.parentTrace.imageUrl) {
+        $('#parentImageWrap').classList.remove('hidden');
+        $('#parentImage').src = state.parentTrace.imageUrl;
+      }
+
+      $('#status').textContent = 'Trace loaded.';
+      $('#status').className = 'notice success';
+    } catch (err) {
+      console.error(err);
+      $('#status').textContent = 'Could not load trace.';
+      $('#status').className = 'notice error';
+    }
+  }
+
+  function resetAll() {
+    if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+    state.file = null;
+    state.previewUrl = null;
+    state.analysis = null;
+    state.poem = null;
+    state.shareUrl = null;
+    state.lastTraceId = null;
+    $('#fileInput').value = '';
+    $('#previewWrap').classList.add('hidden');
+    $('#previewImage').removeAttribute('src');
+    $('#poemOutput').textContent = 'Poem appears here.';
+    $('#metaOutput').innerHTML = '<div class="small">No analysis yet.</div>';
+    $('#generateBtn').disabled = true;
+    $('#saveBtn').disabled = true;
+    $('#qrCard').classList.add('hidden');
+    if (!state.parentTrace) {
+      $('#status').textContent = '';
+      $('#status').className = 'notice';
+    }
+  }
+
+  function round(n,d=2){ return Number.isFinite(n) ? Number(n.toFixed(d)) : null; }
+
+  function rgbToHsl(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    let h=0,s=0,l=(max+min)/2;
+    if(max!==min){
+      const d=max-min;
+      s=l>0.5?d/(2-max-min):d/(max+min);
+      switch(max){
+        case r: h=(g-b)/d+(g<b?6:0); break;
+        case g: h=(b-r)/d+2; break;
+        default: h=(r-g)/d+4;
+      }
+      h/=6;
+    }
+    return {h:h*360,s:s*100,l:l*100};
+  }
+
+  function hueName(h){
+    if(h < 15 || h >= 345) return 'red';
+    if(h < 45) return 'amber';
+    if(h < 70) return 'yellow';
+    if(h < 160) return 'green';
+    if(h < 210) return 'cyan';
+    if(h < 260) return 'blue';
+    if(h < 300) return 'violet';
+    return 'magenta';
+  }
+
+  function brightnessName(l){
+    if(l < 18) return 'dark';
+    if(l < 38) return 'dim';
+    if(l < 68) return 'soft';
+    return 'bright';
+  }
+
+  function timeOfDayName(date){
+    if(!date) return 'unknown hour';
+    const h = date.getHours();
+    if(h >= 5 && h < 11) return 'morning';
+    if(h >= 11 && h < 16) return 'afternoon';
+    if(h >= 16 && h < 21) return 'evening';
+    return 'night';
+  }
+
+  function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  async function readExif(file){
+    try{
+      const data = await exifr.parse(file, { gps:true, exif:true, tiff:true });
+      const date = data?.DateTimeOriginal || data?.CreateDate || data?.ModifyDate || new Date(file.lastModified);
+      return {
+        date: date instanceof Date ? date : new Date(file.lastModified),
+        cameraMake: data?.Make || null,
+        cameraModel: data?.Model || null,
+        gps: (typeof data?.latitude === 'number' && typeof data?.longitude === 'number')
+          ? { latitude: round(data.latitude, 6), longitude: round(data.longitude, 6) }
+          : null
+      };
+    } catch(err) {
+      return {
+        date: new Date(file.lastModified),
+        cameraMake: null,
+        cameraModel: null,
+        gps: null
+      };
+    }
+  }
+
+  async function analyzeColors(file){
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.src = objectUrl;
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+
+    const maxSize = 180;
+    const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, w, h);
+
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let r=0,g=0,b=0,p=0;
+    for(let i=0;i<data.length;i+=4){
+      if(data[i+3] < 20) continue;
+      r += data[i]; g += data[i+1]; b += data[i+2]; p++;
+    }
+    URL.revokeObjectURL(objectUrl);
+    const avg = p ? { r:Math.round(r/p), g:Math.round(g/p), b:Math.round(b/p) } : { r:0,g:0,b:0 };
+    const hsl = rgbToHsl(avg.r,avg.g,avg.b);
+    return {
+      averageRgb: avg,
+      hsl: { h: round(hsl.h,1), s: round(hsl.s,1), l: round(hsl.l,1) },
+      hueLabel: hueName(hsl.h),
+      brightnessLabel: brightnessName(hsl.l)
+    };
+  }
+
+  function generatePoem({ exif, color, incomingPoem = null }) {
+    const tod = timeOfDayName(exif?.date);
+    const hue = color?.hueLabel || 'unknown';
+    const bright = color?.brightnessLabel || 'soft';
+    const hasGps = !!exif?.gps;
+
+    const opening = {
+      morning: [
+        'Morning opened without explanation.',
+        'The day began in a voice almost too quiet to keep.',
+        'A small morning held its breath here.'
+      ],
+      afternoon: [
+        'Afternoon gathered around the visible world.',
+        'The hour leaned into ordinary light.',
+        'Something stayed in the middle of the day.'
+      ],
+      evening: [
+        'Evening folded its light more slowly than expected.',
+        'The day turned toward shadow without closing.',
+        'A late hour left the scene half-awake.'
+      ],
+      night: [
+        'Night kept the edges of the image unfinished.',
+        'Darkness arrived as a soft agreement.',
+        'The hour moved quietly beyond naming.'
+      ],
+      'unknown hour': [
+        'Time entered the image without introducing itself.',
+        'The moment arrived without a clear hour.',
+        'The image keeps its own clock.'
+      ]
+    };
+
+    const colors = {
+      red: ['A red remainder stayed longer than memory.','Something warm refused to disappear.'],
+      amber: ['Amber light touched what could not be held.','A warm edge lingered after the moment passed.'],
+      yellow: ['A yellow trace held the scene together.','Brightness hovered where certainty should have been.'],
+      green: ['Green patience gathered in the background.','The image breathed through a quiet shade of green.'],
+      cyan: ['A pale blue silence moved under the surface.','Cyan carried distance into the frame.'],
+      blue: ['Blue remained where words would have ended.','The scene kept a blue thought to itself.'],
+      violet: ['Violet turned the ordinary slightly strange.','A violet hush crossed the visible world.'],
+      magenta: ['Magenta left the image faintly unreal.','The frame carried an aftertaste of dream.'],
+      unknown: ['Color passed through the image without settling.','The scene resisted a single tone.']
+    };
+
+    const places = hasGps
+      ? [
+        'The place can be found, but not fully explained.',
+        'Coordinates remember less than the image does.',
+        'The map knows where this happened, not what it meant.'
+      ]
+      : [
+        'The place remains unnamed, as if that mattered.',
+        'No map fully keeps this kind of moment.',
+        'The location has withdrawn into the image.'
+      ];
+
+    const lights = {
+      dark: ['What was hidden did not stay silent.','Darkness carried its own small witness.'],
+      dim: ['The light was low, but not absent.','Dimness made the ordinary hesitate.'],
+      soft: ['Soft light allowed the image to drift.','Nothing insisted; everything remained possible.'],
+      bright: ['Brightness revealed less than it promised.','Even strong light left something unresolved.']
+    };
+
+    const tasks = incomingPoem
+      ? [
+        'Continue from what the previous trace almost said: Take a photograph of a place that seems to remember something quietly.',
+        'Answer the earlier trace without repeating it: Take a photograph of an ordinary scene that feels slightly unfinished.',
+        'Photograph the echo rather than the source: Take a photograph where color stays longer than the event itself.',
+        'Continue the chain: Take a photograph of a place between leaving and staying.'
+      ]
+      : [
+        'For the next player: Take a photograph of something visible that still resists explanation.',
+        'Next trace: Take a photograph where silence seems to have a location.',
+        'Invitation: Take a photograph of an ordinary place that behaves like a memory.',
+        'For the next player: Take a photograph of what remains when almost nothing happens.'
+      ];
+
+    return [
+      choose(opening[tod] || opening['unknown hour']),
+      choose(colors[hue] || colors.unknown),
+      choose(places),
+      choose(lights[bright] || lights.soft),
+      '',
+      choose(tasks)
+    ].join('\n');
+  }
+
+  function formatDate(date){
+    try {
+      return new Intl.DateTimeFormat('fi-FI', { dateStyle:'medium', timeStyle:'short' }).format(date);
+    } catch {
+      return 'unknown time';
+    }
+  }
+
+  async function uploadImage(traceId, file) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `traces/${traceId}/image.${ext}`;
+    const ref = storage.ref().child(path);
+    await ref.put(file, { contentType: file.type || 'image/jpeg' });
+    return await ref.getDownloadURL();
+  }
+
+  async function saveTrace(traceId, imageUrl, exif, color, poem) {
+    const payload = {
+      id: traceId,
+      parentId: state.parentTrace?.id || null,
+      poem,
+      imageUrl,
+      exif: {
+        dateISO: exif?.date ? exif.date.toISOString() : null,
+        cameraMake: exif?.cameraMake || null,
+        cameraModel: exif?.cameraModel || null,
+        gps: exif?.gps || null
+      },
+      color: {
+        averageRgb: color?.averageRgb || null,
+        hsl: color?.hsl || null,
+        hueLabel: color?.hueLabel || null,
+        brightnessLabel: color?.brightnessLabel || null
+      },
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    await db.collection('traces').doc(traceId).set(payload);
+  }
+
+  $('#fileInput').addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+    state.file = file;
+    state.previewUrl = URL.createObjectURL(file);
+    $('#previewImage').src = state.previewUrl;
+    $('#previewWrap').classList.remove('hidden');
+    $('#generateBtn').disabled = false;
+    $('#saveBtn').disabled = true;
+    $('#qrCard').classList.add('hidden');
+    $('#status').textContent = 'Image selected.';
+    $('#status').className = 'notice';
+    $('#poemOutput').textContent = 'Poem appears here.';
+    $('#metaOutput').innerHTML = '<div class="small">No analysis yet.</div>';
+  });
+
+  $('#generateBtn').addEventListener('click', async () => {
+    if (!state.file) return;
+    $('#generateBtn').disabled = true;
+    $('#saveBtn').disabled = true;
+    $('#status').textContent = 'Reading EXIF and image colors…';
+    $('#status').className = 'notice';
+
+    try {
+      const [exif, color] = await Promise.all([readExif(state.file), analyzeColors(state.file)]);
+      state.analysis = { exif, color };
+      state.poem = generatePoem({ exif, color, incomingPoem: state.parentTrace?.poem || null });
+
+      $('#poemOutput').textContent = state.poem;
+      $('#metaOutput').innerHTML = `
+        <div class="tags">
+          <span class="tag">${esc(timeOfDayName(exif.date))}</span>
+          <span class="tag">${esc(color.hueLabel)}</span>
+          <span class="tag">${esc(color.brightnessLabel)}</span>
+          <span class="tag">${esc(([exif.cameraMake, exif.cameraModel].filter(Boolean).join(' ') || 'unknown camera'))}</span>
+        </div>
+        <div>${esc(formatDate(exif.date))}</div>
+        <div>${esc(exif.gps ? (exif.gps.latitude + ', ' + exif.gps.longitude) : 'no GPS')}</div>
+      `;
+      $('#saveBtn').disabled = false;
+      $('#status').textContent = 'Poem generated. Save to Firebase next.';
+      $('#status').className = 'notice success';
+    } catch (err) {
+      console.error(err);
+      $('#status').textContent = 'Generation failed.';
+      $('#status').className = 'notice error';
+    } finally {
+      $('#generateBtn').disabled = false;
+    }
+  });
+
+  $('#saveBtn').addEventListener('click', async () => {
+    if (!state.file || !state.analysis || !state.poem) return;
+    $('#saveBtn').disabled = true;
+    $('#status').textContent = 'Uploading image and saving trace…';
+    $('#status').className = 'notice';
+
+    try {
+      const traceId = crypto.randomUUID();
+      const imageUrl = await uploadImage(traceId, state.file);
+      await saveTrace(traceId, imageUrl, state.analysis.exif, state.analysis.color, state.poem);
+      state.lastTraceId = traceId;
+      state.shareUrl = `${getBaseUrl()}?id=${encodeURIComponent(traceId)}`;
+      await QRCode.toCanvas($('#qrCanvas'), state.shareUrl, {
+        width: 280,
+        margin: 1,
+        errorCorrectionLevel: 'M'
+      });
+      $('#shareLink').textContent = state.shareUrl;
+      $('#qrCard').classList.remove('hidden');
+      $('#status').textContent = 'Saved to Firebase. QR ready for the next player.';
+      $('#status').className = 'notice success';
+    } catch (err) {
+      console.error(err);
+      $('#status').textContent = 'Saving failed. Check Firestore/Storage rules and try again.';
+      $('#status').className = 'notice error';
+      $('#saveBtn').disabled = false;
+    }
+  });
+
+  $('#copyBtn').addEventListener('click', async () => {
+    if (!state.shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(state.shareUrl);
+      $('#status').textContent = 'Link copied.';
+      $('#status').className = 'notice success';
+    } catch {
+      $('#status').textContent = 'Copy failed.';
+      $('#status').className = 'notice error';
+    }
+  });
+
+  $('#openBtn').addEventListener('click', () => {
+    if (state.shareUrl) location.href = state.shareUrl;
+  });
+
+  $('#resetBtn').addEventListener('click', resetAll);
+
+  loadParentTrace();
+})();
+</script>
+</body>
+</html>
