@@ -1,56 +1,98 @@
-<!doctype html>
-<html lang="fi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Photodiarygame – QR Gallery</title>
-  <meta name="description" content="Gallery of QR codes created in the QR generator." />
-  <link rel="stylesheet" href="src/qr-gallery.css" />
-</head>
-<body>
-  <main class="shell">
-    <section class="hero">
-      <a href="gallery.html" class="back-link">Photodiarygame</a>
-      <div class="eyebrow">QR Gallery</div>
-      <h1>Recent QR codes.</h1>
-      <p class="lead">
-        Tämä galleria näyttää aikajärjestyksessä luodut QR-koodit. Klikkaa postimerkkiä nähdäksesi suuremman koodin ja avataksesi alkuperäisen datan.
-      </p>
-    </section>
+import QRCode from "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-    <div class="topbar">
-      <div class="meta-pill" id="countPill">Loading QR codes…</div>
-      <a href="qr-generator.html" class="meta-pill">Open QR Generator</a>
-    </div>
+// FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+  authDomain: "photodiarygame.firebaseapp.com",
+  projectId: "photodiarygame",
+  storageBucket: "photodiarygame.firebasestorage.app",
+  messagingSenderId: "745003978989",
+  appId: "1:745003978989:web:727489ba72b34d77af3ce4"
+};
 
-    <section class="card">
-      <div id="status" class="status">Loading gallery from Firebase…</div>
-      <div id="grid" class="grid" style="display:none;"></div>
-      <div id="empty" class="empty" style="display:none;">No QR codes found yet.</div>
-    </section>
-  </main>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="modal-card">
-      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
-      <div class="modal-inner">
-        <div class="modal-qr-wrap">
-          <canvas id="modalCanvas" width="420" height="420"></canvas>
+const grid = document.querySelector("#grid");
+const statusEl = document.querySelector("#status");
+const countPill = document.querySelector("#countPill");
+const emptyEl = document.querySelector("#empty");
+
+async function drawQR(canvas, data) {
+  await QRCode.toCanvas(canvas, data, {
+    width: 220,
+    margin: 1,
+    errorCorrectionLevel: "M"
+  });
+}
+
+function formatDate(ts) {
+  try {
+    if (ts && typeof ts.toDate === "function") {
+      return new Intl.DateTimeFormat("fi-FI", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      }).format(ts.toDate());
+    }
+  } catch {}
+  return "Unknown time";
+}
+
+async function load() {
+  try {
+    const q = query(collection(db, "qr_codes"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      statusEl.style.display = "none";
+      emptyEl.style.display = "block";
+      countPill.textContent = "0 QR codes";
+      return;
+    }
+
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    countPill.textContent = `${items.length} QR code${items.length === 1 ? "" : "s"}`;
+
+    grid.innerHTML = items.map(item => `
+      <button class="thumb" data-id="${item.id}">
+        <div class="thumb-qr">
+          <canvas class="thumb-canvas" width="220" height="220"></canvas>
         </div>
-        <aside class="modal-side">
-          <div class="eyebrow">QR code</div>
-          <h2 class="modal-title" id="modalDate">Created</h2>
-          <div class="info" id="modalInfo"></div>
-          <div class="actions">
-            <a id="openDataBtn" class="button primary hidden" target="_blank" rel="noopener">Open original data</a>
-            <button id="copyTextBtn" class="button hidden">Copy text</button>
+        <div class="thumb-meta">
+          <div class="thumb-date">${formatDate(item.createdAt)}</div>
+          <div class="thumb-tags">
+            <span class="tag">${item.type || "unknown"}</span>
           </div>
-          <div id="textBlock" class="text-block hidden"></div>
-        </aside>
-      </div>
-    </div>
-  </div>
+        </div>
+      </button>
+    `).join("");
 
-  <script type="module" src="src/qr-gallery.js"></script>
-</body>
-</html>
+    grid.style.display = "grid";
+    statusEl.style.display = "none";
+    emptyEl.style.display = "none";
+
+    const buttons = [...grid.querySelectorAll(".thumb")];
+
+    for (const btn of buttons) {
+      const item = items.find(x => x.id === btn.dataset.id);
+      const canvas = btn.querySelector("canvas");
+      if (item && canvas) {
+        await drawQR(canvas, item.qrData || "");
+      }
+
+      btn.onclick = () => {
+        alert(item.qrData || "");
+      };
+    }
+
+  } catch (e) {
+    console.error(e);
+    statusEl.textContent = "Error loading QR gallery";
+    statusEl.style.display = "block";
+    countPill.textContent = "Load failed";
+  }
+}
+
+load();
