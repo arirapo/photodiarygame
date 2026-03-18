@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Photodiarygame – QR Gallery</title>
+  <meta name="description" content="Gallery of QR codes created in the QR generator." />
+  <link rel="stylesheet" href="src/qr-gallery.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <a href="gallery.html" class="back-link">Photodiarygame</a>
+      <div class="eyebrow">QR Gallery</div>
+      <h1>Recent QR codes.</h1>
+      <p class="lead">
+        Tämä galleria näyttää aikajärjestyksessä luodut QR-koodit. Klikkaa postimerkkiä nähdäksesi suuremman koodin ja avataksesi alkuperäisen datan.
+      </p>
+    </section>
+
+    <div class="topbar">
+      <div class="meta-pill" id="countPill">Loading QR codes…</div>
+      <a href="qr-generator.html" class="meta-pill">Open QR Generator</a>
+    </div>
+
+    <section class="card">
+      <div id="status" class="status">Loading gallery from Firebase…</div>
+      <div id="grid" class="grid" style="display:none;"></div>
+      <div id="empty" class="empty" style="display:none;">No QR codes found yet.</div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-inner">
+        <div class="modal-qr-wrap">
+          <canvas id="modalCanvas" width="420" height="420"></canvas>
+        </div>
+        <aside class="modal-side">
+          <div class="eyebrow">QR code</div>
+          <h2 class="modal-title" id="modalDate">Created</h2>
+          <div class="info" id="modalInfo"></div>
+          <div class="actions">
+            <a id="openDataBtn" class="button primary hidden" target="_blank" rel="noopener">Open original data</a>
+            <button id="copyTextBtn" class="button hidden">Copy text</button>
+          </div>
+          <div id="textBlock" class="text-block hidden"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/qr-gallery.js"></script>
+</body>
+</html>
