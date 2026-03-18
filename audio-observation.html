@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Photodiarygame – Audio Observation</title>
+  <meta name="description" content="Record or upload audio, generate a poem, and save the observation to Firebase." />
+  <style>
+    :root{
+      --bg:#f5f1ea; --ink:#2f2a24; --muted:#7a7168; --line:rgba(47,42,36,.12);
+      --soft:#efe7dc; --ok:#49684f; --warn:#9a5c3c; --radius:22px; --shadow:0 14px 40px rgba(45,38,31,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;min-height:100%;background:linear-gradient(180deg,var(--bg),#efe8de);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    body{min-height:100vh}
+    button,input{font:inherit}
+    a{text-decoration:none;color:inherit}
+    .shell{width:min(1100px,calc(100vw - 28px));margin:0 auto;padding:24px 0 56px}
+    .hero{padding:20px 0 14px}
+    .back-link{display:inline-block;margin-bottom:14px;font-size:.9rem;color:var(--muted)}
+    .back-link:hover{text-decoration:underline}
+    .eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(2rem,6vw,4.4rem);line-height:.94;letter-spacing:-.045em;margin-bottom:14px}
+    .lead{font-size:clamp(1rem,2vw,1.08rem);line-height:1.68;color:var(--muted);max-width:64ch}
+    .layout{display:grid;gap:18px}
+    @media (min-width:920px){.layout{grid-template-columns:1fr .92fr;align-items:start}}
+    .card{background:rgba(255,255,255,.56);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .stack{display:grid;gap:16px}
+    .section-title{font-size:1.08rem;letter-spacing:-.02em}
+    .mode-tabs{display:flex;gap:10px;flex-wrap:wrap}
+    .mode-tab,.button{appearance:none;border:1px solid var(--line);border-radius:999px;min-height:46px;padding:12px 18px;cursor:pointer;background:rgba(255,255,255,.58);color:var(--ink);transition:transform .12s ease, background .12s ease, border-color .12s ease}
+    .mode-tab:hover,.button:hover{transform:translateY(-1px);background:white}
+    .mode-tab.active{background:var(--ink);color:white;border-color:transparent}
+    .button.primary{background:var(--ink);color:white;border-color:transparent}
+    .button.soft{background:var(--soft)}
+    .button.danger{background:#7f2f2f;color:white;border-color:transparent}
+    .hidden{display:none!important}
+    .input{width:100%;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.52);color:var(--ink);padding:12px 14px}
+    .status{font-size:.95rem;line-height:1.55;color:var(--muted)}
+    .status.ok{color:var(--ok)}
+    .status.warn{color:var(--warn)}
+    .small{font-size:.9rem;color:var(--muted);line-height:1.55}
+    .player-wrap{border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.48);padding:16px;min-height:120px}
+    audio{width:100%}
+    .poem-block{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.46);padding:14px}
+    .poem-title{font-size:.84rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .poem{font-family:Georgia,"Times New Roman",serif;font-size:1.08rem;line-height:1.72;white-space:pre-line}
+    .meta{display:grid;gap:8px;color:var(--muted);font-size:.94rem;line-height:1.5}
+    .meta code{background:rgba(255,255,255,.55);padding:2px 6px;border-radius:8px}
+    .record-box{border:1px dashed rgba(47,42,36,.18);border-radius:18px;padding:16px;background:rgba(255,255,255,.34)}
+    .timer{font-size:1.2rem;font-weight:600;letter-spacing:.02em}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#c33;margin-right:8px;vertical-align:middle}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <a href="gallery.html" class="back-link">Photodiarygame</a>
+      <div class="eyebrow">Audio Observation</div>
+      <h1>Capture a passing sound.</h1>
+      <p class="lead">
+        Nauhoita lyhyt äänijälki tai lataa äänitiedosto. Sovellus luo siitä runon, tallentaa audion Firebaseen ja näyttää havainnon myöhemmin galleriassa.
+      </p>
+    </section>
+
+    <section class="layout">
+      <section class="card stack">
+        <div class="section-title">Input</div>
+
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-mode="record">Record</button>
+          <button class="mode-tab" data-mode="upload">Upload</button>
+        </div>
+
+        <div id="panel-record" class="stack">
+          <div class="record-box stack">
+            <div class="small">Record a short auditory trace.</div>
+            <div id="recordState" class="timer">00:00</div>
+            <div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">
+              <button id="startRecordBtn" class="button primary">Start recording</button>
+              <button id="stopRecordBtn" class="button danger hidden">Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-upload" class="stack hidden">
+          <div class="small">Upload an audio file from your device.</div>
+          <input id="audioInput" class="input" type="file" accept="audio/*" />
+        </div>
+
+        <div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <button id="generateBtn" class="button primary">Generate poem</button>
+          <button id="saveBtn" class="button soft">Save to Firebase</button>
+          <a href="audio-gallery.html" class="button soft">Open Audio Gallery</a>
+        </div>
+
+        <div id="status" class="status">Ready.</div>
+      </section>
+
+      <section class="card stack">
+        <div class="section-title">Result</div>
+
+        <div class="player-wrap stack">
+          <audio id="audioPlayer" controls class="hidden"></audio>
+          <div id="audioPlaceholder" class="small">No audio yet.</div>
+        </div>
+
+        <div class="poem-block">
+          <div class="poem-title">Poem</div>
+          <div class="poem" id="poemOutput">No poem yet.</div>
+        </div>
+
+        <div class="meta" id="resultMeta">
+          <div class="small">No saved observation yet.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const bank = {
+      opening: [
+        "The moment arrives before language.",
+        "Listening begins before meaning settles.",
+        "A passing trace enters quietly.",
+        "Sound reaches the body before it becomes thought.",
+        "The world leaves a small auditory mark."
+      ],
+      breath: [
+        "Breath passes through the edge of the moment.",
+        "A brief breath steadies attention.",
+        "Air becomes almost visible in listening.",
+        "The body enters the record through breath."
+      ],
+      silence: [
+        "Silence remains inside the sound.",
+        "What is not said shapes the trace.",
+        "A quiet interval keeps the moment open.",
+        "The pause is part of the record."
+      ],
+      voice: [
+        "A voice appears and leaves its warmth behind.",
+        "The voice does not explain; it remains.",
+        "Speech passes, but presence stays.",
+        "A human nearness enters the recording."
+      ],
+      echo: [
+        "A faint echo widens the space.",
+        "The sound returns altered and gentler.",
+        "Distance folds back into the trace.",
+        "An after-sound keeps the moment alive."
+      ],
+      distance: [
+        "Distance enters the recording as atmosphere.",
+        "Far and near remain together in the ear.",
+        "The trace carries a small depth of space.",
+        "The sound arrives from somewhere not fully seen."
+      ],
+      passing: [
+        "Something passes and leaves a slight imprint.",
+        "The moment is already disappearing as it is heard.",
+        "A passing fragment becomes enough.",
+        "The trace remains after the event has moved on."
+      ],
+      attention: [
+        "Attention stays with what almost disappears.",
+        "Listening gathers what the eye would miss.",
+        "The ear keeps a different kind of image.",
+        "Nothing needs to be solved in this sound."
+      ],
+      ending: [
+        "The recording keeps only the trace of that meeting.",
+        "Nothing more was needed.",
+        "The moment was already complete.",
+        "A small auditory relationship was enough."
+      ]
+    };
+
+    const state = {
+      mode: "record",
+      mediaRecorder: null,
+      chunks: [],
+      audioBlob: null,
+      audioUrl: "",
+      durationSec: 0,
+      poem: "",
+      sourceKind: "",
+      timerInterval: null,
+      startedAt: null
+    };
+
+    const tabs = document.querySelectorAll(".mode-tab");
+    const panelRecord = document.querySelector("#panel-record");
+    const panelUpload = document.querySelector("#panel-upload");
+    const startRecordBtn = document.querySelector("#startRecordBtn");
+    const stopRecordBtn = document.querySelector("#stopRecordBtn");
+    const recordState = document.querySelector("#recordState");
+    const audioInput = document.querySelector("#audioInput");
+    const generateBtn = document.querySelector("#generateBtn");
+    const saveBtn = document.querySelector("#saveBtn");
+    const statusEl = document.querySelector("#status");
+    const audioPlayer = document.querySelector("#audioPlayer");
+    const audioPlaceholder = document.querySelector("#audioPlaceholder");
+    const poemOutput = document.querySelector("#poemOutput");
+    const resultMeta = document.querySelector("#resultMeta");
+
+    function uid(){
+      return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+    }
+    function esc(str=""){
+      return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+    }
+    function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function setStatus(message, kind=""){
+      statusEl.textContent = message;
+      statusEl.className = kind ? `status ${kind}` : "status";
+    }
+    function formatSeconds(sec){
+      const s = Math.max(0, Math.round(sec));
+      const mm = String(Math.floor(s / 60)).padStart(2,"0");
+      const ss = String(s % 60).padStart(2,"0");
+      return `${mm}:${ss}`;
+    }
+    function setMode(mode){
+      state.mode = mode;
+      tabs.forEach(tab => tab.classList.toggle("active", tab.dataset.mode === mode));
+      panelRecord.classList.toggle("hidden", mode !== "record");
+      panelUpload.classList.toggle("hidden", mode !== "upload");
+    }
+    function setAudioBlob(blob, sourceKind){
+      if(state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+      state.audioBlob = blob;
+      state.audioUrl = URL.createObjectURL(blob);
+      state.sourceKind = sourceKind;
+      audioPlayer.src = state.audioUrl;
+      audioPlayer.classList.remove("hidden");
+      audioPlaceholder.classList.add("hidden");
+      poemOutput.textContent = "No poem yet.";
+      state.poem = "";
+    }
+    function updateTimer(){
+      if(!state.startedAt) return;
+      const elapsed = (Date.now() - state.startedAt) / 1000;
+      recordState.innerHTML = `<span class="dot"></span>${formatSeconds(elapsed)}`;
+    }
+    function buildPoem(durationSec, sourceKind){
+      const lines = [choose(bank.opening)];
+      if(durationSec < 6){
+        lines.push(choose(bank.breath));
+        lines.push(choose(bank.silence));
+      } else if(durationSec < 18){
+        lines.push(choose(bank.attention));
+        lines.push(choose(bank.passing));
+      } else {
+        lines.push(choose(bank.voice));
+        lines.push(choose(bank.distance));
+      }
+      if(sourceKind === "uploaded"){
+        lines.push(choose(bank.echo));
+      } else {
+        lines.push(choose(bank.passing));
+      }
+      lines.push(choose(bank.ending));
+      return [...new Set(lines.filter(Boolean))].join("\n");
+    }
+
+    tabs.forEach(tab => tab.addEventListener("click", () => setMode(tab.dataset.mode)));
+
+    startRecordBtn.addEventListener("click", async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        state.mediaRecorder = recorder;
+        state.chunks = [];
+        state.startedAt = Date.now();
+        recordState.innerHTML = `<span class="dot"></span>00:00`;
+        state.timerInterval = setInterval(updateTimer, 250);
+
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) state.chunks.push(e.data);
+        };
+
+        recorder.onstop = () => {
+          clearInterval(state.timerInterval);
+          state.timerInterval = null;
+          state.durationSec = (Date.now() - state.startedAt) / 1000;
+          recordState.textContent = formatSeconds(state.durationSec);
+          const blob = new Blob(state.chunks, { type: recorder.mimeType || "audio/webm" });
+          setAudioBlob(blob, "recorded");
+          stream.getTracks().forEach(track => track.stop());
+          setStatus("Recording ready.", "ok");
+          startRecordBtn.classList.remove("hidden");
+          stopRecordBtn.classList.add("hidden");
+        };
+
+        recorder.start();
+        setStatus("Recording…");
+        startRecordBtn.classList.add("hidden");
+        stopRecordBtn.classList.remove("hidden");
+      } catch (err) {
+        console.error(err);
+        setStatus("Microphone access failed.", "warn");
+      }
+    });
+
+    stopRecordBtn.addEventListener("click", () => {
+      if (state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
+        state.mediaRecorder.stop();
+      }
+    });
+
+    audioInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      state.durationSec = 0;
+      setAudioBlob(file, "uploaded");
+      audioPlayer.onloadedmetadata = () => {
+        if (Number.isFinite(audioPlayer.duration)) {
+          state.durationSec = audioPlayer.duration;
+          setStatus("Audio file ready.", "ok");
+        }
+      };
+    });
+
+    generateBtn.addEventListener("click", () => {
+      if (!state.audioBlob) {
+        setStatus("Please record or upload audio first.", "warn");
+        return;
+      }
+      const duration = state.durationSec || audioPlayer.duration || 0;
+      state.poem = buildPoem(duration, state.sourceKind || "uploaded");
+      poemOutput.textContent = state.poem;
+      setStatus("Poem generated.", "ok");
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      if (!state.audioBlob) {
+        setStatus("Please record or upload audio first.", "warn");
+        return;
+      }
+      if (!state.poem) {
+        setStatus("Generate a poem first.", "warn");
+        return;
+      }
+
+      saveBtn.disabled = true;
+      setStatus("Uploading audio and saving observation…");
+
+      try {
+        const id = uid();
+        const ext = state.sourceKind === "uploaded" && "name" in state.audioBlob && String(state.audioBlob.name).includes(".")
+          ? String(state.audioBlob.name).split(".").pop().toLowerCase()
+          : (state.audioBlob.type.includes("mp4") ? "m4a" : state.audioBlob.type.includes("mpeg") ? "mp3" : state.audioBlob.type.includes("ogg") ? "ogg" : "webm");
+
+        const audioRef = ref(storage, `audio-observations/${id}/source.${ext}`);
+        await uploadBytes(audioRef, state.audioBlob, {
+          contentType: state.audioBlob.type || "audio/webm"
+        });
+        const audioUrl = await getDownloadURL(audioRef);
+
+        const payload = {
+          type: "audio",
+          mode: "audio-observation",
+          audioUrl,
+          duration: Number((state.durationSec || audioPlayer.duration || 0).toFixed(2)),
+          createdAt: serverTimestamp(),
+          poem: state.poem,
+          sourceKind: state.sourceKind || "uploaded",
+          sourceDevice: "web"
+        };
+
+        const docRef = await addDoc(collection(db, "audio_observations"), payload);
+
+        resultMeta.innerHTML = `
+          <div><strong>Type:</strong> audio</div>
+          <div><strong>Document id:</strong> <code>${esc(docRef.id)}</code></div>
+          <div><strong>Duration:</strong> ${esc(formatSeconds(payload.duration))}</div>
+          <div><strong>Gallery:</strong> <a href="audio-gallery.html">Open Audio Gallery</a></div>
+        `;
+        setStatus("Saved to Firebase.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Saving failed. Check rules or connection.", "warn");
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    setMode("record");
+  </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Photodiarygame – Audio Gallery</title>
+  <meta name="description" content="Gallery of audio observations created in the audio module." />
+  <style>
+    :root{
+      --bg:#f5f1ea; --ink:#2f2a24; --muted:#7a7168; --line:rgba(47,42,36,.12);
+      --soft:#efe7dc; --radius:22px; --shadow:0 14px 40px rgba(45,38,31,.08); --warn:#9a5c3c;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;min-height:100%;background:linear-gradient(180deg,var(--bg),#efe8de);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    body{min-height:100vh}
+    button{font:inherit}
+    a{text-decoration:none;color:inherit}
+    .shell{width:min(1200px, calc(100vw - 28px));margin:0 auto;padding:24px 0 56px}
+    .hero{padding:18px 0 20px}
+    .back-link{display:inline-block;margin-bottom:14px;font-size:.92rem;color:var(--muted)}
+    .back-link:hover{text-decoration:underline}
+    .eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(2.2rem,6vw,4.6rem);line-height:.94;letter-spacing:-.045em;margin-bottom:14px}
+    .lead{max-width:64ch;color:var(--muted);font-size:clamp(1rem,2vw,1.08rem);line-height:1.7;margin-bottom:0}
+    .topbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .meta-pill{display:inline-flex;align-items:center;min-height:34px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.48);color:var(--muted);font-size:.9rem}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media (min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media (min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+    @media (min-width:1180px){.grid{grid-template-columns:repeat(5,1fr)}}
+    .card{border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.56);backdrop-filter:blur(10px);box-shadow:var(--shadow);padding:18px}
+    .thumb{appearance:none;width:100%;border:1px solid var(--line);background:rgba(255,255,255,.46);border-radius:18px;overflow:hidden;padding:0;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s ease,border-color .12s ease;text-align:left}
+    .thumb:hover{transform:translateY(-2px);border-color:rgba(47,42,36,.22)}
+    .thumb-top{aspect-ratio:1 / 1;background:#f1ece5;display:flex;align-items:center;justify-content:center;padding:14px}
+    .play-badge{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:white;border:1px solid var(--line);font-size:2rem}
+    .thumb-meta{padding:10px 11px 11px;display:grid;gap:6px;background:rgba(255,255,255,.58)}
+    .thumb-date{font-size:.84rem;color:var(--muted);line-height:1.4}
+    .thumb-tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{display:inline-flex;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.76rem;background:rgba(255,255,255,.5)}
+    .status{color:var(--muted);line-height:1.6}
+    .status.warn{color:var(--warn)}
+    .empty{padding:26px 0;text-align:center;color:var(--muted)}
+    .modal{position:fixed;inset:0;background:rgba(26,21,16,.72);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}
+    .modal.open{display:flex}
+    .modal-card{width:min(1060px,100%);max-height:min(92vh,980px);overflow:auto;border-radius:24px;border:1px solid rgba(255,255,255,.14);background:rgba(250,246,240,.96);box-shadow:0 24px 70px rgba(0,0,0,.25);position:relative}
+    .modal-close{appearance:none;position:sticky;top:14px;margin:14px 14px 0 auto;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.9);cursor:pointer;z-index:2}
+    .modal-inner{padding:0 18px 18px;display:grid;gap:16px}
+    @media (min-width:920px){.modal-inner{grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);align-items:start}}
+    .modal-audio-wrap{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#e7e0d6;padding:18px}
+    .modal-side{display:grid;gap:14px;padding-bottom:8px}
+    .modal-title{font-size:1.15rem;letter-spacing:-.02em;margin-bottom:0}
+    .info{display:grid;gap:8px;color:var(--muted);font-size:.94rem;line-height:1.5}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .button{appearance:none;border:1px solid var(--line);border-radius:999px;min-height:46px;padding:12px 18px;background:rgba(255,255,255,.58);cursor:pointer}
+    .button.primary{background:var(--ink);color:white;border-color:transparent}
+    .poem-block{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.46)}
+    .poem-title{font-size:.84rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .poem{font-family:Georgia,"Times New Roman",serif;font-size:1.02rem;line-height:1.72;white-space:pre-line}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <a href="gallery.html" class="back-link">Photodiarygame</a>
+      <div class="eyebrow">Audio Gallery</div>
+      <h1>Recent auditory traces.</h1>
+      <p class="lead">
+        Tämä galleria näyttää aikajärjestyksessä luodut äänihavainnot. Klikkaa postimerkkiä kuunnellaksesi äänen ja nähdäksesi siihen liittyvän runon.
+      </p>
+    </section>
+
+    <div class="topbar">
+      <div class="meta-pill" id="countPill">Loading audio observations…</div>
+      <a href="audio-observation.html" class="meta-pill">Open Audio Observation</a>
+    </div>
+
+    <section class="card">
+      <div id="status" class="status">Loading gallery from Firebase…</div>
+      <div id="grid" class="grid" style="display:none;"></div>
+      <div id="empty" class="empty" style="display:none;">No audio observations found yet.</div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-inner">
+        <div class="modal-audio-wrap">
+          <audio id="modalAudio" controls style="width:100%"></audio>
+        </div>
+        <aside class="modal-side">
+          <div class="eyebrow">Audio observation</div>
+          <h2 class="modal-title" id="modalDate">Created</h2>
+          <div class="poem-block">
+            <div class="poem-title">Poem</div>
+            <div class="poem" id="modalPoem"></div>
+          </div>
+          <div class="info" id="modalInfo"></div>
+          <div class="actions">
+            <a id="openAudioBtn" class="button primary" target="_blank" rel="noopener">Open original audio</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const statusEl = document.querySelector("#status");
+    const gridEl = document.querySelector("#grid");
+    const emptyEl = document.querySelector("#empty");
+    const countPill = document.querySelector("#countPill");
+    const modal = document.querySelector("#modal");
+    const modalClose = document.querySelector("#modalClose");
+    const modalAudio = document.querySelector("#modalAudio");
+    const modalDate = document.querySelector("#modalDate");
+    const modalPoem = document.querySelector("#modalPoem");
+    const modalInfo = document.querySelector("#modalInfo");
+    const openAudioBtn = document.querySelector("#openAudioBtn");
+
+    function esc(str=""){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
+    function formatDate(ts, fallback=""){
+      try {
+        if(ts && typeof ts.toDate === "function"){
+          return new Intl.DateTimeFormat("fi-FI", { dateStyle:"medium", timeStyle:"short" }).format(ts.toDate());
+        }
+      } catch {}
+      return fallback || "Unknown time";
+    }
+    function formatSeconds(sec){
+      const s = Math.max(0, Math.round(sec || 0));
+      const mm = String(Math.floor(s / 60)).padStart(2,"0");
+      const ss = String(s % 60).padStart(2,"0");
+      return `${mm}:${ss}`;
+    }
+    function buildTags(item){
+      const tags = [item.sourceKind || "audio"];
+      tags.push(formatSeconds(item.duration || 0));
+      return tags;
+    }
+    function openModal(item){
+      modalAudio.src = item.audioUrl || "";
+      modalDate.textContent = formatDate(item.createdAt, "Created");
+      modalPoem.textContent = item.poem || "";
+      modalInfo.innerHTML = `
+        <div><strong>Type:</strong> audio</div>
+        <div><strong>Created:</strong> ${esc(formatDate(item.createdAt, "Unknown time"))}</div>
+        <div><strong>Duration:</strong> ${esc(formatSeconds(item.duration || 0))}</div>
+        <div><strong>Source:</strong> ${esc(item.sourceKind || "unknown")}</div>
+        <div><strong>Document id:</strong> ${esc(item.id)}</div>
+      `;
+      openAudioBtn.href = item.audioUrl || "#";
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+    function closeModal(){
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      modalAudio.pause();
+      modalAudio.removeAttribute("src");
+      modalAudio.load();
+    }
+
+    modalClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+    window.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+
+    async function loadGallery(){
+      try {
+        const q = query(collection(db, "audio_observations"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+
+        if(snap.empty){
+          statusEl.style.display = "none";
+          emptyEl.style.display = "block";
+          countPill.textContent = "0 audio observations";
+          return;
+        }
+
+        const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        countPill.textContent = `${items.length} audio observation${items.length === 1 ? "" : "s"}`;
+
+        gridEl.innerHTML = items.map(item => {
+          const date = formatDate(item.createdAt, "Unknown time");
+          const tags = buildTags(item);
+          return `
+            <button class="thumb" data-id="${esc(item.id)}">
+              <div class="thumb-top"><div class="play-badge">▶</div></div>
+              <div class="thumb-meta">
+                <div class="thumb-date">${esc(date)}</div>
+                <div class="thumb-tags">${tags.map(tag => `<span class="tag">${esc(tag)}</span>`).join("")}</div>
+              </div>
+            </button>
+          `;
+        }).join("");
+
+        gridEl.style.display = "grid";
+        statusEl.style.display = "none";
+
+        [...gridEl.querySelectorAll(".thumb")].forEach(btn => {
+          const item = items.find(x => x.id === btn.dataset.id);
+          btn.addEventListener("click", () => { if(item) openModal(item); });
+        });
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Gallery loading failed. Check Firestore rules, collection name, or network connection.";
+        statusEl.classList.add("warn");
+        countPill.textContent = "Load failed";
+      }
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html>
