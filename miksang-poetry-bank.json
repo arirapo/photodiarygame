@@ -1,0 +1,201 @@
+{
+  "structures": [
+    [
+      "opening",
+      "color",
+      "light",
+      "ending"
+    ],
+    [
+      "opening",
+      "space",
+      "light",
+      "ending"
+    ],
+    [
+      "opening",
+      "color",
+      "attention",
+      "ending"
+    ],
+    [
+      "opening",
+      "surface",
+      "light",
+      "ending"
+    ],
+    [
+      "opening",
+      "wonder",
+      "space",
+      "ending"
+    ],
+    [
+      "opening",
+      "light",
+      "surface",
+      "ending"
+    ],
+    [
+      "opening",
+      "color",
+      "surface",
+      "attention",
+      "ending"
+    ]
+  ],
+  "opening": [
+    "The moment arrives before language.",
+    "Seeing happens before naming.",
+    "The visible world settles into itself.",
+    "Something appears without asking to be explained.",
+    "The scene opens quietly.",
+    "Attention gathers before thought.",
+    "The world offers a small complete fragment.",
+    "What appears does not need emphasis.",
+    "The ordinary becomes visible again.",
+    "A simple meeting begins in looking."
+  ],
+  "attention": [
+    "Attention rests where nothing special was demanded.",
+    "Curiosity stays with what first appeared.",
+    "Nothing needs to be solved here.",
+    "The eye meets the scene without urgency.",
+    "Wonder begins in simple attention.",
+    "The frame holds what asked to be noticed.",
+    "Humility leaves the image open.",
+    "The visible remains enough."
+  ],
+  "space": [
+    "Space opens around what is already there.",
+    "Distance and nearness settle in one field.",
+    "The frame breathes through quiet space.",
+    "An interval appears and holds the eye.",
+    "The scene keeps room for stillness.",
+    "Air, edge, and form remain in relation.",
+    "Openness enters without effort.",
+    "The visible leaves space around itself."
+  ],
+  "surface": [
+    "A surface becomes sufficient.",
+    "Texture carries more than explanation could.",
+    "The visible rests on a simple plane.",
+    "Form touches the eye through surface alone.",
+    "A small contact with the world is enough.",
+    "The scene offers itself through texture and edge.",
+    "The surface holds the meeting lightly.",
+    "What is seen remains close to itself."
+  ],
+  "wonder": [
+    "Wonder appears without announcement.",
+    "The ordinary turns luminous for a moment.",
+    "A quiet surprise enters the frame.",
+    "Something small becomes inexhaustible.",
+    "The scene leans gently toward astonishment.",
+    "A brief astonishment keeps the image open.",
+    "What appears remains simple and strange.",
+    "The familiar pauses and becomes visible."
+  ],
+  "light": {
+    "soft": [
+      "Soft light leaves room for attention.",
+      "Nothing insists in this light.",
+      "Light touches the scene lightly.",
+      "Softness allows the eye to settle.",
+      "The light does not press for emphasis.",
+      "The scene stays open in gentle light."
+    ],
+    "bright": [
+      "Brightness reveals without explaining.",
+      "Strong light still leaves room for humility.",
+      "The visible becomes immediate in brightness.",
+      "Light opens the surface and then withdraws.",
+      "Brightness gathers the scene without noise.",
+      "What is lit becomes simple."
+    ],
+    "dim": [
+      "Low light simplifies the act of seeing.",
+      "Dimness asks to be met, not solved.",
+      "Less light makes presence clearer.",
+      "The scene remains quiet in dim light.",
+      "The visible holds itself close in the half-light.",
+      "A muted light keeps the image near silence."
+    ],
+    "dark": [
+      "Darkness simplifies the frame.",
+      "What remains visible is sufficient.",
+      "Less light, more presence.",
+      "Darkness leaves only what is necessary.",
+      "The image begins where certainty grows quieter.",
+      "A darker field steadies attention."
+    ]
+  },
+  "color": {
+    "red": [
+      "Red announces itself and then becomes still.",
+      "A red tone gathers warmth without explanation.",
+      "Color turns toward warmth and stays there.",
+      "The visible carries a quiet red insistence."
+    ],
+    "amber": [
+      "Amber lingers near the edge of attention.",
+      "A warm tone holds the meeting.",
+      "Warmth gathers quietly in the frame.",
+      "Amber remains after naming falls away.",
+      "The scene keeps a small warmth to itself."
+    ],
+    "yellow": [
+      "Yellow steadies the moment from within.",
+      "Brightness leans gently toward yellow.",
+      "A yellow note holds the frame together.",
+      "The scene turns lightly toward yellow attention."
+    ],
+    "green": [
+      "Green gathers the moment without effort.",
+      "The visible rests in a green patience.",
+      "A green field steadies the eye.",
+      "Green allows the scene to remain simple."
+    ],
+    "cyan": [
+      "A cool openness gives the scene its breath.",
+      "Cyan carries distance into the frame.",
+      "A pale coolness opens the visible.",
+      "The image breathes through a cool note."
+    ],
+    "blue": [
+      "Blue opens the space without urgency.",
+      "The scene breathes through blue.",
+      "Blue asks only to be seen as blue.",
+      "A calm blue note keeps the frame open.",
+      "The visible leans toward blue stillness."
+    ],
+    "violet": [
+      "A slight violet strangeness keeps the image awake.",
+      "Violet makes the ordinary quietly unfamiliar.",
+      "The frame carries a small violet hesitation.",
+      "A violet tone leaves room for wonder."
+    ],
+    "magenta": [
+      "A vivid note enters and then softens.",
+      "The visible leans gently toward the unexpected.",
+      "A bright inflection keeps the scene alive.",
+      "Color arrives with a small surprise."
+    ],
+    "unknown": [
+      "Color remains open and unnamed.",
+      "The visible resists a single tone.",
+      "The scene keeps its color to itself.",
+      "No single hue is asked to lead."
+    ]
+  },
+  "ending": [
+    "The photograph keeps only the trace of that meeting.",
+    "Nothing more was needed.",
+    "The meeting was already complete.",
+    "The image records a moment of contact.",
+    "The frame keeps what attention found.",
+    "The photograph remains only as a trace.",
+    "Nothing was missing from the moment.",
+    "A simple relationship was enough."
+  ]
+}
