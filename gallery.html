@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Photodiarygame</title>
+  <meta
+    name="description"
+    content="Photodiarygame gallery – choose between the chain experience and the Miksang practice flow."
+  />
+  <style>
+    :root{
+      --bg:#f4efe8;
+      --paper:#fbf8f3;
+      --ink:#2d2823;
+      --muted:#7b7168;
+      --line:rgba(45,40,35,.12);
+      --accent:#8c7763;
+      --soft:#eee5da;
+      --soft-2:#f7f3ed;
+      --radius:24px;
+      --shadow:0 16px 46px rgba(40,32,24,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at top, #faf6f0 0%, #f3ece2 48%, #eee6db 100%);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+    }
+
+    img{
+      max-width:100%;
+      display:block;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .shell{
+      width:min(1100px, calc(100vw - 28px));
+      margin:0 auto;
+      padding:26px 0 60px;
+    }
+
+    .hero{
+      padding:24px 0 24px;
+    }
+
+    .eyebrow{
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    h1,h2,h3,p{
+      margin-top:0;
+    }
+
+    h1{
+      font-size:clamp(2.4rem, 7vw, 5rem);
+      line-height:.93;
+      letter-spacing:-.045em;
+      margin-bottom:16px;
+      max-width:9ch;
+    }
+
+    .lead{
+      max-width:64ch;
+      color:var(--muted);
+      font-size:clamp(1rem, 2.1vw, 1.12rem);
+      line-height:1.7;
+      margin-bottom:0;
+    }
+
+    .grid{
+      display:grid;
+      gap:18px;
+    }
+
+    @media (min-width: 860px){
+      .grid.two{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    .card{
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.58);
+      backdrop-filter:blur(10px);
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:auto -20% -40% auto;
+      width:200px;
+      height:200px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(140,119,99,.10), transparent 65%);
+      pointer-events:none;
+    }
+
+    .module-label{
+      font-size:.76rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .module-title{
+      font-size:clamp(1.6rem, 3vw, 2.3rem);
+      line-height:1.02;
+      letter-spacing:-.035em;
+      margin-bottom:12px;
+    }
+
+    .module-text{
+      color:var(--muted);
+      line-height:1.7;
+      margin-bottom:18px;
+      max-width:42ch;
+    }
+
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:18px;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      min-height:32px;
+      padding:6px 11px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+    }
+
+    .button{
+      appearance:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:12px 18px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.72);
+      color:var(--ink);
+      font:inherit;
+      cursor:pointer;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+
+    .button:hover{
+      transform:translateY(-1px);
+      background:white;
+    }
+
+    .button.primary{
+      background:var(--ink);
+      color:white;
+      border-color:transparent;
+    }
+
+    .button.soft{
+      background:var(--soft);
+    }
+
+    .mini{
+      font-size:.92rem;
+      color:var(--muted);
+    }
+
+    .section{
+      margin-top:18px;
+    }
+
+    .section-title{
+      font-size:1.05rem;
+      letter-spacing:-.02em;
+      margin-bottom:12px;
+    }
+
+    .list{
+      display:grid;
+      gap:10px;
+    }
+
+    .list-item{
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.44);
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .footer-note{
+      margin-top:28px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.6;
+    }
+
+    .hero-card{
+      margin-top:18px;
+      padding:16px 18px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.48);
+      color:var(--muted);
+      line-height:1.65;
+      max-width:66ch;
+    }
+
+    .subtle-link{
+      color:var(--accent);
+      text-decoration:none;
+    }
+
+    .subtle-link:hover{
+      text-decoration:underline;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Photodiarygame</div>
+      <h1>Choose a way of seeing.</h1>
+      <p class="lead">
+        Photodiarygame is a small web-based environment for image, attention, memory, and poetic response.
+        This gallery page works as a quiet entry point to two different modes: a chain-based image experience and a Miksang-inspired practice flow.
+      </p>
+
+      <div class="hero-card">
+        The first module continues the original Photodiarygame logic:
+        image → poem → response.  
+        The second module slows the process down through three stages:
+        Pause → Notice → Capture.
+      </div>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="module-label">Module 01</div>
+        <h2 class="module-title">Photodiarygame</h2>
+        <p class="module-text">
+          The original chain-based experience. A photograph becomes a poetic prompt and opens a path for the next image.
+          This mode feels more playful, generative, and connective.
+        </p>
+
+        <div class="tags">
+          <span class="tag">Chain</span>
+          <span class="tag">Poem</span>
+          <span class="tag">QR logic</span>
+          <span class="tag">Firebase</span>
+        </div>
+
+        <div class="actions">
+          <a class="button primary" href="index.html">Open Photodiarygame</a>
+        </div>
+
+        <div class="section">
+          <div class="section-title">What happens here</div>
+          <div class="list">
+            <div class="list-item">Take or upload an image</div>
+            <div class="list-item">Generate a poetic response from image properties</div>
+            <div class="list-item">Continue the chain through the next image prompt</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="module-label">Module 02</div>
+        <h2 class="module-title">Miksang Practice</h2>
+        <p class="module-text">
+          A quieter observational flow inspired by Nalanda Miksang and Kim Manley Ort.
+          The emphasis is on attention, humility, wonder, and one simple photographic act.
+        </p>
+
+        <div class="tags">
+          <span class="tag">Pause</span>
+          <span class="tag">Notice</span>
+          <span class="tag">Capture</span>
+          <span class="tag">Aforism</span>
+        </div>
+
+        <div class="actions">
+          <a class="button primary" href="miksang.html">Open Miksang</a>
+        </div>
+
+        <div class="section">
+          <div class="section-title">What happens here</div>
+          <div class="list">
+            <div class="list-item">Move through three phases of seeing</div>
+            <div class="list-item">Capture one simple image only in the final stage</div>
+            <div class="list-item">Receive a short aforism generated from the image</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <div class="module-label">About this page</div>
+        <h3 class="section-title">How to use the gallery</h3>
+        <div class="list">
+          <div class="list-item">Use this page as the main entry point in GitHub Pages.</div>
+          <div class="list-item">Keep <code>index.html</code>, <code>miksang.html</code>, and <code>gallery.html</code> in the same folder.</div>
+          <div class="list-item">Links work as simple local references: <code>index.html</code> and <code>miksang.html</code>.</div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Suggested structure in your repository:  
+      <a class="subtle-link" href="gallery.html">gallery.html</a> ·
+      <a class="subtle-link" href="index.html">index.html</a> ·
+      <a class="subtle-link" href="miksang.html">miksang.html</a>
+    </p>
+  </main>
+</body>
+</html>

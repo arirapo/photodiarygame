@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Photodiarygame – Miksang Gallery</title>
+  <meta name="description" content="Miksang gallery showing images saved from the miksang.html module." />
+  <style>
+    :root{
+      --bg:#f5f1ea;
+      --paper:#fbf8f3;
+      --ink:#2f2a24;
+      --muted:#7a7168;
+      --line:rgba(47,42,36,.12);
+      --accent:#8b7765;
+      --soft:#efe7dc;
+      --radius:22px;
+      --shadow:0 14px 40px rgba(45,38,31,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;min-height:100%;
+      background:linear-gradient(180deg,var(--bg),#efe8de);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
+    body{min-height:100vh}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    button{font:inherit}
+    .shell{width:min(1200px, calc(100vw - 28px));margin:0 auto;padding:24px 0 56px}
+    .hero{padding:18px 0 20px}
+    .back-link{display:inline-block;margin-bottom:14px;font-size:.92rem;color:var(--muted);text-decoration:none}
+    .back-link:hover{text-decoration:underline}
+    .eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(2.2rem,6vw,4.6rem);line-height:.94;letter-spacing:-.045em;margin-bottom:14px}
+    .lead{max-width:64ch;color:var(--muted);font-size:clamp(1rem,2vw,1.08rem);line-height:1.7;margin-bottom:0}
+    .topbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .meta-pill{display:inline-flex;align-items:center;min-height:34px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.48);color:var(--muted);font-size:.9rem}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media (min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media (min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+    @media (min-width:1180px){.grid{grid-template-columns:repeat(5,1fr)}}
+    .thumb{
+      appearance:none;width:100%;border:1px solid var(--line);background:rgba(255,255,255,.46);
+      border-radius:18px;overflow:hidden;padding:0;cursor:pointer;box-shadow:var(--shadow);
+      transition:transform .12s ease,border-color .12s ease;text-align:left
+    }
+    .thumb:hover{transform:translateY(-2px);border-color:rgba(47,42,36,.22)}
+    .thumb-image{aspect-ratio:1 / 1;background:#ddd;overflow:hidden}
+    .thumb-image img{width:100%;height:100%;object-fit:cover}
+    .thumb-meta{padding:10px 11px 11px;display:grid;gap:6px;background:rgba(255,255,255,.58)}
+    .thumb-date{font-size:.84rem;color:var(--muted);line-height:1.4}
+    .thumb-tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{display:inline-flex;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.76rem;background:rgba(255,255,255,.5)}
+    .card{border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.56);backdrop-filter:blur(10px);box-shadow:var(--shadow);padding:18px}
+    .status{color:var(--muted);line-height:1.6}
+    .status.warn{color:#9a5c3c}
+    .empty{padding:26px 0;text-align:center;color:var(--muted)}
+    .modal{
+      position:fixed;inset:0;background:rgba(26,21,16,.72);backdrop-filter:blur(8px);
+      display:none;align-items:center;justify-content:center;padding:18px;z-index:1000
+    }
+    .modal.open{display:flex}
+    .modal-card{
+      width:min(1000px,100%);max-height:min(92vh,980px);overflow:auto;border-radius:24px;
+      border:1px solid rgba(255,255,255,.14);background:rgba(250,246,240,.96);
+      box-shadow:0 24px 70px rgba(0,0,0,.25);position:relative
+    }
+    .modal-close{
+      appearance:none;position:sticky;top:14px;margin:14px 14px 0 auto;display:flex;align-items:center;justify-content:center;
+      width:42px;height:42px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.9);cursor:pointer;z-index:2
+    }
+    .modal-inner{padding:0 18px 18px;display:grid;gap:16px}
+    @media (min-width:920px){.modal-inner{grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);align-items:start}}
+    .modal-image-wrap{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#e7e0d6}
+    .modal-image-wrap img{width:100%;max-height:78vh;object-fit:contain;background:#eee4d7}
+    .modal-side{display:grid;gap:14px;padding-bottom:8px}
+    .modal-title{font-size:1.15rem;letter-spacing:-.02em;margin-bottom:0}
+    .aforism{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.08rem,2vw,1.34rem);line-height:1.72;white-space:pre-line}
+    .info{display:grid;gap:8px;color:var(--muted);font-size:.94rem;line-height:1.5}
+    .footer-note{margin-top:24px;color:var(--muted);font-size:.9rem;line-height:1.6}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <a href="gallery.html" class="back-link">Photodiarygame</a>
+      <div class="eyebrow">Miksang Gallery</div>
+      <h1>Recent observations.</h1>
+      <p class="lead">
+        Tämä galleria näyttää aikajärjestyksessä miksang.html-sivulla tallennetut kuvat.
+        Klikkaa postimerkkiä nähdäksesi kuvan suurempana ja lukeaksesi siihen liittyvän aforismin.
+      </p>
+    </section>
+
+    <div class="topbar">
+      <div class="meta-pill" id="countPill">Loading images…</div>
+      <a href="miksang.html" class="meta-pill">Open Miksang practice</a>
+    </div>
+
+    <section class="card">
+      <div id="status" class="status">Loading gallery from Firebase…</div>
+      <div id="grid" class="grid" style="display:none;"></div>
+      <div id="empty" class="empty" style="display:none;">No Miksang sessions found yet.</div>
+    </section>
+
+    <p class="footer-note">
+      Kuvien järjestys perustuu Firestore-dokumentin <code>createdAt</code>-kenttään, uusin ensin.
+    </p>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-inner">
+        <div class="modal-image-wrap">
+          <img id="modalImage" alt="Miksang image" />
+        </div>
+        <aside class="modal-side">
+          <div class="eyebrow">Miksang session</div>
+          <h2 class="modal-title" id="modalDate">Observation</h2>
+          <div class="aforism" id="modalAforism"></div>
+          <div class="info" id="modalInfo"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const statusEl = document.querySelector("#status");
+    const gridEl = document.querySelector("#grid");
+    const emptyEl = document.querySelector("#empty");
+    const countPill = document.querySelector("#countPill");
+
+    const modal = document.querySelector("#modal");
+    const modalClose = document.querySelector("#modalClose");
+    const modalImage = document.querySelector("#modalImage");
+    const modalDate = document.querySelector("#modalDate");
+    const modalAforism = document.querySelector("#modalAforism");
+    const modalInfo = document.querySelector("#modalInfo");
+
+    function esc(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function formatDate(ts, fallback = "") {
+      try {
+        if (ts && typeof ts.toDate === "function") {
+          return new Intl.DateTimeFormat("fi-FI", { dateStyle: "medium", timeStyle: "short" }).format(ts.toDate());
+        }
+        if (typeof ts === "string" && ts) {
+          return new Intl.DateTimeFormat("fi-FI", { dateStyle: "medium", timeStyle: "short" }).format(new Date(ts));
+        }
+      } catch {}
+      return fallback || "Unknown time";
+    }
+
+    function buildTags(item) {
+      const tags = [];
+      if (item.color && item.color.hueLabel) tags.push(item.color.hueLabel);
+      if (item.color && item.color.brightnessLabel) tags.push(item.color.brightnessLabel);
+      if (item.exif && item.exif.cameraModel) tags.push(item.exif.cameraModel);
+      return tags;
+    }
+
+    function openModal(item) {
+      modalImage.src = item.imageUrl || "";
+      modalDate.textContent = formatDate(item.createdAt, "Observation");
+      modalAforism.textContent = item.aforism || "";
+
+      const infoParts = [];
+      if ((item.exif && item.exif.cameraMake) || (item.exif && item.exif.cameraModel)) {
+        infoParts.push(`${item.exif?.cameraMake || ""} ${item.exif?.cameraModel || ""}`.trim());
+      }
+      if (item.exif && item.exif.gps && item.exif.gps.latitude && item.exif.gps.longitude) {
+        infoParts.push(`${item.exif.gps.latitude}, ${item.exif.gps.longitude}`);
+      }
+      if (item.color && (item.color.hueLabel || item.color.brightnessLabel)) {
+        const bits = [item.color.hueLabel, item.color.brightnessLabel].filter(Boolean).join(" · ");
+        if (bits) infoParts.push(bits);
+      }
+      if (item.id) infoParts.push(`Document id: ${item.id}`);
+
+      modalInfo.innerHTML = infoParts.map(part => `<div>${esc(part)}</div>`).join("");
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      modalImage.removeAttribute("src");
+    }
+
+    modalClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    async function loadGallery() {
+      try {
+        const q = query(collection(db, "miksang_sessions"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          statusEl.style.display = "none";
+          emptyEl.style.display = "block";
+          countPill.textContent = "0 images";
+          return;
+        }
+
+        const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        countPill.textContent = `${items.length} image${items.length === 1 ? "" : "s"}`;
+
+        gridEl.innerHTML = items.map(item => {
+          const date = formatDate(item.createdAt, "Unknown time");
+          const tags = buildTags(item);
+          return `
+            <button class="thumb" data-id="${esc(item.id)}">
+              <div class="thumb-image">
+                <img src="${esc(item.imageUrl || "")}" alt="Miksang image" loading="lazy" />
+              </div>
+              <div class="thumb-meta">
+                <div class="thumb-date">${esc(date)}</div>
+                ${tags.length ? `<div class="thumb-tags">${tags.slice(0,2).map(tag => `<span class="tag">${esc(tag)}</span>`).join("")}</div>` : ""}
+              </div>
+            </button>
+          `;
+        }).join("");
+
+        gridEl.style.display = "grid";
+        statusEl.style.display = "none";
+
+        gridEl.querySelectorAll(".thumb").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const item = items.find(x => x.id === btn.dataset.id);
+            if (item) openModal(item);
+          });
+        });
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Gallery loading failed. Check Firestore rules, collection name, or network connection.";
+        statusEl.classList.add("warn");
+        countPill.textContent = "Load failed";
+      }
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html>
