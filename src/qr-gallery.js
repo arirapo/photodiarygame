@@ -17,46 +17,81 @@ const db = getFirestore(app);
 
 const grid = document.querySelector("#grid");
 const statusEl = document.querySelector("#status");
+const countPill = document.querySelector("#countPill");
+const emptyEl = document.querySelector("#empty");
 
-async function drawQR(canvas, data){
-  await QRCode.toCanvas(canvas, data, { width:220 });
+async function drawQR(canvas, data) {
+  await QRCode.toCanvas(canvas, data, {
+    width: 220,
+    margin: 1,
+    errorCorrectionLevel: "M"
+  });
 }
 
-async function load(){
-  try{
-    const q = query(collection(db,"qr_codes"), orderBy("createdAt","desc"));
+function formatDate(ts) {
+  try {
+    if (ts && typeof ts.toDate === "function") {
+      return new Intl.DateTimeFormat("fi-FI", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      }).format(ts.toDate());
+    }
+  } catch {}
+  return "Unknown time";
+}
+
+async function load() {
+  try {
+    const q = query(collection(db, "qr_codes"), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
 
-    if(snap.empty){
-      statusEl.textContent = "No QR codes yet.";
+    if (snap.empty) {
+      statusEl.style.display = "none";
+      emptyEl.style.display = "block";
+      countPill.textContent = "0 QR codes";
       return;
     }
 
-    const items = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    countPill.textContent = `${items.length} QR code${items.length === 1 ? "" : "s"}`;
 
-    grid.innerHTML = items.map(i=>`
-      <button class="thumb" data-id="${i.id}">
-        <canvas width="220" height="220"></canvas>
-        <div>${i.type}</div>
+    grid.innerHTML = items.map(item => `
+      <button class="thumb" data-id="${item.id}">
+        <div class="thumb-qr">
+          <canvas class="thumb-canvas" width="220" height="220"></canvas>
+        </div>
+        <div class="thumb-meta">
+          <div class="thumb-date">${formatDate(item.createdAt)}</div>
+          <div class="thumb-tags">
+            <span class="tag">${item.type || "unknown"}</span>
+          </div>
+        </div>
       </button>
     `).join("");
 
-    statusEl.style.display="none";
+    grid.style.display = "grid";
+    statusEl.style.display = "none";
+    emptyEl.style.display = "none";
 
     const buttons = [...grid.querySelectorAll(".thumb")];
 
-    for(let btn of buttons){
-      const item = items.find(x=>x.id===btn.dataset.id);
+    for (const btn of buttons) {
+      const item = items.find(x => x.id === btn.dataset.id);
       const canvas = btn.querySelector("canvas");
-      await drawQR(canvas, item.qrData);
+      if (item && canvas) {
+        await drawQR(canvas, item.qrData || "");
+      }
 
-      btn.onclick = ()=>{
-        alert(item.qrData);
+      btn.onclick = () => {
+        alert(item.qrData || "");
       };
     }
 
-  }catch(e){
-    statusEl.textContent = "Error loading";
+  } catch (e) {
+    console.error(e);
+    statusEl.textContent = "Error loading QR gallery";
+    statusEl.style.display = "block";
+    countPill.textContent = "Load failed";
   }
 }
 
