@@ -11,7 +11,14 @@
       --soft:#efe7dc; --ok:#49684f; --warn:#9a5c3c; --radius:22px; --shadow:0 14px 40px rgba(45,38,31,.08);
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;min-height:100%;background:linear-gradient(180deg,var(--bg),#efe8de);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      background:linear-gradient(180deg,var(--bg),#efe8de);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
     body{min-height:100vh}
     button,input{font:inherit}
     a{text-decoration:none;color:inherit}
@@ -24,33 +31,129 @@
     h1{font-size:clamp(2rem,6vw,4.4rem);line-height:.94;letter-spacing:-.045em;margin-bottom:14px}
     .lead{font-size:clamp(1rem,2vw,1.08rem);line-height:1.68;color:var(--muted);max-width:64ch}
     .layout{display:grid;gap:18px}
-    @media (min-width:920px){.layout{grid-template-columns:1fr .92fr;align-items:start}}
-    .card{background:rgba(255,255,255,.56);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    @media (min-width:920px){
+      .layout{grid-template-columns:1fr .92fr;align-items:start}
+    }
+    .card{
+      background:rgba(255,255,255,.56);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
     .stack{display:grid;gap:16px}
     .section-title{font-size:1.08rem;letter-spacing:-.02em}
     .mode-tabs{display:flex;gap:10px;flex-wrap:wrap}
-    .mode-tab,.button{appearance:none;border:1px solid var(--line);border-radius:999px;min-height:46px;padding:12px 18px;cursor:pointer;background:rgba(255,255,255,.58);color:var(--ink);transition:transform .12s ease, background .12s ease, border-color .12s ease}
-    .mode-tab:hover,.button:hover{transform:translateY(-1px);background:white}
-    .mode-tab.active{background:var(--ink);color:white;border-color:transparent}
-    .button.primary{background:var(--ink);color:white;border-color:transparent}
+    .mode-tab,.button{
+      appearance:none;
+      border:1px solid var(--line);
+      border-radius:999px;
+      min-height:46px;
+      padding:12px 18px;
+      cursor:pointer;
+      background:rgba(255,255,255,.58);
+      color:var(--ink);
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .mode-tab:hover,.button:hover{
+      transform:translateY(-1px);
+      background:white;
+    }
+    .mode-tab.active{
+      background:var(--ink);
+      color:white;
+      border-color:transparent;
+    }
+    .button.primary{
+      background:var(--ink);
+      color:white;
+      border-color:transparent;
+    }
     .button.soft{background:var(--soft)}
-    .button.danger{background:#7f2f2f;color:white;border-color:transparent}
+    .button.danger{
+      background:#7f2f2f;
+      color:white;
+      border-color:transparent;
+    }
     .hidden{display:none!important}
-    .input{width:100%;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.52);color:var(--ink);padding:12px 14px}
+    .input{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.52);
+      color:var(--ink);
+      padding:12px 14px;
+    }
     .status{font-size:.95rem;line-height:1.55;color:var(--muted)}
     .status.ok{color:var(--ok)}
     .status.warn{color:var(--warn)}
     .small{font-size:.9rem;color:var(--muted);line-height:1.55}
-    .player-wrap{border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.48);padding:16px;min-height:120px}
+    .player-wrap{
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.48);
+      padding:16px;
+      min-height:120px;
+    }
     audio{width:100%}
-    .poem-block{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.46);padding:14px}
-    .poem-title{font-size:.84rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-    .poem{font-family:Georgia,"Times New Roman",serif;font-size:1.08rem;line-height:1.72;white-space:pre-line}
-    .meta{display:grid;gap:8px;color:var(--muted);font-size:.94rem;line-height:1.5}
-    .meta code{background:rgba(255,255,255,.55);padding:2px 6px;border-radius:8px}
-    .record-box{border:1px dashed rgba(47,42,36,.18);border-radius:18px;padding:16px;background:rgba(255,255,255,.34)}
-    .timer{font-size:1.2rem;font-weight:600;letter-spacing:.02em}
-    .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#c33;margin-right:8px;vertical-align:middle}
+    .poem-block{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.46);
+      padding:14px;
+    }
+    .poem-title{
+      font-size:.84rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .poem{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:1.08rem;
+      line-height:1.72;
+      white-space:pre-line;
+    }
+    .meta{
+      display:grid;
+      gap:8px;
+      color:var(--muted);
+      font-size:.94rem;
+      line-height:1.5;
+    }
+    .meta code{
+      background:rgba(255,255,255,.55);
+      padding:2px 6px;
+      border-radius:8px;
+    }
+    .record-box{
+      border:1px dashed rgba(47,42,36,.18);
+      border-radius:18px;
+      padding:16px;
+      background:rgba(255,255,255,.34);
+    }
+    .timer{
+      font-size:1.2rem;
+      font-weight:600;
+      letter-spacing:.02em;
+    }
+    .dot{
+      display:inline-block;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#c33;
+      margin-right:8px;
+      vertical-align:middle;
+    }
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
   </style>
 </head>
 <body>
@@ -77,7 +180,7 @@
           <div class="record-box stack">
             <div class="small">Record a short auditory trace.</div>
             <div id="recordState" class="timer">00:00</div>
-            <div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">
+            <div class="actions">
               <button id="startRecordBtn" class="button primary">Start recording</button>
               <button id="stopRecordBtn" class="button danger hidden">Stop</button>
             </div>
@@ -86,10 +189,10 @@
 
         <div id="panel-upload" class="stack hidden">
           <div class="small">Upload an audio file from your device.</div>
-          <input id="audioInput" class="input" type="file" accept="audio/*" />
+          <input id="audioInput" class="input" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" />
         </div>
 
-        <div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <div class="actions">
           <button id="generateBtn" class="button primary">Generate poem</button>
           <button id="saveBtn" class="button soft">Save to Firebase</button>
           <a href="audio-gallery.html" class="button soft">Open Audio Gallery</a>
@@ -111,7 +214,7 @@
           <div class="poem" id="poemOutput">No poem yet.</div>
         </div>
 
-        <div class="meta" id="resultMeta">
+        <div id="resultMeta" class="meta">
           <div class="small">No saved observation yet.</div>
         </div>
       </section>
@@ -224,28 +327,42 @@
     const resultMeta = document.querySelector("#resultMeta");
 
     function uid(){
-      return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+      return crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + Math.random().toString(16).slice(2);
     }
+
     function esc(str=""){
-      return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
     }
-    function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function choose(arr){
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
     function setStatus(message, kind=""){
       statusEl.textContent = message;
       statusEl.className = kind ? `status ${kind}` : "status";
     }
+
     function formatSeconds(sec){
       const s = Math.max(0, Math.round(sec));
       const mm = String(Math.floor(s / 60)).padStart(2,"0");
       const ss = String(s % 60).padStart(2,"0");
       return `${mm}:${ss}`;
     }
+
     function setMode(mode){
       state.mode = mode;
       tabs.forEach(tab => tab.classList.toggle("active", tab.dataset.mode === mode));
       panelRecord.classList.toggle("hidden", mode !== "record");
       panelUpload.classList.toggle("hidden", mode !== "upload");
     }
+
     function setAudioBlob(blob, sourceKind){
       if(state.audioUrl) URL.revokeObjectURL(state.audioUrl);
       state.audioBlob = blob;
@@ -257,13 +374,16 @@
       poemOutput.textContent = "No poem yet.";
       state.poem = "";
     }
+
     function updateTimer(){
       if(!state.startedAt) return;
       const elapsed = (Date.now() - state.startedAt) / 1000;
       recordState.innerHTML = `<span class="dot"></span>${formatSeconds(elapsed)}`;
     }
+
     function buildPoem(durationSec, sourceKind){
       const lines = [choose(bank.opening)];
+
       if(durationSec < 6){
         lines.push(choose(bank.breath));
         lines.push(choose(bank.silence));
@@ -274,11 +394,13 @@
         lines.push(choose(bank.voice));
         lines.push(choose(bank.distance));
       }
+
       if(sourceKind === "uploaded"){
         lines.push(choose(bank.echo));
       } else {
         lines.push(choose(bank.passing));
       }
+
       lines.push(choose(bank.ending));
       return [...new Set(lines.filter(Boolean))].join("\n");
     }
@@ -331,12 +453,22 @@
     audioInput.addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
+
+      console.log("Selected file:", file.name, file.type);
+
+      if (!file.type.startsWith("audio/")) {
+        setStatus("File type unclear, trying anyway…", "warn");
+      }
+
       state.durationSec = 0;
       setAudioBlob(file, "uploaded");
+
       audioPlayer.onloadedmetadata = () => {
         if (Number.isFinite(audioPlayer.duration)) {
           state.durationSec = audioPlayer.duration;
           setStatus("Audio file ready.", "ok");
+        } else {
+          setStatus("Audio loaded (duration unknown)", "warn");
         }
       };
     });
@@ -346,6 +478,7 @@
         setStatus("Please record or upload audio first.", "warn");
         return;
       }
+
       const duration = state.durationSec || audioPlayer.duration || 0;
       state.poem = buildPoem(duration, state.sourceKind || "uploaded");
       poemOutput.textContent = state.poem;
@@ -357,6 +490,7 @@
         setStatus("Please record or upload audio first.", "warn");
         return;
       }
+
       if (!state.poem) {
         setStatus("Generate a poem first.", "warn");
         return;
@@ -367,9 +501,19 @@
 
       try {
         const id = uid();
-        const ext = state.sourceKind === "uploaded" && "name" in state.audioBlob && String(state.audioBlob.name).includes(".")
-          ? String(state.audioBlob.name).split(".").pop().toLowerCase()
-          : (state.audioBlob.type.includes("mp4") ? "m4a" : state.audioBlob.type.includes("mpeg") ? "mp3" : state.audioBlob.type.includes("ogg") ? "ogg" : "webm");
+
+        const ext =
+          state.sourceKind === "uploaded" &&
+          "name" in state.audioBlob &&
+          String(state.audioBlob.name).includes(".")
+            ? String(state.audioBlob.name).split(".").pop().toLowerCase()
+            : state.audioBlob.type.includes("mp4")
+              ? "m4a"
+              : state.audioBlob.type.includes("mpeg")
+                ? "mp3"
+                : state.audioBlob.type.includes("ogg")
+                  ? "ogg"
+                  : "webm";
 
         const audioRef = ref(storage, `audio-observations/${id}/source.${ext}`);
         await uploadBytes(audioRef, state.audioBlob, {
