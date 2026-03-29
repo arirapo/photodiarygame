@@ -2,89 +2,182 @@
 <html lang="fi">
 <head>
 <meta charset="UTF-8">
-<title>QR Zine – toimii varmasti</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Zine Demo A4</title>
 
 <style>
-@page { size:A4; margin:0; }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
 
-body { margin:0; background:#ddd; }
+  * {
+    box-sizing: border-box;
+  }
 
-.sheet {
-  width:210mm;
-  height:297mm;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:repeat(4,1fr);
-  background:white;
-}
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #dcdcdc;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 
-.cell {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
+  .sheet {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    background: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(4, 1fr);
+  }
 
-.qr {
-  width:75%;
-}
+  .cell {
+    position: relative;
+    overflow: hidden;
+    background: white;
+  }
 
-.upside { transform:rotate(180deg); }
+  .inner {
+    position: absolute;
+    inset: 8mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.cover {
-  width:140%;
-  height:140%;
-  object-fit:cover;
-}
+  .inner.tight-cover {
+    inset: 0;
+  }
 
-.cover.corrected {
-  transform:rotate(270deg);
-}
+  .upside-down {
+    transform: rotate(180deg);
+    transform-origin: center center;
+  }
+
+  .cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Kansikuvat: tässä vain 180 astetta */
+  .cover-180 {
+    transform: rotate(180deg);
+    transform-origin: center center;
+  }
+
+  .qr {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    image-rendering: auto;
+  }
+
+  @media screen {
+    body {
+      padding: 16px;
+    }
+
+    .sheet {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    }
+  }
+
+  @media print {
+    html, body {
+      background: white;
+    }
+
+    .sheet {
+      margin: 0;
+      box-shadow: none;
+    }
+  }
 </style>
 </head>
-
 <body>
 
 <div class="sheet">
 
-  <!-- 7 -->
-  <div class="cell upside">
-    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://arirapo.github.io/photodiarygame/miksang.html">
-  </div>
-
-  <!-- 8 -->
+  <!-- rivi 1: 7 | 8 -->
   <div class="cell">
-    <img src="IMG_0274.jpeg" class="cover corrected">
+    <div class="inner upside-down">
+      <img
+        class="qr"
+        alt="Sivu 7 QR"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https%3A%2F%2Farirapo.github.io%2Fphotodiarygame%2Fmiksang.html">
+    </div>
   </div>
 
-  <!-- 6 -->
-  <div class="cell upside">
-    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=V%C3%A4hitellen%20kulkija%20alkaa%20muistuttaa%20jotakin%20muuta%20kuin%20yksitt%C3%A4ist%C3%A4%20hahmoa.%20Se%20on%20er%C3%A4%C3%A4nlainen%20merkki%20l%C3%A4sn%C3%A4olosta%20%E2%80%93%20pieni%20varjo%20ajassa.">
-  </div>
-
-  <!-- 1 -->
   <div class="cell">
-    <img src="IMG_3574.jpeg" class="cover corrected">
+    <div class="inner tight-cover">
+      <img
+        class="cover cover-180"
+        src="skull.jpg"
+        alt="Sivu 8 kansikuva">
+    </div>
   </div>
 
-  <!-- 5 -->
-  <div class="cell upside">
-    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://photodiary.gallery/nft/portal.html">
-  </div>
-
-  <!-- 2 -->
+  <!-- rivi 2: 6 | 1 -->
   <div class="cell">
-    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Muisti%20on%20enemmän%20prosessi%20kuin%20tallennustila.">
+    <div class="inner upside-down">
+      <img
+        class="qr"
+        alt="Sivu 6 QR"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=V%C3%A4hitellen%20kulkija%20alkaa%20muistuttaa%20jotakin%20muuta%20kuin%20yksitt%C3%A4ist%C3%A4%20hahmoa.%20Se%20on%20er%C3%A4%C3%A4nlainen%20merkki%20l%C3%A4sn%C3%A4olosta%20%E2%80%93%20pieni%20varjo%20ajassa.%20Se%20ilmestyy%20kuviin%20kuin%20muistutus%20siit%C3%A4%2C%20ett%C3%A4%20joku%20oli%20t%C3%A4%C3%A4ll%C3%A4.%20Ei%20sankarina%20eik%C3%A4%20kertojana%2C%20vaan%20ohikulkijana%2C%20joka%20n%C3%A4ki%20hetken%20ja%20antoi%20sen%20kulkua%20ohi.">
+    </div>
   </div>
 
-  <!-- 4 -->
-  <div class="cell upside">
-    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Muistan%20t%C3%A4m%C3%A4n%20nyt%20n%C3%A4in,%20huomisesta%20en%20ole%20varma.">
-  </div>
-
-  <!-- 3 -->
   <div class="cell">
-    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://photodiary.gallery/experiment/experiment8.html">
+    <div class="inner tight-cover">
+      <img
+        class="cover cover-180"
+        src="traces.jpg"
+        alt="Sivu 1 kansikuva">
+    </div>
+  </div>
+
+  <!-- rivi 3: 5 | 2 -->
+  <div class="cell">
+    <div class="inner upside-down">
+      <img
+        class="qr"
+        alt="Sivu 5 QR"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https%3A%2F%2Fphotodiary.gallery%2Fnft%2Fportal.html">
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="inner">
+      <img
+        class="qr"
+        alt="Sivu 2 QR"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=Muisti%20on%20enemmän%20prosessi%20kuin%20tallennustila.">
+    </div>
+  </div>
+
+  <!-- rivi 4: 4 | 3 -->
+  <div class="cell">
+    <div class="inner upside-down">
+      <img
+        class="qr"
+        alt="Sivu 4 QR"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=Muistan%20t%C3%A4m%C3%A4n%20nyt%20n%C3%A4in%2C%20huomisesta%20en%20ole%20varma.">
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="inner">
+      <img
+        class="qr"
+        alt="Sivu 3 QR"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https%3A%2F%2Fphotodiary.gallery%2Fexperiment%2Fexperiment8.html">
+    </div>
   </div>
 
 </div>
