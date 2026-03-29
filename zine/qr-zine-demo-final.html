@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>QR Zine Final</title>
+
+<!-- QR kirjasto -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+@page { size: A4 portrait; margin: 0; }
+
+body { margin:0; background:#ddd; }
+
+.sheet {
+  width:210mm;
+  height:297mm;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:repeat(4,1fr);
+  background:white;
+}
+
+.cell {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.qrbox {
+  width:70%;
+}
+
+.upside { transform: rotate(180deg); }
+
+.cover {
+  width:140%;
+  height:140%;
+  object-fit:cover;
+}
+
+.cover.corrected {
+  transform: rotate(270deg);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+  <!-- 7 -->
+  <div class="cell upside"><div id="qr7" class="qrbox"></div></div>
+
+  <!-- 8 -->
+  <div class="cell">
+    <img src="skull.jpg" class="cover corrected">
+  </div>
+
+  <!-- 6 -->
+  <div class="cell upside"><div id="qr6" class="qrbox"></div></div>
+
+  <!-- 1 -->
+  <div class="cell">
+    <img src="traces.jpg" class="cover corrected">
+  </div>
+
+  <!-- 5 -->
+  <div class="cell upside"><div id="qr5" class="qrbox"></div></div>
+
+  <!-- 2 -->
+  <div class="cell"><div id="qr2" class="qrbox"></div></div>
+
+  <!-- 4 -->
+  <div class="cell upside"><div id="qr4" class="qrbox"></div></div>
+
+  <!-- 3 -->
+  <div class="cell"><div id="qr3" class="qrbox"></div></div>
+
+</div>
+
+<script>
+new QRCode("qr2", {
+  text: "Muisti on enemmän prosessi kuin tallennustila.",
+  width: 300,
+  height: 300
+});
+
+new QRCode("qr3", {
+  text: "https://photodiary.gallery/experiment/experiment8.html",
+  width: 300,
+  height: 300
+});
+
+new QRCode("qr4", {
+  text: "Muistan tämän nyt näin, huomisesta en ole varma.",
+  width: 300,
+  height: 300
+});
+
+new QRCode("qr5", {
+  text: "https://photodiary.gallery/nft/portal.html",
+  width: 300,
+  height: 300
+});
+
+new QRCode("qr6", {
+  text: "Vähitellen kulkija alkaa muistuttaa jotakin muuta kuin yksittäistä hahmoa. Se on eräänlainen merkki läsnäolosta – pieni varjo ajassa. Se ilmestyy kuviin kuin muistutus siitä, että joku oli täällä. Ei sankarina eikä kertojana, vaan ohikulkijana, joka näki hetken ja antoi sen kulkea ohi.",
+  width: 300,
+  height: 300
+});
+
+new QRCode("qr7", {
+  text: "https://arirapo.github.io/photodiarygame/miksang.html",
+  width: 300,
+  height: 300
+});
+</script>
+
+</body>
+</html>
