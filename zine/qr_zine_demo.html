@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>QR Zine Demo</title>
+<style>
+  body {
+    margin: 0;
+    background: #ddd;
+  }
+  .sheet {
+    width: 210mm;
+    height: 297mm;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0;
+  }
+  .page {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  .page img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .qr {
+    width: 80%;
+    height: auto;
+  }
+  .upside-down {
+    transform: rotate(180deg);
+  }
+
+  @media print {
+    body { background: white; }
+    .sheet { margin: 0; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+  <!-- 8 -->
+  <div class="page">
+    <img src="skull.jpg">
+  </div>
+
+  <!-- 1 -->
+  <div class="page">
+    <img src="traces.jpg">
+  </div>
+
+  <!-- 7 -->
+  <div class="page upside-down">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://arirapo.github.io/photodiarygame/miksang.html">
+  </div>
+
+  <!-- 2 -->
+  <div class="page">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Muisti%20on%20enemmän%20prosessi%20kuin%20tallennustila.">
+  </div>
+
+  <!-- 6 (tyhjä placeholder) -->
+  <div class="page upside-down">
+  </div>
+
+  <!-- 3 -->
+  <div class="page">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://photodiary.gallery/experiments/experiment8.html">
+  </div>
+
+  <!-- 5 -->
+  <div class="page upside-down">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://photodiary.gallery/nft/portal.html">
+  </div>
+
+  <!-- 4 -->
+  <div class="page upside-down">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Muistan%20tämän%20nyt%20näin,%20huomisesta%20en%20ole%20varma.">
+  </div>
+
+</div>
+
+</body>
+</html>
