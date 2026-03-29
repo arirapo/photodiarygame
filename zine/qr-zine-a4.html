@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>QR Zine – toimii varmasti</title>
+
+<style>
+@page { size:A4; margin:0; }
+
+body { margin:0; background:#ddd; }
+
+.sheet {
+  width:210mm;
+  height:297mm;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:repeat(4,1fr);
+  background:white;
+}
+
+.cell {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.qr {
+  width:75%;
+}
+
+.upside { transform:rotate(180deg); }
+
+.cover {
+  width:140%;
+  height:140%;
+  object-fit:cover;
+}
+
+.cover.corrected {
+  transform:rotate(270deg);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+
+  <!-- 7 -->
+  <div class="cell upside">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://arirapo.github.io/photodiarygame/miksang.html">
+  </div>
+
+  <!-- 8 -->
+  <div class="cell">
+    <img src="skull.jpg" class="cover corrected">
+  </div>
+
+  <!-- 6 -->
+  <div class="cell upside">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=V%C3%A4hitellen%20kulkija%20alkaa%20muistuttaa%20jotakin%20muuta%20kuin%20yksitt%C3%A4ist%C3%A4%20hahmoa.%20Se%20on%20er%C3%A4%C3%A4nlainen%20merkki%20l%C3%A4sn%C3%A4olosta%20%E2%80%93%20pieni%20varjo%20ajassa.">
+  </div>
+
+  <!-- 1 -->
+  <div class="cell">
+    <img src="traces.jpg" class="cover corrected">
+  </div>
+
+  <!-- 5 -->
+  <div class="cell upside">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://photodiary.gallery/nft/portal.html">
+  </div>
+
+  <!-- 2 -->
+  <div class="cell">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Muisti%20on%20enemmän%20prosessi%20kuin%20tallennustila.">
+  </div>
+
+  <!-- 4 -->
+  <div class="cell upside">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Muistan%20t%C3%A4m%C3%A4n%20nyt%20n%C3%A4in,%20huomisesta%20en%20ole%20varma.">
+  </div>
+
+  <!-- 3 -->
+  <div class="cell">
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://photodiary.gallery/experiment/experiment8.html">
+  </div>
+
+</div>
+
+</body>
+</html>
