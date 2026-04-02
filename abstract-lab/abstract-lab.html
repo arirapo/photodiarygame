@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photodiarygame – Abstract Lab</title>
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel2: #1f2430;
+      --text: #eaeaea;
+      --muted: #a7b0c0;
+      --line: #2f3645;
+      --accent: #8fb7ff;
+      --danger: #ff6b6b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 24px 20px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, #12151c, #0f1115);
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 1.7rem;
+      font-weight: 700;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .wrap {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      padding: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .panel h2, .panel h3 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    textarea,
+    select,
+    input[type="file"] {
+      width: 100%;
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .slider-row {
+      margin: 10px 0;
+    }
+
+    .slider-row label {
+      margin-bottom: 4px;
+    }
+
+    .slider-row small {
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #111;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    button.danger {
+      color: white;
+      background: #7c2d2d;
+      border-color: #a33b3b;
+    }
+
+    .preview-wrap {
+      display: grid;
+      gap: 16px;
+    }
+
+    .preview-box {
+      background: #0b0d11;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 72vh;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .meta-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .meta-box p {
+      margin: 6px 0;
+      color: var(--muted);
+    }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .thumb {
+      aspect-ratio: 1 / 1;
+      background: #0b0d11;
+      overflow: hidden;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-body {
+      padding: 10px 12px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      width: min(1100px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      background: #11151d;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+
+    .modal-image {
+      background: #0b0d11;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      place-items: center;
+    }
+
+    .modal-image img {
+      max-width: 100%;
+      max-height: 75vh;
+      border-radius: 8px;
+    }
+
+    .modal-side h3 {
+      margin-top: 0;
+    }
+
+    .modal-side p {
+      margin: 8px 0;
+    }
+
+    @media (max-width: 980px) {
+      .wrap {
+        grid-template-columns: 1fr;
+      }
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Photodiarygame – Abstract Lab</h1>
+    <p>
+      Pieni laboratorio abstraktin valokuvan syöttämiseen, EXIF-tietojen lukemiseen,
+      suodinkokeiluihin ja galleriakatseluun.
+    </p>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Lisää uusi kuva</h2>
+
+      <label for="imageFile">Kuvatiedosto</label>
+      <input id="imageFile" type="file" accept="image/*" />
+
+      <label for="author">Kuvaaja / nimimerkki</label>
+      <input id="author" type="text" placeholder="esim. Ari Rapo / Trace Operator" />
+
+      <label for="title">Kuvan nimi</label>
+      <input id="title" type="text" placeholder="esim. Surface Memory" />
+
+      <label for="description">Kuvausteksti</label>
+      <textarea id="description" placeholder="Lyhyt kuvausteksti, ajatus, havainto, tunnelma..."></textarea>
+
+      <h3>Suotimet</h3>
+
+      <label for="preset">Esiasetus</label>
+      <select id="preset">
+        <option value="none">Ei esiasetusta</option>
+        <option value="negative">Negatiivi</option>
+        <option value="falsecolor">Vääräväri</option>
+        <option value="dream">Dream / pehmeä</option>
+        <option value="surreal">Surrealismi</option>
+      </select>
+
+      <div class="slider-row">
+        <label for="invertRange">Nega / invert (%)</label>
+        <input id="invertRange" type="range" min="0" max="100" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <label for="hueRange">Värisiirto / hue-rotate (°)</label>
+        <input id="hueRange" type="range" min="0" max="360" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <label for="satRange">Saturaatio (%)</label>
+        <input id="satRange" type="range" min="0" max="300" value="100" />
+      </div>
+
+      <div class="slider-row">
+        <label for="contrastRange">Kontrasti (%)</label>
+        <input id="contrastRange" type="range" min="50" max="250" value="100" />
+      </div>
+
+      <div class="slider-row">
+        <label for="blurRange">Pehmennys / blur (px)</label>
+        <input id="blurRange" type="range" min="0" max="8" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <label for="distortRange">Vääristys (%)</label>
+        <input id="distortRange" type="range" min="0" max="30" value="0" />
+        <small>Tämä tekee ensimmäisessä versiossa lievän perspektiivisen venytyksen.</small>
+      </div>
+
+      <div class="btn-row">
+        <button id="resetFiltersBtn" type="button">Nollaa suotimet</button>
+        <button id="saveBtn" class="primary" type="button">Tallenna galleriaan</button>
+      </div>
+    </section>
+
+    <section class="preview-wrap">
+      <div class="preview-box">
+        <canvas id="previewCanvas" width="1200" height="1200"></canvas>
+      </div>
+
+      <div class="meta-box">
+        <h3>EXIF / tekniset tiedot</h3>
+        <div id="exifBox" class="muted">Ei vielä tiedostoa valittuna.</div>
+      </div>
+
+      <section class="panel">
+        <div class="gallery-header">
+          <h2 style="margin:0;">Galleria</h2>
+          <div class="btn-row" style="margin-top:0;">
+            <button id="clearGalleryBtn" class="danger" type="button">Tyhjennä paikallinen galleria</button>
+          </div>
+        </div>
+        <div id="gallery" class="gallery"></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <div class="btn-row" style="justify-content:flex-end; margin-bottom:10px;">
+        <button id="closeModalBtn" type="button">Sulje</button>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-image">
+          <img id="modalImg" src="" alt="" />
+        </div>
+        <div class="modal-side">
+          <h3 id="modalTitle">Kuvan nimi</h3>
+          <p><strong>Tekijä:</strong> <span id="modalAuthor"></span></p>
+          <p><strong>Kuvaus:</strong> <span id="modalDescription"></span></p>
+          <p><strong>Kuvaushetki:</strong> <span id="modalDate"></span></p>
+          <p><strong>Kamera:</strong> <span id="modalCamera"></span></p>
+          <p><strong>Tallennettu:</strong> <span id="modalSaved"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "abstractLabEntries_v1";
+
+    const imageFile = document.getElementById("imageFile");
+    const author = document.getElementById("author");
+    const titleInput = document.getElementById("title");
+    const description = document.getElementById("description");
+    const preset = document.getElementById("preset");
+
+    const invertRange = document.getElementById("invertRange");
+    const hueRange = document.getElementById("hueRange");
+    const satRange = document.getElementById("satRange");
+    const contrastRange = document.getElementById("contrastRange");
+    const blurRange = document.getElementById("blurRange");
+    const distortRange = document.getElementById("distortRange");
+
+    const previewCanvas = document.getElementById("previewCanvas");
+    const ctx = previewCanvas.getContext("2d");
+
+    const exifBox = document.getElementById("exifBox");
+    const gallery = document.getElementById("gallery");
+
+    const saveBtn = document.getElementById("saveBtn");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const clearGalleryBtn = document.getElementById("clearGalleryBtn");
+
+    const modal = document.getElementById("modal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const modalImg = document.getElementById("modalImg");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalAuthor = document.getElementById("modalAuthor");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalDate = document.getElementById("modalDate");
+    const modalCamera = document.getElementById("modalCamera");
+    const modalSaved = document.getElementById("modalSaved");
+
+    let currentImage = null;
+    let currentExif = {};
+    let currentOriginalDataUrl = null;
+
+    function getEntries() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    }
+
+    function setEntries(entries) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function escapeHtml(str = "") {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatExifDate(value) {
+      if (!value) return "Ei saatavilla";
+      try {
+        if (value instanceof Date) {
+          return value.toLocaleString("fi-FI");
+        }
+        return String(value);
+      } catch {
+        return String(value);
+      }
+    }
+
+    function formatSavedDate(value) {
+      try {
+        return new Date(value).toLocaleString("fi-FI");
+      } catch {
+        return value || "";
+      }
+    }
+
+    function getFilterState() {
+      return {
+        invert: Number(invertRange.value),
+        hue: Number(hueRange.value),
+        saturate: Number(satRange.value),
+        contrast: Number(contrastRange.value),
+        blur: Number(blurRange.value),
+        distort: Number(distortRange.value),
+        preset: preset.value
+      };
+    }
+
+    function setFilterState(state) {
+      invertRange.value = state.invert ?? 0;
+      hueRange.value = state.hue ?? 0;
+      satRange.value = state.saturate ?? 100;
+      contrastRange.value = state.contrast ?? 100;
+      blurRange.value = state.blur ?? 0;
+      distortRange.value = state.distort ?? 0;
+      preset.value = state.preset ?? "none";
+    }
+
+    function resetFilters() {
+      setFilterState({
+        invert: 0,
+        hue: 0,
+        saturate: 100,
+        contrast: 100,
+        blur: 0,
+        distort: 0,
+        preset: "none"
+      });
+      renderPreview();
+    }
+
+    function applyPreset(name) {
+      if (name === "negative") {
+        setFilterState({ invert: 100, hue: 0, saturate: 100, contrast: 110, blur: 0, distort: 0, preset: "negative" });
+      } else if (name === "falsecolor") {
+        setFilterState({ invert: 0, hue: 140, saturate: 180, contrast: 125, blur: 0, distort: 4, preset: "falsecolor" });
+      } else if (name === "dream") {
+        setFilterState({ invert: 0, hue: 25, saturate: 130, contrast: 90, blur: 2, distort: 0, preset: "dream" });
+      } else if (name === "surreal") {
+        setFilterState({ invert: 20, hue: 210, saturate: 210, contrast: 135, blur: 1, distort: 12, preset: "surreal" });
+      } else {
+        resetFilters();
+      }
+    }
+
+    function drawImageContain(img, canvas, ctx, distortPercent = 0) {
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = img.width;
+      const ih = img.height;
+
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.fillStyle = "#0b0d11";
+      ctx.fillRect(0, 0, cw, ch);
+
+      const scale = Math.min(cw / iw, ch / ih);
+      const w = iw * scale;
+      const h = ih * scale;
+      const x = (cw - w) / 2;
+      const y = (ch - h) / 2;
+
+      ctx.save();
+
+      if (distortPercent > 0) {
+        const skew = distortPercent / 100;
+        ctx.translate(cw / 2, ch / 2);
+        ctx.transform(1, 0, skew * 0.35, 1, 0, 0);
+        ctx.translate(-cw / 2, -ch / 2);
+      }
+
+      ctx.drawImage(img, x, y, w, h);
+      ctx.restore();
+    }
+
+    function renderPreview() {
+      if (!currentImage) {
+        ctx.fillStyle = "#0b0d11";
+        ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        ctx.fillStyle = "#6f7785";
+        ctx.font = "24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Valitse kuva nähdäksesi esikatselun", previewCanvas.width / 2, previewCanvas.height / 2);
+        return;
+      }
+
+      const filters = getFilterState();
+      ctx.save();
+      ctx.filter = `
+        invert(${filters.invert}%)
+        hue-rotate(${filters.hue}deg)
+        saturate(${filters.saturate}%)
+        contrast(${filters.contrast}%)
+        blur(${filters.blur}px)
+      `;
+      drawImageContain(currentImage, previewCanvas, ctx, filters.distort);
+      ctx.restore();
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+
+      currentOriginalDataUrl = await fileToDataURL(file);
+
+      const img = new Image();
+      img.onload = async () => {
+        currentImage = img;
+        renderPreview();
+
+        try {
+          const exif = await exifr.parse(file, true);
+          currentExif = exif || {};
+          renderExif();
+        } catch (err) {
+          currentExif = {};
+          exifBox.innerHTML = `<p>EXIF-tietojen luku ei onnistunut.</p>`;
+        }
+      };
+      img.src = currentOriginalDataUrl;
+    }
+
+    function renderExif() {
+      const dateOriginal = currentExif.DateTimeOriginal || currentExif.CreateDate || currentExif.ModifyDate;
+      const make = currentExif.Make || "";
+      const model = currentExif.Model || "";
+      const lens = currentExif.LensModel || "";
+      const iso = currentExif.ISO || "";
+      const fnumber = currentExif.FNumber || "";
+      const exposure = currentExif.ExposureTime || "";
+      const focal = currentExif.FocalLength || "";
+
+      exifBox.innerHTML = `
+        <p><strong>Kuvaushetki:</strong> ${escapeHtml(formatExifDate(dateOriginal))}</p>
+        <p><strong>Kamera:</strong> ${escapeHtml([make, model].filter(Boolean).join(" ")) || "Ei saatavilla"}</p>
+        <p><strong>Objektiivi:</strong> ${escapeHtml(String(lens || "Ei saatavilla"))}</p>
+        <p><strong>ISO:</strong> ${escapeHtml(String(iso || "Ei saatavilla"))}</p>
+        <p><strong>Aukko:</strong> ${escapeHtml(fnumber ? "f/" + fnumber : "Ei saatavilla")}</p>
+        <p><strong>Valotusaika:</strong> ${escapeHtml(String(exposure || "Ei saatavilla"))}</p>
+        <p><strong>Polttoväli:</strong> ${escapeHtml(focal ? focal + " mm" : "Ei saatavilla")}</p>
+      `;
+    }
+
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function createRenderedImageDataURL() {
+      return previewCanvas.toDataURL("image/jpeg", 0.92);
+    }
+
+    function saveEntry() {
+      if (!currentImage) {
+        alert("Valitse ensin kuva.");
+        return;
+      }
+
+      const entry = {
+        id: crypto.randomUUID(),
+        author: author.value.trim(),
+        title: titleInput.value.trim(),
+        description: description.value.trim(),
+        exif: {
+          dateOriginal: currentExif.DateTimeOriginal || currentExif.CreateDate || null,
+          make: currentExif.Make || "",
+          model: currentExif.Model || ""
+        },
+        filters: getFilterState(),
+        imageData: createRenderedImageDataURL(),
+        originalImageData: currentOriginalDataUrl,
+        savedAt: new Date().toISOString()
+      };
+
+      const entries = getEntries();
+      entries.unshift(entry);
+      setEntries(entries);
+      renderGallery();
+      alert("Kuva tallennettu paikalliseen galleriaan.");
+    }
+
+    function renderGallery() {
+      const entries = getEntries();
+
+      if (!entries.length) {
+        gallery.innerHTML = `<p class="muted">Galleriassa ei ole vielä kuvia.</p>`;
+        return;
+      }
+
+      gallery.innerHTML = entries.map(entry => `
+        <article class="card" data-id="${entry.id}">
+          <div class="thumb">
+            <img src="${entry.imageData}" alt="${escapeHtml(entry.title || "Abstrakti kuva")}" />
+          </div>
+          <div class="card-body">
+            <div class="card-title">${escapeHtml(entry.title || "Nimetön")}</div>
+            <div class="card-meta">${escapeHtml(entry.author || "Tuntematon")}</div>
+          </div>
+        </article>
+      `).join("");
+
+      [...gallery.querySelectorAll(".card")].forEach(card => {
+        card.addEventListener("click", () => openModal(card.dataset.id));
+      });
+    }
+
+    function openModal(id) {
+      const entries = getEntries();
+      const entry = entries.find(e => e.id === id);
+      if (!entry) return;
+
+      modalImg.src = entry.imageData;
+      modalTitle.textContent = entry.title || "Nimetön";
+      modalAuthor.textContent = entry.author || "Tuntematon";
+      modalDescription.textContent = entry.description || "—";
+      modalDate.textContent = formatExifDate(entry.exif?.dateOriginal);
+      modalCamera.textContent = [entry.exif?.make, entry.exif?.model].filter(Boolean).join(" ") || "Ei saatavilla";
+      modalSaved.textContent = formatSavedDate(entry.savedAt);
+
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      modalImg.src = "";
+    }
+
+    imageFile.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      handleFile(file);
+    });
+
+    [
+      invertRange,
+      hueRange,
+      satRange,
+      contrastRange,
+      blurRange,
+      distortRange
+    ].forEach(el => el.addEventListener("input", renderPreview));
+
+    preset.addEventListener("change", () => {
+      applyPreset(preset.value);
+    });
+
+    resetFiltersBtn.addEventListener("click", resetFilters);
+    saveBtn.addEventListener("click", saveEntry);
+
+    clearGalleryBtn.addEventListener("click", () => {
+      const ok = confirm("Tyhjennetäänkö paikallinen galleria tästä selaimesta?");
+      if (!ok) return;
+      localStorage.removeItem(STORAGE_KEY);
+      renderGallery();
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    renderPreview();
+    renderGallery();
+  </script>
+</body>
+</html>
