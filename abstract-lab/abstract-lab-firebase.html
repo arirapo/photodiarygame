@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Photodiarygame – Abstract Lab (Firebase)</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 
   <style>
     :root {
@@ -532,6 +532,17 @@
         .replaceAll("'", "&#39;");
     }
 
+    function updateCanvasCssPreview() {
+  const filters = getFilterState();
+
+  previewCanvas.style.filter =
+    "invert(" + filters.invert + "%) " +
+    "hue-rotate(" + filters.hue + "deg) " +
+    "saturate(" + filters.saturate + "%) " +
+    "contrast(" + filters.contrast + "%) " +
+    "blur(" + filters.blur + "px)";
+}
+
     function formatExifDate(value) {
       if (!value) return "Ei saatavilla";
       try {
@@ -575,18 +586,19 @@
       preset.value = state.preset ?? "none";
     }
 
-    function resetFilters() {
-      setFilterState({
-        invert: 0,
-        hue: 0,
-        saturate: 100,
-        contrast: 100,
-        blur: 0,
-        distort: 0,
-        preset: "none"
-      });
-      renderPreview();
-    }
+function resetFilters() {
+  setFilterState({
+    invert: 0,
+    hue: 0,
+    saturate: 100,
+    contrast: 100,
+    blur: 0,
+    distort: 0,
+    preset: "none"
+  });
+  renderPreview();
+  updateCanvasCssPreview();
+}
 
     function applyPreset(name) {
       if (name === "negative") {
@@ -602,87 +614,121 @@
       }
     }
 
-    function drawImageContain(img, canvas, ctx, distortPercent = 0) {
-      const cw = canvas.width;
-      const ch = canvas.height;
-      const iw = img.width;
-      const ih = img.height;
+function drawImageContain(img, canvas, ctx, distortPercent = 0) {
+  const cw = canvas.width;
+  const ch = canvas.height;
+  const iw = img.width;
+  const ih = img.height;
 
-      ctx.clearRect(0, 0, cw, ch);
-      ctx.fillStyle = "#0b0d11";
-      ctx.fillRect(0, 0, cw, ch);
+  const scale = Math.min(cw / iw, ch / ih);
+  const w = iw * scale;
+  const h = ih * scale;
+  const x = (cw - w) / 2;
+  const y = (ch - h) / 2;
 
-      const scale = Math.min(cw / iw, ch / ih);
-      const w = iw * scale;
-      const h = ih * scale;
-      const x = (cw - w) / 2;
-      const y = (ch - h) / 2;
+  ctx.save();
 
-      ctx.save();
+  if (distortPercent > 0) {
+    const skew = distortPercent / 100;
+    ctx.translate(cw / 2, ch / 2);
+    ctx.transform(1, 0, skew * 0.35, 1, 0, 0);
+    ctx.translate(-cw / 2, -ch / 2);
+  }
 
-      if (distortPercent > 0) {
-        const skew = distortPercent / 100;
-        ctx.translate(cw / 2, ch / 2);
-        ctx.transform(1, 0, skew * 0.35, 1, 0, 0);
-        ctx.translate(-cw / 2, -ch / 2);
-      }
-
-      ctx.drawImage(img, x, y, w, h);
-      ctx.restore();
-    }
+  ctx.drawImage(img, x, y, w, h);
+  ctx.restore();
+}
 
     function renderPreview() {
-      if (!currentImage) {
-        ctx.fillStyle = "#0b0d11";
-        ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
-        ctx.fillStyle = "#6f7785";
-        ctx.font = "24px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("Valitse kuva nähdäksesi esikatselun", previewCanvas.width / 2, previewCanvas.height / 2);
-        return;
+  if (!currentImage) {
+    ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    ctx.fillStyle = "#0b0d11";
+    ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+    ctx.fillStyle = "#6f7785";
+    ctx.font = "24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Valitse kuva nähdäksesi esikatselun", previewCanvas.width / 2, previewCanvas.height / 2);
+    previewCanvas.style.filter = "none";
+    return;
+  }
+
+  const filters = getFilterState();
+
+  ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+  ctx.fillStyle = "#0b0d11";
+  ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+  console.log("ctx.filter before:", ctx.filter);
+  ctx.filter =
+    "invert(" + filters.invert + "%) " +
+    "hue-rotate(" + filters.hue + "deg) " +
+    "saturate(" + filters.saturate + "%) " +
+    "contrast(" + filters.contrast + "%) " +
+    "blur(" + filters.blur + "px)";
+  console.log("ctx.filter after set:", ctx.filter);
+
+  drawImageContain(currentImage, previewCanvas, ctx, filters.distort);
+  ctx.filter = "none";
+
+  // lisäksi CSS-pohjainen previewtesti iPad/WebKitin varalta
+  updateCanvasCssPreview();
+}
+
+async function handleFile(file) {
+  if (!file) return;
+
+  console.log("FILE:", file);
+  console.log("file.name:", file?.name);
+  console.log("file.type:", file?.type);
+  console.log("file.size:", file?.size);
+  console.log("lastModified:", file?.lastModified);
+
+  originalFile = file;
+  currentExif = {};
+
+  const dataUrl = await fileToDataURL(file);
+  const img = new Image();
+
+  img.onload = async () => {
+    currentImage = img;
+    renderPreview();
+    updateCanvasCssPreview();
+
+    try {
+      const buffer = await file.arrayBuffer();
+      console.log("arrayBuffer bytes:", buffer.byteLength);
+
+      const exif = await exifr.parse(buffer, {
+        tiff: true,
+        ifd0: true,
+        exif: true,
+        gps: true,
+        xmp: true,
+        icc: false,
+        iptc: false
+      });
+
+      console.log("EXIF RESULT:", exif);
+
+      currentExif = exif || {};
+      renderExif();
+
+      if (Object.keys(currentExif).length === 0) {
+        exifBox.innerHTML = "<p>EXIF-tietoja ei löytynyt tästä tiedostosta.</p>";
+        setStatus("Kuva ladattu, mutta EXIF-tietoja ei löytynyt File-objektista.", "");
+      } else {
+        setStatus("Kuva ladattu. EXIF löytyi.", "ok");
       }
-
-      const filters = getFilterState();
-
-      ctx.save();
-      ctx.filter = `
-        invert(${filters.invert}%)
-        hue-rotate(${filters.hue}deg)
-        saturate(${filters.saturate}%)
-        contrast(${filters.contrast}%)
-        blur(${filters.blur}px)
-      `;
-      drawImageContain(currentImage, previewCanvas, ctx, filters.distort);
-      ctx.restore();
-    }
-
-    async function handleFile(file) {
-      if (!file) return;
-
-      originalFile = file;
+    } catch (err) {
+      console.error("EXIF parse error:", err);
       currentExif = {};
-
-      const dataUrl = await fileToDataURL(file);
-      const img = new Image();
-
-      img.onload = async () => {
-        currentImage = img;
-        renderPreview();
-
-        try {
-          const exif = await exifr.parse(file, true);
-          currentExif = exif || {};
-          renderExif();
-          setStatus("Kuva ladattu. Voit nyt säätää suotimia ja tallentaa.", "ok");
-        } catch (err) {
-          currentExif = {};
-          exifBox.innerHTML = "<p>EXIF-tietojen luku ei onnistunut.</p>";
-          setStatus("Kuva ladattu, mutta EXIF-tietojen luku ei onnistunut.", "");
-        }
-      };
-
-      img.src = dataUrl;
+      exifBox.innerHTML = "<p>EXIF-tietojen luku ei onnistunut.</p>";
+      setStatus("Kuva ladattu, mutta EXIF-tietojen luku ei onnistunut.", "");
     }
+  };
+
+  img.src = dataUrl;
+}
 
     function renderExif() {
       const dateOriginal = currentExif.DateTimeOriginal || currentExif.CreateDate || currentExif.ModifyDate;
@@ -897,14 +943,18 @@ async function saveToFirebase() {
     });
 
     [
-      invertRange,
-      hueRange,
-      satRange,
-      contrastRange,
-      blurRange,
-      distortRange
-    ].forEach(el => el.addEventListener("input", renderPreview));
-
+  invertRange,
+  hueRange,
+  satRange,
+  contrastRange,
+  blurRange,
+  distortRange
+].forEach(el =>
+  el.addEventListener("input", () => {
+    renderPreview();
+    updateCanvasCssPreview();
+  })
+);
     preset.addEventListener("change", () => {
       applyPreset(preset.value);
     });
