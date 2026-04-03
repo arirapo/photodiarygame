@@ -832,10 +832,10 @@ function renderExif() {
     <p><strong>Kuvaushetki:</strong> ${escapeHtml(formatExifDate(exif.dateOriginal))}</p>
     <p><strong>Kamera:</strong> ${escapeHtml([exif.make, exif.model].filter(Boolean).join(" ")) || "Ei saatavilla"}</p>
     <p><strong>Objektiivi:</strong> ${escapeHtml(String(exif.lens || "Ei saatavilla"))}</p>
-    <p><strong>ISO:</strong> ${escapeHtml(formatISO(exif.iso))}</p>
-    <p><strong>Aukko:</strong> ${escapeHtml(formatAperture(exif.aperture))}</p>
-    <p><strong>Valotusaika:</strong> ${escapeHtml(formatExposureTime(exif.exposureTime))}</p>
-    <p><strong>Polttoväli:</strong> ${escapeHtml(formatFocalLength(exif.focalLength))}</p>
+    <p><strong>ISO:</strong> ${escapeHtml(String(exif.iso || "Ei saatavilla"))}</p>
+    <p><strong>Aukko:</strong> ${escapeHtml(exif.aperture ? "f/" + exif.aperture : "Ei saatavilla")}</p>
+    <p><strong>Valotusaika:</strong> ${escapeHtml(String(exif.exposureTime || "Ei saatavilla"))}</p>
+    <p><strong>Polttoväli:</strong> ${escapeHtml(exif.focalLength ? exif.focalLength + " mm" : "Ei saatavilla")}</p>
   `;
 }
 
