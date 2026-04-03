@@ -1,1 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photodiarygame – Abstract Lab (Firebase)</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel2: #1f2430;
+      --text: #eaeaea;
+      --muted: #a7b0c0;
+      --line: #2f3645;
+      --accent: #8fb7ff;
+      --danger: #ff6b6b;
+      --ok: #7ddc96;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 24px 20px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, #12151c, #0f1115);
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 1.7rem;
+      font-weight: 700;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .wrap {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      padding: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .panel h2, .panel h3 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    textarea,
+    select,
+    input[type="file"] {
+      width: 100%;
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .slider-row {
+      margin: 10px 0;
+    }
+
+    .slider-row label {
+      margin-bottom: 4px;
+    }
+
+    .slider-row small {
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #111;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .preview-wrap {
+      display: grid;
+      gap: 16px;
+    }
+
+    .preview-box {
+      background: #0b0d11;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 72vh;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .meta-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .meta-box p {
+      margin: 6px 0;
+      color: var(--muted);
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #11161d;
+      color: var(--muted);
+      min-height: 44px;
+    }
+
+    .status.ok {
+      border-color: rgba(125,220,150,0.35);
+      color: var(--ok);
+    }
+
+    .status.error {
+      border-color: rgba(255,107,107,0.35);
+      color: var(--danger);
+    }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .thumb {
+      aspect-ratio: 1 / 1;
+      background: #0b0d11;
+      overflow: hidden;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-body {
+      padding: 10px 12px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      width: min(1100px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      background: #11151d;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+
+    .modal-image {
+      background: #0b0d11;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      place-items: center;
+    }
+
+    .modal-image img {
+      max-width: 100%;
+      max-height: 75vh;
+      border-radius: 8px;
+    }
+
+    .modal-side h3 {
+      margin-top: 0;
+    }
+
+    .modal-side p {
+      margin: 8px 0;
+    }
+
+    @media (max-width: 980px) {
+      .wrap {
+        grid-template-columns: 1fr;
+      }
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Photodiarygame – Abstract Lab</h1>
+    <p>
+      Firebase-versio abstraktien kuvien syöttämiseen, EXIF-lukuun, suodinkokeiluihin ja galleriakatseluun.
+    </p>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Lisää uusi kuva</h2>
+
+      <label for="imageFile">Kuvatiedosto</label>
+      <input id="imageFile" type="file" accept="image/*" />
+
+      <label for="author">Kuvaaja / nimimerkki</label>
+      <input id="author" type="text" placeholder="esim. Ari Rapo / Trace Operator" />
+
+      <label for="title">Kuvan nimi</label>
+      <input id="title" type="text" placeholder="esim. Surface Memory" />
+
+      <label for="description">Kuvausteksti</label>
+      <textarea id="description" placeholder="Lyhyt kuvausteksti, ajatus, havainto, tunnelma..."></textarea>
+
+      <h3>Suotimet</h3>
+
+      <label for="preset">Esiasetus</label>
+      <select id="preset">
+        <option value="none">Ei esiasetusta</option>
+        <option value="negative">Negatiivi</option>
+        <option value="falsecolor">Vääräväri</option>
+        <option value="dream">Dream / pehmeä</option>
+        <option value="surreal">Surrealismi</option>
+      </select>
+
+      <div class="slider-row">
+        <label for="invertRange">Nega / invert (%)</label>
+        <input id="invertRange" type="range" min="0" max="100" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <label for="hueRange">Värisiirto / hue-rotate (°)</label>
+        <input id="hueRange" type="range" min="0" max="360" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <label for="satRange">Saturaatio (%)</label>
+        <input id="satRange" type="range" min="0" max="300" value="100" />
+      </div>
+
+      <div class="slider-row">
+        <label for="contrastRange">Kontrasti (%)</label>
+        <input id="contrastRange" type="range" min="50" max="250" value="100" />
+      </div>
+
+      <div class="slider-row">
+        <label for="blurRange">Pehmennys / blur (px)</label>
+        <input id="blurRange" type="range" min="0" max="8" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <label for="distortRange">Vääristys (%)</label>
+        <input id="distortRange" type="range" min="0" max="30" value="0" />
+        <small>Lievä perspektiivinen venytys laboratoriokokeiluun.</small>
+      </div>
+
+      <div class="btn-row">
+        <button id="resetFiltersBtn" type="button">Nollaa suotimet</button>
+        <button id="saveBtn" class="primary" type="button">Tallenna Firebaseen</button>
+      </div>
+
+      <div id="statusBox" class="status">Valitse kuva ja täytä tiedot.</div>
+    </section>
+
+    <section class="preview-wrap">
+      <div class="preview-box">
+        <canvas id="previewCanvas" width="1600" height="1600"></canvas>
+      </div>
+
+      <div class="meta-box">
+        <h3>EXIF / tekniset tiedot</h3>
+        <div id="exifBox" class="muted">Ei vielä tiedostoa valittuna.</div>
+      </div>
+
+      <section class="panel">
+        <div class="gallery-header">
+          <h2 style="margin:0;">Galleria</h2>
+          <div class="small">Kuvat tulevat Firestoresta / Storagesta</div>
+        </div>
+        <div id="gallery" class="gallery"></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <div class="btn-row" style="justify-content:flex-end; margin-bottom:10px;">
+        <button id="closeModalBtn" type="button">Sulje</button>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-image">
+          <img id="modalImg" src="" alt="" />
+        </div>
+        <div class="modal-side">
+          <h3 id="modalTitle">Kuvan nimi</h3>
+          <p><strong>Tekijä:</strong> <span id="modalAuthor"></span></p>
+          <p><strong>Kuvaus:</strong> <span id="modalDescription"></span></p>
+          <p><strong>Kuvaushetki:</strong> <span id="modalDate"></span></p>
+          <p><strong>Kamera:</strong> <span id="modalCamera"></span></p>
+          <p><strong>Tallennettu:</strong> <span id="modalSaved"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      orderBy,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const imageFile = document.getElementById("imageFile");
+    const author = document.getElementById("author");
+    const titleInput = document.getElementById("title");
+    const description = document.getElementById("description");
+    const preset = document.getElementById("preset");
+
+    const invertRange = document.getElementById("invertRange");
+    const hueRange = document.getElementById("hueRange");
+    const satRange = document.getElementById("satRange");
+    const contrastRange = document.getElementById("contrastRange");
+    const blurRange = document.getElementById("blurRange");
+    const distortRange = document.getElementById("distortRange");
+
+    const previewCanvas = document.getElementById("previewCanvas");
+    const ctx = previewCanvas.getContext("2d");
+
+    const exifBox = document.getElementById("exifBox");
+    const gallery = document.getElementById("gallery");
+    const statusBox = document.getElementById("statusBox");
+
+    const saveBtn = document.getElementById("saveBtn");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+
+    const modal = document.getElementById("modal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const modalImg = document.getElementById("modalImg");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalAuthor = document.getElementById("modalAuthor");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalDate = document.getElementById("modalDate");
+    const modalCamera = document.getElementById("modalCamera");
+    const modalSaved = document.getElementById("modalSaved");
+
+    let currentImage = null;
+    let currentExif = {};
+    let originalFile = null;
+    let galleryEntries = [];
+
+    function setStatus(message, type = "") {
+      statusBox.textContent = message;
+      statusBox.className = "status";
+      if (type) statusBox.classList.add(type);
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function updateCanvasCssPreview() {
+      const filters = getFilterState();
+
+      previewCanvas.style.filter =
+        "invert(" + filters.invert + "%) " +
+        "hue-rotate(" + filters.hue + "deg) " +
+        "saturate(" + filters.saturate + "%) " +
+        "contrast(" + filters.contrast + "%) " +
+        "blur(" + filters.blur + "px)";
+    }
+
+    function formatExifDate(value) {
+      if (!value) return "Ei saatavilla";
+      try {
+        if (value?.toDate) return value.toDate().toLocaleString("fi-FI");
+        if (value instanceof Date) return value.toLocaleString("fi-FI");
+        return String(value);
+      } catch {
+        return String(value);
+      }
+    }
+
+    function formatSavedDate(value) {
+      if (!value) return "Ei saatavilla";
+      try {
+        if (value?.toDate) return value.toDate().toLocaleString("fi-FI");
+        return new Date(value).toLocaleString("fi-FI");
+      } catch {
+        return String(value);
+      }
+    }
+
+    function getFilterState() {
+      return {
+        invert: Number(invertRange.value),
+        hue: Number(hueRange.value),
+        saturate: Number(satRange.value),
+        contrast: Number(contrastRange.value),
+        blur: Number(blurRange.value),
+        distort: Number(distortRange.value),
+        preset: preset.value
+      };
+    }
+
+    function setFilterState(state) {
+      invertRange.value = state.invert ?? 0;
+      hueRange.value = state.hue ?? 0;
+      satRange.value = state.saturate ?? 100;
+      contrastRange.value = state.contrast ?? 100;
+      blurRange.value = state.blur ?? 0;
+      distortRange.value = state.distort ?? 0;
+      preset.value = state.preset ?? "none";
+    }
+
+    function resetFilters() {
+      setFilterState({
+        invert: 0,
+        hue: 0,
+        saturate: 100,
+        contrast: 100,
+        blur: 0,
+        distort: 0,
+        preset: "none"
+      });
+      renderPreview();
+      updateCanvasCssPreview();
+    }
+
+    function normalizeExif(exif = {}) {
+      return {
+        dateOriginal:
+          exif.DateTimeOriginal ||
+          exif.CreateDate ||
+          exif.ModifyDate ||
+          exif.DateTimeDigitized ||
+          null,
+
+        make:
+          exif.Make ||
+          exif.make ||
+          "",
+
+        model:
+          exif.Model ||
+          exif.model ||
+          "",
+
+        lens:
+          exif.LensModel ||
+          exif.Lens ||
+          exif.lens ||
+          "",
+
+        iso:
+          exif.ISO ||
+          exif.ISOSpeedRatings ||
+          exif.iso ||
+          "",
+
+        aperture:
+          exif.FNumber ||
+          exif.ApertureValue ||
+          exif.aperture ||
+          "",
+
+        exposureTime:
+          exif.ExposureTime ||
+          exif.ShutterSpeedValue ||
+          exif.exposureTime ||
+          "",
+
+        focalLength:
+          exif.FocalLength ||
+          exif.focalLength ||
+          ""
+      };
+    }
+
+    function applyPreset(name) {
+      if (name === "negative") {
+        setFilterState({ invert: 100, hue: 0, saturate: 100, contrast: 110, blur: 0, distort: 0, preset: "negative" });
+      } else if (name === "falsecolor") {
+        setFilterState({ invert: 0, hue: 140, saturate: 180, contrast: 125, blur: 0, distort: 4, preset: "falsecolor" });
+      } else if (name === "dream") {
+        setFilterState({ invert: 0, hue: 25, saturate: 130, contrast: 90, blur: 2, distort: 0, preset: "dream" });
+      } else if (name === "surreal") {
+        setFilterState({ invert: 20, hue: 210, saturate: 210, contrast: 135, blur: 1, distort: 12, preset: "surreal" });
+      } else {
+        resetFilters();
+      }
+    }
+
+    function drawImageContain(img, canvas, ctx, distortPercent = 0) {
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = img.width;
+      const ih = img.height;
+
+      const scale = Math.min(cw / iw, ch / ih);
+      const w = iw * scale;
+      const h = ih * scale;
+      const x = (cw - w) / 2;
+      const y = (ch - h) / 2;
+
+      ctx.save();
+
+      if (distortPercent > 0) {
+        const skew = distortPercent / 100;
+        ctx.translate(cw / 2, ch / 2);
+        ctx.transform(1, 0, skew * 0.35, 1, 0, 0);
+        ctx.translate(-cw / 2, -ch / 2);
+      }
+
+      ctx.drawImage(img, x, y, w, h);
+      ctx.restore();
+    }
+
+    function renderFilteredCanvas(targetCanvas) {
+      if (!currentImage) return null;
+
+      const filters = getFilterState();
+      const rctx = targetCanvas.getContext("2d");
+
+      targetCanvas.width = previewCanvas.width;
+      targetCanvas.height = previewCanvas.height;
+
+      rctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+      rctx.fillStyle = "#0b0d11";
+      rctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+
+      rctx.filter =
+        "invert(" + filters.invert + "%) " +
+        "hue-rotate(" + filters.hue + "deg) " +
+        "saturate(" + filters.saturate + "%) " +
+        "contrast(" + filters.contrast + "%) " +
+        "blur(" + filters.blur + "px) ";
+
+      drawImageContain(currentImage, targetCanvas, rctx, filters.distort);
+      rctx.filter = "none";
+
+      return targetCanvas;
+    }
+
+    function renderPreview() {
+      if (!currentImage) {
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        ctx.fillStyle = "#0b0d11";
+        ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        ctx.fillStyle = "#6f7785";
+        ctx.font = "24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Valitse kuva nähdäksesi esikatselun", previewCanvas.width / 2, previewCanvas.height / 2);
+        previewCanvas.style.filter = "none";
+        return;
+      }
+
+      const filters = getFilterState();
+
+      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      ctx.fillStyle = "#0b0d11";
+      ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+      ctx.filter =
+        "invert(" + filters.invert + "%) " +
+        "hue-rotate(" + filters.hue + "deg) " +
+        "saturate(" + filters.saturate + "%) " +
+        "contrast(" + filters.contrast + "%) " +
+        "blur(" + filters.blur + "px)";
+
+      drawImageContain(currentImage, previewCanvas, ctx, filters.distort);
+      ctx.filter = "none";
+
+      updateCanvasCssPreview();
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+
+      originalFile = file;
+      currentExif = {};
+
+      const dataUrl = await fileToDataURL(file);
+      const img = new Image();
+
+      img.onload = async () => {
+        currentImage = img;
+        renderPreview();
+        updateCanvasCssPreview();
+
+        try {
+          const buffer = await file.arrayBuffer();
+
+          const exif = await exifr.parse(buffer, {
+            tiff: true,
+            ifd0: true,
+            exif: true,
+            gps: true,
+            xmp: true,
+            icc: false,
+            iptc: false
+          });
+
+          currentExif = exif || {};
+          renderExif();
+
+          if (Object.keys(currentExif).length === 0) {
+            exifBox.innerHTML = "<p>EXIF-tietoja ei löytynyt tästä tiedostosta.</p>";
+            setStatus("Kuva ladattu, mutta EXIF-tietoja ei löytynyt File-objektista.", "");
+          } else {
+            setStatus("Kuva ladattu. EXIF löytyi.", "ok");
+          }
+        } catch (err) {
+          console.error("EXIF parse error:", err);
+          currentExif = {};
+          exifBox.innerHTML = "<p>EXIF-tietojen luku ei onnistunut.</p>";
+          setStatus("Kuva ladattu, mutta EXIF-tietojen luku ei onnistunut.", "");
+        }
+      };
+
+      img.src = dataUrl;
+    }
+
+    function renderExif() {
+      const exif = normalizeExif(currentExif);
+
+      exifBox.innerHTML = `
+        <p><strong>Kuvaushetki:</strong> ${escapeHtml(formatExifDate(exif.dateOriginal))}</p>
+        <p><strong>Kamera:</strong> ${escapeHtml([exif.make, exif.model].filter(Boolean).join(" ")) || "Ei saatavilla"}</p>
+        <p><strong>Objektiivi:</strong> ${escapeHtml(String(exif.lens || "Ei saatavilla"))}</p>
+        <p><strong>ISO:</strong> ${escapeHtml(String(exif.iso || "Ei saatavilla"))}</p>
+        <p><strong>Aukko:</strong> ${escapeHtml(exif.aperture ? "f/" + exif.aperture : "Ei saatavilla")}</p>
+        <p><strong>Valotusaika:</strong> ${escapeHtml(String(exif.exposureTime || "Ei saatavilla"))}</p>
+        <p><strong>Polttoväli:</strong> ${escapeHtml(exif.focalLength ? exif.focalLength + " mm" : "Ei saatavilla")}</p>
+      `;
+    }
+
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function canvasToBlob(canvas, type = "image/jpeg", quality = 0.92) {
+      return new Promise((resolve) => {
+        canvas.toBlob(resolve, type, quality);
+      });
+    }
+
+    async function saveToFirebase() {
+      if (!originalFile || !currentImage) {
+        setStatus("Valitse ensin kuva.", "error");
+        return;
+      }
+
+      if (!author.value.trim()) {
+        setStatus("Anna kuvaajan nimi tai nimimerkki.", "error");
+        return;
+      }
+
+      if (!titleInput.value.trim()) {
+        setStatus("Anna kuvalle nimi.", "error");
+        return;
+      }
+
+      try {
+        saveBtn.disabled = true;
+        setStatus("Tallennetaan kuvaa Firebase Storageen ja metadataa Firestoreen...");
+
+        const filters = getFilterState();
+        const exifData = normalizeExif(currentExif);
+
+        const renderCanvas = document.createElement("canvas");
+        renderFilteredCanvas(renderCanvas);
+
+        const blob = await canvasToBlob(renderCanvas, "image/jpeg", 0.92);
+        if (!blob) throw new Error("Canvas-blobin luonti epäonnistui.");
+
+        const now = Date.now();
+        const safeAuthor = author.value.trim().replace(/[^\w\-]+/g, "_");
+        const safeTitle = titleInput.value.trim().replace(/[^\w\-]+/g, "_");
+        const filename = `${now}_${safeAuthor}_${safeTitle}.jpg`;
+
+        const storageRef = ref(storage, `abstract-lab/images/${filename}`);
+        await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
+        const imageUrl = await getDownloadURL(storageRef);
+
+        const thumbCanvas = document.createElement("canvas");
+        const thumbSize = 500;
+        thumbCanvas.width = thumbSize;
+        thumbCanvas.height = thumbSize;
+
+        const tctx = thumbCanvas.getContext("2d");
+        tctx.fillStyle = "#0b0d11";
+        tctx.fillRect(0, 0, thumbSize, thumbSize);
+
+        const srcW = renderCanvas.width;
+        const srcH = renderCanvas.height;
+        const scale = Math.min(thumbSize / srcW, thumbSize / srcH);
+        const w = srcW * scale;
+        const h = srcH * scale;
+        const x = (thumbSize - w) / 2;
+        const y = (thumbSize - h) / 2;
+
+        tctx.drawImage(renderCanvas, x, y, w, h);
+
+        const thumbBlob = await canvasToBlob(thumbCanvas, "image/jpeg", 0.82);
+        let thumbUrl = imageUrl;
+
+        if (thumbBlob) {
+          const thumbRef = ref(storage, `abstract-lab/thumbs/thumb_${filename}`);
+          await uploadBytes(thumbRef, thumbBlob, { contentType: "image/jpeg" });
+          thumbUrl = await getDownloadURL(thumbRef);
+        }
+
+        await addDoc(collection(db, "abstractLabEntries"), {
+          author: author.value.trim(),
+          title: titleInput.value.trim(),
+          description: description.value.trim(),
+          imageUrl,
+          thumbUrl,
+          storagePath: `abstract-lab/images/${filename}`,
+          thumbPath: `abstract-lab/thumbs/thumb_${filename}`,
+          filters,
+          exif: exifData,
+          published: true,
+          createdAt: serverTimestamp(),
+          createdAtMs: Date.now()
+        });
+
+        setStatus("Tallennus onnistui.", "ok");
+
+        author.value = "";
+        titleInput.value = "";
+        description.value = "";
+        imageFile.value = "";
+        currentImage = null;
+        originalFile = null;
+        currentExif = {};
+        exifBox.innerHTML = "Ei vielä tiedostoa valittuna.";
+        resetFilters();
+      } catch (err) {
+        console.error(err);
+        setStatus("Tallennus epäonnistui: " + err.message, "error");
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    function renderGallery(entries) {
+      galleryEntries = entries;
+
+      if (!entries.length) {
+        gallery.innerHTML = `<p class="muted">Galleriassa ei ole vielä kuvia.</p>`;
+        return;
+      }
+
+      gallery.innerHTML = entries.map((entry, index) => `
+        <article class="card" data-index="${index}">
+          <div class="thumb">
+            <img src="${entry.thumbUrl || entry.imageUrl}" alt="${escapeHtml(entry.title || "Abstrakti kuva")}" />
+          </div>
+          <div class="card-body">
+            <div class="card-title">${escapeHtml(entry.title || "Nimetön")}</div>
+            <div class="card-meta">${escapeHtml(entry.author || "Tuntematon")}</div>
+          </div>
+        </article>
+      `).join("");
+
+      [...gallery.querySelectorAll(".card")].forEach(card => {
+        card.addEventListener("click", () => {
+          const idx = Number(card.dataset.index);
+          openModal(galleryEntries[idx]);
+        });
+      });
+    }
+
+    function openModal(entry) {
+      if (!entry) return;
+
+      const exif = normalizeExif(entry.exif || {});
+
+      modalImg.src = entry.imageUrl;
+      modalTitle.textContent = entry.title || "Nimetön";
+      modalAuthor.textContent = entry.author || "Tuntematon";
+      modalDescription.textContent = entry.description || "—";
+      modalDate.textContent = formatExifDate(exif.dateOriginal);
+      modalCamera.textContent = [exif.make, exif.model].filter(Boolean).join(" ") || "Ei saatavilla";
+      modalSaved.textContent = formatSavedDate(entry.createdAt);
+
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      modalImg.src = "";
+    }
+
+    function startGalleryListener() {
+      const q = query(collection(db, "abstractLabEntries"), orderBy("createdAt", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        const items = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(item => item.published !== false);
+
+        renderGallery(items);
+      }, (error) => {
+        console.error(error);
+        gallery.innerHTML = `<p class="muted">Gallerian lataus epäonnistui.</p>`;
+      });
+    }
+
+    imageFile.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      handleFile(file);
+    });
+
+    [
+      invertRange,
+      hueRange,
+      satRange,
+      contrastRange,
+      blurRange,
+      distortRange
+    ].forEach(el =>
+      el.addEventListener("input", () => {
+        renderPreview();
+        updateCanvasCssPreview();
+      })
+    );
+
+    preset.addEventListener("change", () => {
+      applyPreset(preset.value);
+    });
+
+    resetFiltersBtn.addEventListener("click", resetFilters);
+    saveBtn.addEventListener("click", saveToFirebase);
+
+    closeModalBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    renderPreview();
+    startGalleryListener();
+  </script>
+</body>
+</html>
