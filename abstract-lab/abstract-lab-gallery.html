@@ -143,6 +143,12 @@
       font-size: 0.92rem;
     }
 
+    .card-date {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 6px;
+    }
+
     .tags {
       display: flex;
       flex-wrap: wrap;
@@ -306,6 +312,7 @@
           <p><strong>Kuvaus:</strong> <span id="modalDescription"></span></p>
           <p><strong>Tagit:</strong></p>
           <div id="modalTags" class="tags"></div>
+          <p><strong>Kuvaushetki:</strong> <span id="modalDate"></span></p>
           <p><strong>Tallennettu:</strong> <span id="modalSaved"></span></p>
           <div id="modalExif" class="exif-grid"></div>
         </div>
@@ -348,6 +355,7 @@
     const modalAuthor = document.getElementById("modalAuthor");
     const modalDescription = document.getElementById("modalDescription");
     const modalTags = document.getElementById("modalTags");
+    const modalDate = document.getElementById("modalDate");
     const modalSaved = document.getElementById("modalSaved");
     const modalExif = document.getElementById("modalExif");
 
@@ -424,14 +432,52 @@
 
     function normalizeExif(exif = {}) {
       return {
-        dateOriginal: exif.DateTimeOriginal || exif.CreateDate || exif.ModifyDate || exif.DateTimeDigitized || null,
-        make: exif.Make || exif.make || "",
-        model: exif.Model || exif.model || "",
-        lens: exif.LensModel || exif.Lens || exif.lens || "",
-        iso: exif.ISO || exif.ISOSpeedRatings || exif.iso || "",
-        aperture: exif.FNumber || exif.ApertureValue || exif.aperture || "",
-        exposureTime: exif.ExposureTime || exif.ShutterSpeedValue || exif.exposureTime || "",
-        focalLength: exif.FocalLength || exif.focalLength || ""
+        dateOriginal:
+          exif.dateOriginal ||
+          exif.DateTimeOriginal ||
+          exif.CreateDate ||
+          exif.ModifyDate ||
+          exif.DateTimeDigitized ||
+          null,
+
+        make:
+          exif.make ||
+          exif.Make ||
+          "",
+
+        model:
+          exif.model ||
+          exif.Model ||
+          "",
+
+        lens:
+          exif.lens ||
+          exif.LensModel ||
+          exif.Lens ||
+          "",
+
+        iso:
+          exif.iso ||
+          exif.ISO ||
+          exif.ISOSpeedRatings ||
+          "",
+
+        aperture:
+          exif.aperture ||
+          exif.FNumber ||
+          exif.ApertureValue ||
+          "",
+
+        exposureTime:
+          exif.exposureTime ||
+          exif.ExposureTime ||
+          exif.ShutterSpeedValue ||
+          "",
+
+        focalLength:
+          exif.focalLength ||
+          exif.FocalLength ||
+          ""
       };
     }
 
@@ -494,18 +540,22 @@
 
       emptyState.style.display = "none";
 
-      gallery.innerHTML = entries.map((entry, index) => `
-        <article class="card" data-index="${index}">
-          <div class="thumb">
-            <img src="${entry.thumbUrl || entry.imageUrl}" alt="${escapeHtml(entry.title || "Abstrakti kuva")}" />
-          </div>
-          <div class="card-body">
-            <div class="card-title">${escapeHtml(entry.title || "Nimetön")}</div>
-            <div class="card-meta">${escapeHtml(entry.author || "Tuntematon")}</div>
-            ${entry.tags && entry.tags.length ? `<div class="tags">${renderTags(entry.tags.slice(0, 4))}</div>` : ""}
-          </div>
-        </article>
-      `).join("");
+      gallery.innerHTML = entries.map((entry, index) => {
+        const exif = normalizeExif(entry.exif || {});
+        return `
+          <article class="card" data-index="${index}">
+            <div class="thumb">
+              <img src="${entry.thumbUrl || entry.imageUrl}" alt="${escapeHtml(entry.title || "Abstrakti kuva")}" />
+            </div>
+            <div class="card-body">
+              <div class="card-title">${escapeHtml(entry.title || "Nimetön")}</div>
+              <div class="card-meta">${escapeHtml(entry.author || "Tuntematon")}</div>
+              <div class="card-date">${escapeHtml(formatExifDate(exif.dateOriginal))}</div>
+              ${entry.tags && entry.tags.length ? `<div class="tags">${renderTags(entry.tags.slice(0, 4))}</div>` : ""}
+            </div>
+          </article>
+        `;
+      }).join("");
 
       [...gallery.querySelectorAll(".card")].forEach(card => {
         card.addEventListener("click", () => {
@@ -518,11 +568,14 @@
     function openModal(entry) {
       if (!entry) return;
 
+      const exif = normalizeExif(entry.exif || {});
+
       modalImg.src = entry.imageUrl;
       modalTitle.textContent = entry.title || "Nimetön";
       modalAuthor.textContent = entry.author || "Tuntematon";
       modalDescription.textContent = entry.description || "—";
       modalTags.innerHTML = renderTags(entry.tags || []);
+      modalDate.textContent = formatExifDate(exif.dateOriginal);
       modalSaved.textContent = formatSavedDate(entry.createdAt);
       modalExif.innerHTML = renderExifDetails(entry.exif || {});
 
