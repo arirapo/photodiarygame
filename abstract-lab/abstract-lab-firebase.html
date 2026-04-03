@@ -600,6 +600,57 @@ function resetFilters() {
   updateCanvasCssPreview();
 }
 
+    function normalizeExif(exif = {}) {
+  return {
+    dateOriginal:
+      exif.DateTimeOriginal ||
+      exif.CreateDate ||
+      exif.ModifyDate ||
+      exif.DateTimeDigitized ||
+      null,
+
+    make:
+      exif.Make ||
+      exif.make ||
+      "",
+
+    model:
+      exif.Model ||
+      exif.model ||
+      "",
+
+    lens:
+      exif.LensModel ||
+      exif.Lens ||
+      exif.lens ||
+      "",
+
+    iso:
+      exif.ISO ||
+      exif.ISOSpeedRatings ||
+      exif.iso ||
+      "",
+
+    aperture:
+      exif.FNumber ||
+      exif.ApertureValue ||
+      exif.aperture ||
+      "",
+
+    exposureTime:
+      exif.ExposureTime ||
+      exif.ShutterSpeedValue ||
+      exif.exposureTime ||
+      "",
+
+    focalLength:
+      exif.FocalLength ||
+      exif.focalLength ||
+      ""
+  };
+}
+
+    
     function applyPreset(name) {
       if (name === "negative") {
         setFilterState({ invert: 100, hue: 0, saturate: 100, contrast: 110, blur: 0, distort: 0, preset: "negative" });
@@ -730,26 +781,19 @@ async function handleFile(file) {
   img.src = dataUrl;
 }
 
-    function renderExif() {
-      const dateOriginal = currentExif.DateTimeOriginal || currentExif.CreateDate || currentExif.ModifyDate;
-      const make = currentExif.Make || "";
-      const model = currentExif.Model || "";
-      const lens = currentExif.LensModel || "";
-      const iso = currentExif.ISO || "";
-      const fnumber = currentExif.FNumber || "";
-      const exposure = currentExif.ExposureTime || "";
-      const focal = currentExif.FocalLength || "";
+function renderExif() {
+  const exif = normalizeExif(currentExif);
 
-      exifBox.innerHTML = `
-        <p><strong>Kuvaushetki:</strong> ${escapeHtml(formatExifDate(dateOriginal))}</p>
-        <p><strong>Kamera:</strong> ${escapeHtml([make, model].filter(Boolean).join(" ")) || "Ei saatavilla"}</p>
-        <p><strong>Objektiivi:</strong> ${escapeHtml(String(lens || "Ei saatavilla"))}</p>
-        <p><strong>ISO:</strong> ${escapeHtml(String(iso || "Ei saatavilla"))}</p>
-        <p><strong>Aukko:</strong> ${escapeHtml(fnumber ? "f/" + fnumber : "Ei saatavilla")}</p>
-        <p><strong>Valotusaika:</strong> ${escapeHtml(String(exposure || "Ei saatavilla"))}</p>
-        <p><strong>Polttoväli:</strong> ${escapeHtml(focal ? focal + " mm" : "Ei saatavilla")}</p>
-      `;
-    }
+  exifBox.innerHTML = `
+    <p><strong>Kuvaushetki:</strong> ${escapeHtml(formatExifDate(exif.dateOriginal))}</p>
+    <p><strong>Kamera:</strong> ${escapeHtml([exif.make, exif.model].filter(Boolean).join(" ")) || "Ei saatavilla"}</p>
+    <p><strong>Objektiivi:</strong> ${escapeHtml(String(exif.lens || "Ei saatavilla"))}</p>
+    <p><strong>ISO:</strong> ${escapeHtml(String(exif.iso || "Ei saatavilla"))}</p>
+    <p><strong>Aukko:</strong> ${escapeHtml(exif.aperture ? "f/" + exif.aperture : "Ei saatavilla")}</p>
+    <p><strong>Valotusaika:</strong> ${escapeHtml(String(exif.exposureTime || "Ei saatavilla"))}</p>
+    <p><strong>Polttoväli:</strong> ${escapeHtml(exif.focalLength ? exif.focalLength + " mm" : "Ei saatavilla")}</p>
+  `;
+}
 
     function fileToDataURL(file) {
       return new Promise((resolve, reject) => {
@@ -786,8 +830,31 @@ async function saveToFirebase() {
     saveBtn.disabled = true;
     setStatus("Tallennetaan kuvaa Firebase Storageen ja metadataa Firestoreen...");
 
-    // 1) Tallennetaan pääkuva previewCanvasista
-    const blob = await canvasToBlob(previewCanvas, "image/jpeg", 0.92);
+    const filters = getFilterState();
+    const exifData = normalizeExif(currentExif);
+
+    // 1) Luodaan tallennuscanvas
+    const renderCanvas = document.createElement("canvas");
+    renderCanvas.width = previewCanvas.width;
+    renderCanvas.height = previewCanvas.height;
+    const rctx = renderCanvas.getContext("2d");
+
+    rctx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
+    rctx.fillStyle = "#0b0d11";
+    rctx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+    // Kokeillaan renderöidä filttereillä tallennusvaiheessa
+    rctx.filter =
+      "invert(" + filters.invert + "%) " +
+      "hue-rotate(" + filters.hue + "deg) " +
+      "saturate(" + filters.saturate + "%) " +
+      "contrast(" + filters.contrast + "%) " +
+      "blur(" + filters.blur + "px)";
+
+    drawImageContain(currentImage, renderCanvas, rctx, filters.distort);
+    rctx.filter = "none";
+
+    const blob = await canvasToBlob(renderCanvas, "image/jpeg", 0.92);
     if (!blob) throw new Error("Canvas-blobin luonti epäonnistui.");
 
     const now = Date.now();
@@ -799,7 +866,7 @@ async function saveToFirebase() {
     await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
     const imageUrl = await getDownloadURL(storageRef);
 
-    // 2) Tehdään thumbnail suoraan previewCanvasista
+    // 2) Thumbnail samasta render-canvasista
     const thumbCanvas = document.createElement("canvas");
     const thumbSize = 500;
     thumbCanvas.width = thumbSize;
@@ -809,15 +876,15 @@ async function saveToFirebase() {
     tctx.fillStyle = "#0b0d11";
     tctx.fillRect(0, 0, thumbSize, thumbSize);
 
-    const srcW = previewCanvas.width;
-    const srcH = previewCanvas.height;
+    const srcW = renderCanvas.width;
+    const srcH = renderCanvas.height;
     const scale = Math.min(thumbSize / srcW, thumbSize / srcH);
     const w = srcW * scale;
     const h = srcH * scale;
     const x = (thumbSize - w) / 2;
     const y = (thumbSize - h) / 2;
 
-    tctx.drawImage(previewCanvas, x, y, w, h);
+    tctx.drawImage(renderCanvas, x, y, w, h);
 
     const thumbBlob = await canvasToBlob(thumbCanvas, "image/jpeg", 0.82);
     let thumbUrl = imageUrl;
@@ -828,7 +895,7 @@ async function saveToFirebase() {
       thumbUrl = await getDownloadURL(thumbRef);
     }
 
-    // 3) Tallennetaan metadata Firestoreen
+    // 3) Metadata Firestoreen
     await addDoc(collection(db, "abstractLabEntries"), {
       author: author.value.trim(),
       title: titleInput.value.trim(),
@@ -837,17 +904,8 @@ async function saveToFirebase() {
       thumbUrl,
       storagePath: `abstract-lab/images/${filename}`,
       thumbPath: `abstract-lab/thumbs/thumb_${filename}`,
-      filters: getFilterState(),
-      exif: {
-        dateOriginal: currentExif.DateTimeOriginal || currentExif.CreateDate || null,
-        make: currentExif.Make || "",
-        model: currentExif.Model || "",
-        lens: currentExif.LensModel || "",
-        iso: currentExif.ISO || "",
-        aperture: currentExif.FNumber || "",
-        exposureTime: currentExif.ExposureTime || "",
-        focalLength: currentExif.FocalLength || ""
-      },
+      filters,
+      exif: exifData,
       published: true,
       createdAt: serverTimestamp(),
       createdAtMs: Date.now()
@@ -855,7 +913,6 @@ async function saveToFirebase() {
 
     setStatus("Tallennus onnistui.", "ok");
 
-    // 4) Tyhjennetään lomake
     author.value = "";
     titleInput.value = "";
     description.value = "";
