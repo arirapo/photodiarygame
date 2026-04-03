@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abstract Lab Admin</title>
+
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel2: #1f2430;
+      --text: #eaeaea;
+      --muted: #a7b0c0;
+      --line: #2f3645;
+      --accent: #8fb7ff;
+      --danger: #ff6b6b;
+      --ok: #7ddc96;
+      --tagbg: #20283a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 24px 20px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, #12151c, #0f1115);
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 1.7rem;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .toplinks {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .link-btn, button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .link-btn:hover, button:hover {
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #111;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    button.danger {
+      background: transparent;
+      color: var(--danger);
+      border-color: rgba(255,107,107,0.45);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .wrap {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      padding: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .panel h2, .panel h3 {
+      margin-top: 0;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #11161d;
+      color: var(--muted);
+      min-height: 44px;
+    }
+
+    .status.ok {
+      border-color: rgba(125,220,150,0.35);
+      color: var(--ok);
+    }
+
+    .status.error {
+      border-color: rgba(255,107,107,0.35);
+      color: var(--danger);
+    }
+
+    .list-controls {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .entry-list {
+      display: grid;
+      gap: 10px;
+      max-height: 70vh;
+      overflow: auto;
+    }
+
+    .entry-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #131822;
+      cursor: pointer;
+    }
+
+    .entry-item:hover {
+      border-color: var(--accent);
+    }
+
+    .entry-item.active {
+      border-color: var(--accent);
+      background: #182133;
+    }
+
+    .entry-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .entry-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .entry-date {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .preview-box {
+      background: #0b0d11;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 10px;
+    }
+
+    .meta-readonly {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .meta-readonly div {
+      margin-bottom: 6px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      background: var(--tagbg);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      line-height: 1.2;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .checkbox-row input {
+      transform: scale(1.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .empty-box {
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      background: #131822;
+    }
+
+    .danger-box {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,107,107,0.2);
+    }
+
+    .danger-box p {
+      color: var(--muted);
+      margin: 6px 0 0;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 1050px) {
+      .wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .edit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .entry-list {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Abstract Lab Admin</h1>
+    <p>Muokkaa, piilota tai poista postauksia turvallisemmin erillisellä ylläpitosivulla.</p>
+    <div class="toplinks">
+      <a class="link-btn" href="abstract-lab-firebase.html">Syöttösivu</a>
+      <a class="link-btn" href="abstract-lab-gallery.html">Gallery-sivu</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Postaukset</h2>
+
+      <div class="list-controls">
+        <input id="searchInput" type="text" placeholder="Hae nimellä, tekijällä, kuvauksella tai tagilla" />
+        <select id="publishedFilter">
+          <option value="all">Kaikki</option>
+          <option value="published">Vain julkaistut</option>
+          <option value="hidden">Vain piilotetut</option>
+        </select>
+      </div>
+
+      <div id="entryList" class="entry-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Muokkaa postausta</h2>
+
+      <div id="editorEmpty" class="empty-box">
+        Valitse vasemmalta postaus muokattavaksi.
+      </div>
+
+      <div id="editorWrap" style="display:none;">
+        <div class="edit-grid">
+          <div>
+            <label for="editAuthor">Tekijä</label>
+            <input id="editAuthor" type="text" />
+
+            <label for="editTitle">Nimi</label>
+            <input id="editTitle" type="text" />
+
+            <label for="editDescription">Kuvaus</label>
+            <textarea id="editDescription"></textarea>
+
+            <label for="editTags">Tagit</label>
+            <input id="editTags" type="text" placeholder="pilkuilla erotettuna" />
+
+            <div class="checkbox-row">
+              <input id="editPublished" type="checkbox" />
+              <label for="editPublished" style="margin:0;">Julkaistu galleriassa</label>
+            </div>
+
+            <div class="btn-row">
+              <button id="saveBtn" class="primary" type="button">Tallenna muutokset</button>
+              <button id="reloadBtn" type="button">Palauta tiedot</button>
+            </div>
+
+            <div class="danger-box">
+              <button id="deleteBtn" class="danger" type="button">Poista postaus</button>
+              <p>Poistaa Firestore-dokumentin ja yrittää poistaa myös kuva- ja thumb-tiedostot Storagesta.</p>
+            </div>
+
+            <div id="statusBox" class="status">Valitse postaus.</div>
+          </div>
+
+          <div class="preview-box">
+            <img id="previewImg" src="" alt="" />
+            <div class="meta-readonly">
+              <div><strong>Doc ID:</strong> <span id="metaDocId"></span></div>
+              <div><strong>Kuvaushetki:</strong> <span id="metaDate"></span></div>
+              <div><strong>Tallennettu:</strong> <span id="metaSaved"></span></div>
+              <div><strong>Storage path:</strong> <span id="metaStoragePath"></span></div>
+              <div><strong>Thumb path:</strong> <span id="metaThumbPath"></span></div>
+              <div><strong>Nykyiset tagit:</strong></div>
+              <div id="metaTags" class="tags"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      onSnapshot,
+      doc,
+      updateDoc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      deleteObject
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const searchInput = document.getElementById("searchInput");
+    const publishedFilter = document.getElementById("publishedFilter");
+    const entryList = document.getElementById("entryList");
+
+    const editorEmpty = document.getElementById("editorEmpty");
+    const editorWrap = document.getElementById("editorWrap");
+
+    const editAuthor = document.getElementById("editAuthor");
+    const editTitle = document.getElementById("editTitle");
+    const editDescription = document.getElementById("editDescription");
+    const editTags = document.getElementById("editTags");
+    const editPublished = document.getElementById("editPublished");
+
+    const previewImg = document.getElementById("previewImg");
+    const metaDocId = document.getElementById("metaDocId");
+    const metaDate = document.getElementById("metaDate");
+    const metaSaved = document.getElementById("metaSaved");
+    const metaStoragePath = document.getElementById("metaStoragePath");
+    const metaThumbPath = document.getElementById("metaThumbPath");
+    const metaTags = document.getElementById("metaTags");
+
+    const saveBtn = document.getElementById("saveBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const statusBox = document.getElementById("statusBox");
+
+    let allEntries = [];
+    let filteredEntries = [];
+    let selectedId = null;
+
+    function setStatus(message, type = "") {
+      statusBox.textContent = message;
+      statusBox.className = "status";
+      if (type) statusBox.classList.add(type);
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "Ei saatavilla";
+      try {
+        if (value?.toDate) return value.toDate().toLocaleString("fi-FI");
+        if (value instanceof Date) return value.toLocaleString("fi-FI");
+        return String(value);
+      } catch {
+        return String(value);
+      }
+    }
+
+    function normalizeExif(exif = {}) {
+      return {
+        dateOriginal:
+          exif.dateOriginal ||
+          exif.DateTimeOriginal ||
+          exif.CreateDate ||
+          exif.ModifyDate ||
+          exif.DateTimeDigitized ||
+          null
+      };
+    }
+
+    function parseTags(input) {
+      return input
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(Boolean)
+        .filter((tag, index, arr) => arr.findIndex(t => t.toLowerCase() === tag.toLowerCase()) === index)
+        .slice(0, 12);
+    }
+
+    function renderTags(tags = []) {
+      if (!Array.isArray(tags) || !tags.length) return "";
+      return tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+    }
+
+    function getSelectedEntry() {
+      return allEntries.find(entry => entry.id === selectedId) || null;
+    }
+
+    function applyFilters() {
+      const q = searchInput.value.trim().toLowerCase();
+      const pub = publishedFilter.value;
+
+      filteredEntries = allEntries.filter(entry => {
+        if (pub === "published" && entry.published === false) return false;
+        if (pub === "hidden" && entry.published !== false) return false;
+
+        if (!q) return true;
+
+        const haystack = [
+          entry.title || "",
+          entry.author || "",
+          entry.description || "",
+          ...(Array.isArray(entry.tags) ? entry.tags : [])
+        ].join(" ").toLowerCase();
+
+        return haystack.includes(q);
+      });
+
+      renderList();
+    }
+
+    function renderList() {
+      if (!filteredEntries.length) {
+        entryList.innerHTML = `<div class="empty-box">Ei postauksia tällä haulla.</div>`;
+        return;
+      }
+
+      entryList.innerHTML = filteredEntries.map(entry => {
+        const exif = normalizeExif(entry.exif || {});
+        return `
+          <div class="entry-item ${entry.id === selectedId ? "active" : ""}" data-id="${entry.id}">
+            <div class="entry-title">${escapeHtml(entry.title || "Nimetön")}</div>
+            <div class="entry-meta">${escapeHtml(entry.author || "Tuntematon")} ${entry.published === false ? "• piilotettu" : "• julkaistu"}</div>
+            <div class="entry-date">${escapeHtml(formatDate(exif.dateOriginal))}</div>
+          </div>
+        `;
+      }).join("");
+
+      [...entryList.querySelectorAll(".entry-item")].forEach(el => {
+        el.addEventListener("click", () => {
+          selectedId = el.dataset.id;
+          loadSelectedEntry();
+          renderList();
+        });
+      });
+    }
+
+    function loadSelectedEntry() {
+      const entry = getSelectedEntry();
+      if (!entry) {
+        editorEmpty.style.display = "block";
+        editorWrap.style.display = "none";
+        return;
+      }
+
+      editorEmpty.style.display = "none";
+      editorWrap.style.display = "block";
+
+      editAuthor.value = entry.author || "";
+      editTitle.value = entry.title || "";
+      editDescription.value = entry.description || "";
+      editTags.value = Array.isArray(entry.tags) ? entry.tags.join(", ") : "";
+      editPublished.checked = entry.published !== false;
+
+      previewImg.src = entry.imageUrl || "";
+      metaDocId.textContent = entry.id || "";
+      metaDate.textContent = formatDate(normalizeExif(entry.exif || {}).dateOriginal);
+      metaSaved.textContent = formatDate(entry.createdAt);
+      metaStoragePath.textContent = entry.storagePath || "Ei saatavilla";
+      metaThumbPath.textContent = entry.thumbPath || "Ei saatavilla";
+      metaTags.innerHTML = renderTags(entry.tags || []);
+
+      setStatus("Postaus ladattu muokattavaksi.");
+    }
+
+    async function saveChanges() {
+      const entry = getSelectedEntry();
+      if (!entry) {
+        setStatus("Valitse ensin postaus.", "error");
+        return;
+      }
+
+      if (!editAuthor.value.trim()) {
+        setStatus("Tekijä ei voi olla tyhjä.", "error");
+        return;
+      }
+
+      if (!editTitle.value.trim()) {
+        setStatus("Nimi ei voi olla tyhjä.", "error");
+        return;
+      }
+
+      try {
+        saveBtn.disabled = true;
+        setStatus("Tallennetaan muutoksia...");
+
+        const payload = {
+          author: editAuthor.value.trim(),
+          title: editTitle.value.trim(),
+          description: editDescription.value.trim(),
+          tags: parseTags(editTags.value),
+          published: editPublished.checked
+        };
+
+        await updateDoc(doc(db, "abstractLabEntries", entry.id), payload);
+        setStatus("Muutokset tallennettu.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Tallennus epäonnistui: " + err.message, "error");
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    async function deleteSelectedEntry() {
+      const entry = getSelectedEntry();
+      if (!entry) {
+        setStatus("Valitse ensin postaus.", "error");
+        return;
+      }
+
+      const ok = window.confirm(`Poistetaanko postaus "${entry.title || "Nimetön"}"?`);
+      if (!ok) return;
+
+      try {
+        deleteBtn.disabled = true;
+        saveBtn.disabled = true;
+        setStatus("Poistetaan postausta...");
+
+        let storageDeleteErrors = [];
+
+        if (entry.storagePath) {
+          try {
+            await deleteObject(ref(storage, entry.storagePath));
+          } catch (err) {
+            console.error("Image delete failed:", err);
+            storageDeleteErrors.push("varsinainen kuva");
+          }
+        }
+
+        if (entry.thumbPath) {
+          try {
+            await deleteObject(ref(storage, entry.thumbPath));
+          } catch (err) {
+            console.error("Thumb delete failed:", err);
+            storageDeleteErrors.push("thumbnail");
+          }
+        }
+
+        await deleteDoc(doc(db, "abstractLabEntries", entry.id));
+
+        selectedId = null;
+        editorEmpty.style.display = "block";
+        editorWrap.style.display = "none";
+
+        if (storageDeleteErrors.length) {
+          setStatus("Firestore-dokumentti poistettu, mutta Storage-poisto epäonnistui osittain: " + storageDeleteErrors.join(", "), "error");
+        } else {
+          setStatus("Postaus poistettu.", "ok");
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("Poisto epäonnistui: " + err.message, "error");
+      } finally {
+        deleteBtn.disabled = false;
+        saveBtn.disabled = false;
+      }
+    }
+
+    function reloadEditor() {
+      loadSelectedEntry();
+      setStatus("Kentät palautettu tallennettuun versioon.");
+    }
+
+    function startListener() {
+      const q = query(collection(db, "abstractLabEntries"), orderBy("createdAt", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        allEntries = snapshot.docs.map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+
+        if (selectedId && !allEntries.some(entry => entry.id === selectedId)) {
+          selectedId = null;
+        }
+
+        applyFilters();
+
+        if (selectedId) {
+          loadSelectedEntry();
+        } else {
+          editorEmpty.style.display = "block";
+          editorWrap.style.display = "none";
+        }
+      }, (error) => {
+        console.error(error);
+        entryList.innerHTML = `<div class="empty-box">Postausten lataus epäonnistui.</div>`;
+      });
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+    publishedFilter.addEventListener("change", applyFilters);
+
+    saveBtn.addEventListener("click", saveChanges);
+    reloadBtn.addEventListener("click", reloadEditor);
+    deleteBtn.addEventListener("click", deleteSelectedEntry);
+
+    startListener();
+  </script>
+</body>
+</html>
