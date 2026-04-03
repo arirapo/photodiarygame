@@ -720,112 +720,112 @@
       });
     }
 
-    async function saveToFirebase() {
-      if (!originalFile || !currentImage) {
-        setStatus("Valitse ensin kuva.", "error");
-        return;
-      }
+async function saveToFirebase() {
+  if (!originalFile || !currentImage) {
+    setStatus("Valitse ensin kuva.", "error");
+    return;
+  }
 
-      if (!author.value.trim()) {
-        setStatus("Anna kuvaajan nimi tai nimimerkki.", "error");
-        return;
-      }
+  if (!author.value.trim()) {
+    setStatus("Anna kuvaajan nimi tai nimimerkki.", "error");
+    return;
+  }
 
-      if (!titleInput.value.trim()) {
-        setStatus("Anna kuvalle nimi.", "error");
-        return;
-      }
+  if (!titleInput.value.trim()) {
+    setStatus("Anna kuvalle nimi.", "error");
+    return;
+  }
 
-      try {
-        saveBtn.disabled = true;
-        setStatus("Tallennetaan kuvaa Firebase Storageen ja metadataa Firestoreen...");
+  try {
+    saveBtn.disabled = true;
+    setStatus("Tallennetaan kuvaa Firebase Storageen ja metadataa Firestoreen...");
 
-        const blob = await canvasToBlob(previewCanvas, "image/jpeg", 0.92);
-        if (!blob) throw new Error("Canvas-blobin luonti epäonnistui.");
+    // 1) Tallennetaan pääkuva previewCanvasista
+    const blob = await canvasToBlob(previewCanvas, "image/jpeg", 0.92);
+    if (!blob) throw new Error("Canvas-blobin luonti epäonnistui.");
 
-        const now = Date.now();
-        const safeAuthor = author.value.trim().replace(/[^\w\-]+/g, "_");
-        const safeTitle = titleInput.value.trim().replace(/[^\w\-]+/g, "_");
-        const filename = `${now}_${safeAuthor}_${safeTitle}.jpg`;
+    const now = Date.now();
+    const safeAuthor = author.value.trim().replace(/[^\w\-]+/g, "_");
+    const safeTitle = titleInput.value.trim().replace(/[^\w\-]+/g, "_");
+    const filename = `${now}_${safeAuthor}_${safeTitle}.jpg`;
 
-        const storageRef = ref(storage, `abstract-lab/images/${filename}`);
-        await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
-        const imageUrl = await getDownloadURL(storageRef);
+    const storageRef = ref(storage, `abstract-lab/images/${filename}`);
+    await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
+    const imageUrl = await getDownloadURL(storageRef);
 
-        const thumbCanvas = document.createElement("canvas");
-        const thumbSize = 500;
-        thumbCanvas.width = thumbSize;
-        thumbCanvas.height = thumbSize;
-        const tctx = thumbCanvas.getContext("2d");
-        tctx.fillStyle = "#0b0d11";
-        tctx.fillRect(0, 0, thumbSize, thumbSize);
-        const tempImg = new Image();
-        tempImg.src = imageUrl;
+    // 2) Tehdään thumbnail suoraan previewCanvasista
+    const thumbCanvas = document.createElement("canvas");
+    const thumbSize = 500;
+    thumbCanvas.width = thumbSize;
+    thumbCanvas.height = thumbSize;
 
-        await new Promise((resolve) => {
-          tempImg.onload = resolve;
-          tempImg.onerror = resolve;
-        });
+    const tctx = thumbCanvas.getContext("2d");
+    tctx.fillStyle = "#0b0d11";
+    tctx.fillRect(0, 0, thumbSize, thumbSize);
 
-        if (tempImg.width && tempImg.height) {
-          const scale = Math.max(thumbSize / tempImg.width, thumbSize / tempImg.height);
-          const w = tempImg.width * scale;
-          const h = tempImg.height * scale;
-          const x = (thumbSize - w) / 2;
-          const y = (thumbSize - h) / 2;
-          tctx.drawImage(tempImg, x, y, w, h);
-        }
+    const srcW = previewCanvas.width;
+    const srcH = previewCanvas.height;
+    const scale = Math.min(thumbSize / srcW, thumbSize / srcH);
+    const w = srcW * scale;
+    const h = srcH * scale;
+    const x = (thumbSize - w) / 2;
+    const y = (thumbSize - h) / 2;
 
-        const thumbBlob = await canvasToBlob(thumbCanvas, "image/jpeg", 0.82);
-        let thumbUrl = imageUrl;
+    tctx.drawImage(previewCanvas, x, y, w, h);
 
-        if (thumbBlob) {
-          const thumbRef = ref(storage, `abstract-lab/thumbs/thumb_${filename}`);
-          await uploadBytes(thumbRef, thumbBlob, { contentType: "image/jpeg" });
-          thumbUrl = await getDownloadURL(thumbRef);
-        }
+    const thumbBlob = await canvasToBlob(thumbCanvas, "image/jpeg", 0.82);
+    let thumbUrl = imageUrl;
 
-        await addDoc(collection(db, "abstractLabEntries"), {
-          author: author.value.trim(),
-          title: titleInput.value.trim(),
-          description: description.value.trim(),
-          imageUrl,
-          thumbUrl,
-          storagePath: `abstract-lab/images/${filename}`,
-          thumbPath: `abstract-lab/thumbs/thumb_${filename}`,
-          filters: getFilterState(),
-          exif: {
-            dateOriginal: currentExif.DateTimeOriginal || currentExif.CreateDate || null,
-            make: currentExif.Make || "",
-            model: currentExif.Model || "",
-            lens: currentExif.LensModel || "",
-            iso: currentExif.ISO || "",
-            aperture: currentExif.FNumber || "",
-            exposureTime: currentExif.ExposureTime || "",
-            focalLength: currentExif.FocalLength || ""
-          },
-          published: true,
-          createdAt: serverTimestamp()
-        });
-
-        setStatus("Tallennus onnistui.", "ok");
-
-        author.value = "";
-        titleInput.value = "";
-        description.value = "";
-        imageFile.value = "";
-        currentImage = null;
-        originalFile = null;
-        currentExif = {};
-        exifBox.innerHTML = "Ei vielä tiedostoa valittuna.";
-        resetFilters();
-      } catch (err) {
-        console.error(err);
-        setStatus("Tallennus epäonnistui: " + err.message, "error");
-      } finally {
-        saveBtn.disabled = false;
-      }
+    if (thumbBlob) {
+      const thumbRef = ref(storage, `abstract-lab/thumbs/thumb_${filename}`);
+      await uploadBytes(thumbRef, thumbBlob, { contentType: "image/jpeg" });
+      thumbUrl = await getDownloadURL(thumbRef);
     }
+
+    // 3) Tallennetaan metadata Firestoreen
+    await addDoc(collection(db, "abstractLabEntries"), {
+      author: author.value.trim(),
+      title: titleInput.value.trim(),
+      description: description.value.trim(),
+      imageUrl,
+      thumbUrl,
+      storagePath: `abstract-lab/images/${filename}`,
+      thumbPath: `abstract-lab/thumbs/thumb_${filename}`,
+      filters: getFilterState(),
+      exif: {
+        dateOriginal: currentExif.DateTimeOriginal || currentExif.CreateDate || null,
+        make: currentExif.Make || "",
+        model: currentExif.Model || "",
+        lens: currentExif.LensModel || "",
+        iso: currentExif.ISO || "",
+        aperture: currentExif.FNumber || "",
+        exposureTime: currentExif.ExposureTime || "",
+        focalLength: currentExif.FocalLength || ""
+      },
+      published: true,
+      createdAt: serverTimestamp(),
+      createdAtMs: Date.now()
+    });
+
+    setStatus("Tallennus onnistui.", "ok");
+
+    // 4) Tyhjennetään lomake
+    author.value = "";
+    titleInput.value = "";
+    description.value = "";
+    imageFile.value = "";
+    currentImage = null;
+    originalFile = null;
+    currentExif = {};
+    exifBox.innerHTML = "Ei vielä tiedostoa valittuna.";
+    resetFilters();
+  } catch (err) {
+    console.error(err);
+    setStatus("Tallennus epäonnistui: " + err.message, "error");
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
 
     function renderGallery(entries) {
       galleryEntries = entries;
