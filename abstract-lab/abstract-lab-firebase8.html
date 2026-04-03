@@ -856,17 +856,55 @@
     }
 
     function normalizeExif(exif = {}) {
-      return {
-        dateOriginal: exif.DateTimeOriginal || exif.CreateDate || exif.ModifyDate || exif.DateTimeDigitized || null,
-        make: exif.Make || exif.make || "",
-        model: exif.Model || exif.model || "",
-        lens: exif.LensModel || exif.Lens || exif.lens || "",
-        iso: exif.ISO || exif.ISOSpeedRatings || exif.iso || "",
-        aperture: exif.FNumber || exif.ApertureValue || exif.aperture || "",
-        exposureTime: exif.ExposureTime || exif.ShutterSpeedValue || exif.exposureTime || "",
-        focalLength: exif.FocalLength || exif.focalLength || ""
-      };
-    }
+  return {
+    dateOriginal:
+      exif.dateOriginal ||
+      exif.DateTimeOriginal ||
+      exif.CreateDate ||
+      exif.ModifyDate ||
+      exif.DateTimeDigitized ||
+      null,
+
+    make:
+      exif.make ||
+      exif.Make ||
+      "",
+
+    model:
+      exif.model ||
+      exif.Model ||
+      "",
+
+    lens:
+      exif.lens ||
+      exif.LensModel ||
+      exif.Lens ||
+      "",
+
+    iso:
+      exif.iso ||
+      exif.ISO ||
+      exif.ISOSpeedRatings ||
+      "",
+
+    aperture:
+      exif.aperture ||
+      exif.FNumber ||
+      exif.ApertureValue ||
+      "",
+
+    exposureTime:
+      exif.exposureTime ||
+      exif.ExposureTime ||
+      exif.ShutterSpeedValue ||
+      "",
+
+    focalLength:
+      exif.focalLength ||
+      exif.FocalLength ||
+      ""
+  };
+}
 
     function renderExifDetails(exifRaw = {}) {
       const exif = normalizeExif(exifRaw);
