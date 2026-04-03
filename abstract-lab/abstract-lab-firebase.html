@@ -554,6 +554,50 @@
       }
     }
 
+    function formatNumber(value, decimals = 1) {
+  const num = Number(value);
+  if (!isFinite(num)) return "";
+  return num.toFixed(decimals).replace(/\.0+$/, "").replace(/(\.\d*[1-9])0+$/, "$1");
+}
+
+function formatAperture(value) {
+  if (value === null || value === undefined || value === "") return "Ei saatavilla";
+  const num = Number(value);
+  if (!isFinite(num)) return String(value);
+  return "f/" + formatNumber(num, 1);
+}
+
+function formatExposureTime(value) {
+  if (value === null || value === undefined || value === "") return "Ei saatavilla";
+
+  const num = Number(value);
+  if (isFinite(num) && num > 0) {
+    if (num >= 1) {
+      return formatNumber(num, 1) + " s";
+    }
+    const reciprocal = Math.round(1 / num);
+    if (reciprocal > 0) {
+      return "1/" + reciprocal + " s";
+    }
+  }
+
+  return String(value);
+}
+
+function formatFocalLength(value) {
+  if (value === null || value === undefined || value === "") return "Ei saatavilla";
+  const num = Number(value);
+  if (!isFinite(num)) return String(value);
+  return formatNumber(num, 1) + " mm";
+}
+
+function formatISO(value) {
+  if (value === null || value === undefined || value === "") return "Ei saatavilla";
+  const num = Number(value);
+  if (!isFinite(num)) return String(value);
+  return String(Math.round(num));
+}
+
     function formatSavedDate(value) {
       if (!value) return "Ei saatavilla";
       try {
@@ -788,10 +832,10 @@ function renderExif() {
     <p><strong>Kuvaushetki:</strong> ${escapeHtml(formatExifDate(exif.dateOriginal))}</p>
     <p><strong>Kamera:</strong> ${escapeHtml([exif.make, exif.model].filter(Boolean).join(" ")) || "Ei saatavilla"}</p>
     <p><strong>Objektiivi:</strong> ${escapeHtml(String(exif.lens || "Ei saatavilla"))}</p>
-    <p><strong>ISO:</strong> ${escapeHtml(String(exif.iso || "Ei saatavilla"))}</p>
-    <p><strong>Aukko:</strong> ${escapeHtml(exif.aperture ? "f/" + exif.aperture : "Ei saatavilla")}</p>
-    <p><strong>Valotusaika:</strong> ${escapeHtml(String(exif.exposureTime || "Ei saatavilla"))}</p>
-    <p><strong>Polttoväli:</strong> ${escapeHtml(exif.focalLength ? exif.focalLength + " mm" : "Ei saatavilla")}</p>
+    <p><strong>ISO:</strong> ${escapeHtml(formatISO(exif.iso))}</p>
+    <p><strong>Aukko:</strong> ${escapeHtml(formatAperture(exif.aperture))}</p>
+    <p><strong>Valotusaika:</strong> ${escapeHtml(formatExposureTime(exif.exposureTime))}</p>
+    <p><strong>Polttoväli:</strong> ${escapeHtml(formatFocalLength(exif.focalLength))}</p>
   `;
 }
 
@@ -959,19 +1003,21 @@ async function saveToFirebase() {
     }
 
     function openModal(entry) {
-      if (!entry) return;
+  if (!entry) return;
 
-      modalImg.src = entry.imageUrl;
-      modalTitle.textContent = entry.title || "Nimetön";
-      modalAuthor.textContent = entry.author || "Tuntematon";
-      modalDescription.textContent = entry.description || "—";
-      modalDate.textContent = formatExifDate(entry.exif?.dateOriginal);
-      modalCamera.textContent = [entry.exif?.make, entry.exif?.model].filter(Boolean).join(" ") || "Ei saatavilla";
-      modalSaved.textContent = formatSavedDate(entry.createdAt);
+  const exif = normalizeExif(entry.exif || {});
 
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-    }
+  modalImg.src = entry.imageUrl;
+  modalTitle.textContent = entry.title || "Nimetön";
+  modalAuthor.textContent = entry.author || "Tuntematon";
+  modalDescription.textContent = entry.description || "—";
+  modalDate.textContent = formatExifDate(exif.dateOriginal);
+  modalCamera.textContent = [exif.make, exif.model].filter(Boolean).join(" ") || "Ei saatavilla";
+  modalSaved.textContent = formatSavedDate(entry.createdAt);
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
 
     function closeModal() {
       modal.classList.remove("open");
