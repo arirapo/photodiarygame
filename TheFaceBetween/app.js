@@ -46,6 +46,122 @@ const demoTraces = [
   { region: "left_cheek_zone", x: 43, y: 60, w: 58, h: 52, r: 0.4, o: 0.24, img: 5 }
 ];
 
+const REGION_LAYOUT = {
+  upper_field: {
+    centerX: 50,
+    centerY: 22,
+    spreadX: 10,
+    spreadY: 6,
+    baseW: 78,
+    baseH: 56,
+    opacity: 0.30,
+    rotation: 2
+  },
+  left_eye_zone: {
+    centerX: 40,
+    centerY: 36,
+    spreadX: 6,
+    spreadY: 4,
+    baseW: 66,
+    baseH: 52,
+    opacity: 0.42,
+    rotation: 2
+  },
+  right_eye_zone: {
+    centerX: 60,
+    centerY: 36,
+    spreadX: 6,
+    spreadY: 4,
+    baseW: 66,
+    baseH: 52,
+    opacity: 0.42,
+    rotation: 2
+  },
+  center_bridge: {
+    centerX: 50,
+    centerY: 48,
+    spreadX: 4,
+    spreadY: 8,
+    baseW: 62,
+    baseH: 82,
+    opacity: 0.40,
+    rotation: 1.2
+  },
+  left_cheek_zone: {
+    centerX: 37,
+    centerY: 56,
+    spreadX: 8,
+    spreadY: 7,
+    baseW: 88,
+    baseH: 70,
+    opacity: 0.36,
+    rotation: 2.5
+  },
+  right_cheek_zone: {
+    centerX: 63,
+    centerY: 56,
+    spreadX: 8,
+    spreadY: 7,
+    baseW: 88,
+    baseH: 70,
+    opacity: 0.36,
+    rotation: 2.5
+  },
+  mouth_zone: {
+    centerX: 50,
+    centerY: 67,
+    spreadX: 7,
+    spreadY: 4,
+    baseW: 112,
+    baseH: 48,
+    opacity: 0.44,
+    rotation: 1.5
+  },
+  lower_field: {
+    centerX: 50,
+    centerY: 82,
+    spreadX: 9,
+    spreadY: 6,
+    baseW: 106,
+    baseH: 72,
+    opacity: 0.28,
+    rotation: 2
+  },
+  outer_shadow_left: {
+    centerX: 26,
+    centerY: 71,
+    spreadX: 6,
+    spreadY: 8,
+    baseW: 78,
+    baseH: 90,
+    opacity: 0.22,
+    rotation: 2
+  },
+  outer_shadow_right: {
+    centerX: 74,
+    centerY: 71,
+    spreadX: 6,
+    spreadY: 8,
+    baseW: 78,
+    baseH: 90,
+    opacity: 0.22,
+    rotation: 2
+  }
+};
+
+const REGION_ORDER = [
+  "upper_field",
+  "left_eye_zone",
+  "right_eye_zone",
+  "center_bridge",
+  "left_cheek_zone",
+  "right_cheek_zone",
+  "mouth_zone",
+  "lower_field",
+  "outer_shadow_left",
+  "outer_shadow_right"
+];
+
 const mosaicLayer = document.getElementById("mosaic-layer");
 const ghostLayer = document.getElementById("ghost-base-layer");
 const promptText = document.getElementById("prompt-text");
@@ -63,18 +179,49 @@ function choosePrompt() {
   promptText.textContent = currentPrompt;
 }
 
-function computeGhostOpacity(count) {
-  const start = 0.28;
-  const min = 0.04;
-  const fade = count * 0.01;
-  return Math.max(min, start - fade);
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function updateGhost(count) {
-  const opacity = computeGhostOpacity(count);
+function randomBetween(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function pickRegionForImage(file) {
+  if (!file || !file.type) {
+    return REGION_ORDER[Math.floor(Math.random() * REGION_ORDER.length)];
+  }
+
+  const isPortraitLikeName = /portrait|self|face/i.test(file.name);
+  if (isPortraitLikeName) {
+    return Math.random() > 0.5 ? "left_cheek_zone" : "right_cheek_zone";
+  }
+
+  return REGION_ORDER[Math.floor(Math.random() * REGION_ORDER.length)];
+}
+
+function getOrientation(width, height) {
+  if (!width || !height) return "unknown";
+  if (width > height) return "landscape";
+  if (height > width) return "portrait";
+  return "square";
+}
+
+function computeGhostOpacityFromState(liveCount, usedRegionsCount) {
+  const start = 0.28;
+  const min = 0.04;
+
+  const countFade = liveCount * 0.008;
+  const regionFade = usedRegionsCount * 0.018;
+
+  return Math.max(min, start - countFade - regionFade);
+}
+
+function updateGhost(liveCount, usedRegionsCount = 0) {
+  const opacity = computeGhostOpacityFromState(liveCount, usedRegionsCount);
   ghostLayer.style.opacity = opacity.toFixed(3);
   ghostOpacityReadout.textContent = opacity.toFixed(2);
-  traceCount.textContent = String(count);
+  traceCount.textContent = String(liveCount);
 }
 
 function formatFileSize(bytes) {
@@ -120,31 +267,66 @@ function createFragmentElement(item, index) {
   return fragment;
 }
 
-function buildHybridTraces(liveImages) {
-  const built = [];
-  const liveCount = liveImages.length;
-  const totalSlots = demoTraces.length;
+function createOrganicTraceFromLive(item, index) {
+  const regionName = item.region && REGION_LAYOUT[item.region]
+    ? item.region
+    : REGION_ORDER[index % REGION_ORDER.length];
 
-  for (let i = 0; i < totalSlots; i += 1) {
-    const slot = demoTraces[i];
-    const hasLive = i < liveCount;
+  const region = REGION_LAYOUT[regionName];
+  const orientation = item.orientation || "unknown";
 
-    let src = demoImagePool[slot.img % demoImagePool.length];
-    let opacity = slot.o;
+  let widthScale = 1;
+  let heightScale = 1;
 
-    if (hasLive) {
-      src = liveImages[i].imageUrl;
-      opacity = Math.min(0.6, slot.o + 0.14);
-    }
-
-    built.push({
-      ...slot,
-      src,
-      o: opacity
-    });
+  if (orientation === "landscape") {
+    widthScale = 1.16;
+    heightScale = 0.88;
+  } else if (orientation === "portrait") {
+    widthScale = 0.88;
+    heightScale = 1.16;
+  } else if (orientation === "square") {
+    widthScale = 0.94;
+    heightScale = 0.94;
   }
 
-  return built;
+  const jitterX = randomBetween(-region.spreadX, region.spreadX);
+  const jitterY = randomBetween(-region.spreadY, region.spreadY);
+
+  const w = Math.round(region.baseW * widthScale * randomBetween(0.88, 1.16));
+  const h = Math.round(region.baseH * heightScale * randomBetween(0.88, 1.16));
+  const r = randomBetween(-region.rotation, region.rotation);
+  const o = clamp(region.opacity + randomBetween(-0.05, 0.12), 0.18, 0.62);
+
+  return {
+    region: regionName,
+    x: clamp(region.centerX + jitterX, 10, 90),
+    y: clamp(region.centerY + jitterY, 8, 92),
+    w,
+    h,
+    r,
+    o,
+    src: item.imageUrl,
+    isLive: true
+  };
+}
+
+function createFallbackDemoTrace(slot) {
+  return {
+    ...slot,
+    src: demoImagePool[slot.img % demoImagePool.length],
+    isLive: false
+  };
+}
+
+function buildHybridTraces(liveImages) {
+  const liveFragments = liveImages.map((item, index) => createOrganicTraceFromLive(item, index));
+
+  const fallbackCount = Math.max(0, demoTraces.length - liveFragments.length);
+  const fallbackFragments = demoTraces
+    .slice(0, fallbackCount)
+    .map((slot) => createFallbackDemoTrace(slot));
+
+  return [...fallbackFragments, ...liveFragments];
 }
 
 function renderFragments(items) {
@@ -162,7 +344,7 @@ async function loadLiveTraces() {
     const q = query(
       tracesRef,
       orderBy("createdAt", "desc"),
-      limit(demoTraces.length)
+      limit(24)
     );
 
     const snapshot = await getDocs(q);
@@ -171,9 +353,15 @@ async function loadLiveTraces() {
       .map((doc) => ({ id: doc.id, ...doc.data() }))
       .filter((item) => item.status === "active" && item.imageUrl);
 
+    const usedRegions = new Set(
+      liveImages
+        .map((item) => item.region)
+        .filter((region) => region && REGION_LAYOUT[region])
+    );
+
     const hybrid = buildHybridTraces(liveImages);
     renderFragments(hybrid);
-    updateGhost(liveImages.length);
+    updateGhost(liveImages.length, usedRegions.size);
 
     if (liveImages.length > 0) {
       statusText.textContent = `${liveImages.length} live trace${liveImages.length === 1 ? "" : "s"} in the field.`;
@@ -182,15 +370,42 @@ async function loadLiveTraces() {
     }
   } catch (error) {
     console.error(error);
-    renderFragments(
-      demoTraces.map((slot) => ({
-        ...slot,
-        src: demoImagePool[slot.img % demoImagePool.length]
-      }))
-    );
-    updateGhost(0);
+
+    const fallback = demoTraces.map((slot) => createFallbackDemoTrace(slot));
+    renderFragments(fallback);
+    updateGhost(0, 0);
     statusText.textContent = "Could not load Firestore traces. Showing demo field.";
   }
+}
+
+async function readImageDimensions(file) {
+  return new Promise((resolve) => {
+    if (!file || !file.type || !file.type.startsWith("image/")) {
+      resolve({ width: null, height: null, orientation: "unknown" });
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      const width = img.naturalWidth || null;
+      const height = img.naturalHeight || null;
+      URL.revokeObjectURL(objectUrl);
+      resolve({
+        width,
+        height,
+        orientation: getOrientation(width, height)
+      });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve({ width: null, height: null, orientation: "unknown" });
+    };
+
+    img.src = objectUrl;
+  });
 }
 
 async function handleSubmit(event) {
@@ -203,6 +418,11 @@ async function handleSubmit(event) {
   }
 
   try {
+    statusText.textContent = "Preparing trace...";
+
+    const { width, height, orientation } = await readImageDimensions(file);
+    const region = pickRegionForImage(file);
+
     statusText.textContent = "Uploading trace to Storage...";
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -225,7 +445,11 @@ async function handleSubmit(event) {
       word: wordInput.value.trim() || "",
       promptText: currentPrompt,
       createdAt: serverTimestamp(),
-      status: "active"
+      status: "active",
+      region,
+      orientation,
+      width,
+      height
     });
 
     statusText.textContent = "Your trace has entered the field.";
