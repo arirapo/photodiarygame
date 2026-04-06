@@ -14,7 +14,6 @@
   --panel-strong: rgba(255, 255, 255, 0.3);
   --ghost-opacity: 0.22;
   --veil-opacity: 0.08;
-  --stage-max: 1200px;
 }
 
 html,
@@ -22,7 +21,7 @@ body {
   margin: 0;
   min-height: 100%;
   background:
-    radial-gradient(circle at top, rgba(255,255,255,0.42), transparent 32%),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.42), transparent 32%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -36,7 +35,6 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 0;
 }
 
 .art-stage {
@@ -44,8 +42,8 @@ body {
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 18%, rgba(255,255,255,0.35), transparent 28%),
-    radial-gradient(circle at 50% 76%, rgba(0,0,0,0.08), transparent 36%);
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.35), transparent 28%),
+    radial-gradient(circle at 50% 76%, rgba(0, 0, 0, 0.08), transparent 36%);
 }
 
 .layer {
@@ -55,9 +53,9 @@ body {
 
 .layer-atmosphere {
   background:
-    radial-gradient(circle at 48% 22%, rgba(255,255,255,0.32), transparent 20%),
-    radial-gradient(circle at 50% 48%, rgba(0,0,0,0.06), transparent 24%),
-    radial-gradient(circle at 51% 76%, rgba(0,0,0,0.08), transparent 28%);
+    radial-gradient(circle at 48% 22%, rgba(255, 255, 255, 0.32), transparent 20%),
+    radial-gradient(circle at 50% 48%, rgba(0, 0, 0, 0.06), transparent 24%),
+    radial-gradient(circle at 51% 76%, rgba(0, 0, 0, 0.08), transparent 28%);
   filter: blur(18px);
   transform: scale(1.05);
   animation: breathe 18s ease-in-out infinite;
@@ -76,7 +74,7 @@ body {
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  filter: blur(1.4px) saturate(0.9) contrast(0.92);
+  filter: blur(1.6px) saturate(0.88) contrast(0.9);
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -87,8 +85,8 @@ body {
 
 .layer-veil {
   background:
-    linear-gradient(180deg, rgba(255,255,255,var(--veil-opacity)) 0%, rgba(255,255,255,0) 22%),
-    linear-gradient(0deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 24%);
+    linear-gradient(180deg, rgba(255, 255, 255, var(--veil-opacity)) 0%, rgba(255, 255, 255, 0) 22%),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 24%);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -112,7 +110,7 @@ body {
   position: relative;
   min-height: 100vh;
   border-left: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0.12));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.12));
   backdrop-filter: blur(8px);
 }
 
@@ -201,7 +199,7 @@ h1 {
 #word-input {
   min-height: 44px;
   border: 1px solid var(--line);
-  background: rgba(255,255,255,0.28);
+  background: rgba(255, 255, 255, 0.28);
   padding: 10px 12px;
   color: var(--ink);
   font: inherit;
@@ -209,8 +207,8 @@ h1 {
 }
 
 #word-input:focus {
-  border-color: rgba(14,17,22,0.3);
-  background: rgba(255,255,255,0.42);
+  border-color: rgba(14, 17, 22, 0.3);
+  background: rgba(255, 255, 255, 0.42);
 }
 
 .submit-button {
@@ -241,7 +239,11 @@ h1 {
   opacity: 0;
   transform-origin: center center;
   animation: fragmentIn 1.4s ease forwards;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 10px 30px rgba(0, 0, 0, 0.035);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(1px);
 }
 
 .fragment img {
@@ -249,11 +251,12 @@ h1 {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.9) contrast(0.98);
+  filter: saturate(0.88) contrast(0.96) brightness(0.98);
 }
 
 @keyframes breathe {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.9;
     transform: scale(1.05);
   }
