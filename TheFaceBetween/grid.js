@@ -181,58 +181,6 @@ function pickBlurClass(index, total) {
   return "";
 }
 
-function getZoneCells(regionName) {
-  const zone = REGION_ZONES[regionName] || REGION_ZONES.lower_field;
-  const cells = [];
-
-  for (let row = zone.rows[0]; row <= zone.rows[1]; row += 1) {
-    for (let col = zone.cols[0]; col <= zone.cols[1]; col += 1) {
-      cells.push({ row, col });
-    }
-  }
-
-  return cells;
-}
-
-function buildCellAddressMap(liveImages) {
-  const assignments = new Map();
-  const used = new Set();
-
-  liveImages.forEach((item, index) => {
-    const region = item.region && REGION_ZONES[item.region] ? item.region : REGION_ORDER[index % REGION_ORDER.length];
-    const candidates = getZoneCells(region);
-
-    let placed = false;
-    for (let i = 0; i < candidates.length; i += 1) {
-      const candidate = candidates[Math.floor(Math.random() * candidates.length)];
-      const key = `${candidate.row}-${candidate.col}`;
-      if (!used.has(key)) {
-        assignments.set(key, item);
-        used.add(key);
-        placed = true;
-        break;
-      }
-    }
-
-    if (!placed) {
-      for (let row = 0; row < GRID_SIZE; row += 1) {
-        for (let col = 0; col < GRID_SIZE; col += 1) {
-          const key = `${row}-${col}`;
-          if (!used.has(key)) {
-            assignments.set(key, item);
-            used.add(key);
-            placed = true;
-            break;
-          }
-        }
-        if (placed) break;
-      }
-    }
-  });
-
-  return assignments;
-}
-
 function createCellElement(item, index, total) {
   const cell = document.createElement("div");
   const blurClass = item.isLive ? pickBlurClass(index, total) : "is-deep-soft";
@@ -252,7 +200,7 @@ function createFallbackDemoItem(index) {
   return {
     src: demoImagePool[index % demoImagePool.length],
     isLive: false,
-    opacity: clamp(0.08 + randomBetween(-0.02, 0.03), 0.05, 0.14)
+    opacity: clamp(0.035 + randomBetween(-0.01, 0.02), 0.02, 0.08)
   };
 }
 
@@ -274,7 +222,7 @@ function buildGridItems(liveImages) {
     items.push({
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.24 + randomBetween(-0.04, 0.05)) * ageFade, 0.06, 0.32),
+      opacity: clamp((0.12 + randomBetween(-0.03, 0.03)) * ageFade, 0.035, 0.16),
       region: source.region || null
     });
   }
