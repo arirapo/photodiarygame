@@ -200,10 +200,9 @@ function createFallbackDemoItem(index) {
   return {
     src: demoImagePool[index % demoImagePool.length],
     isLive: false,
-    opacity: clamp(0.03 + randomBetween(-0.01, 0.01), 0.01, 0.05)
+    opacity: clamp(0.015 + randomBetween(-0.005, 0.005), 0.005, 0.025)
   };
 }
-
 function buildGridItems(liveImages) {
   const items = [];
 
@@ -222,7 +221,7 @@ function buildGridItems(liveImages) {
     items.push({
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.20 + randomBetween(-0.03, 0.03)) * ageFade, 0.05, 0.20),
+opacity: clamp((0.08 + randomBetween(-0.015, 0.015)) * ageFade, 0.015, 0.08),
       region: source.region || null
     });
   }
