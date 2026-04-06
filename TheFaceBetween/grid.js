@@ -16,6 +16,7 @@ import {
 const GRID_SIZE = 12;
 const GRID_CELL_COUNT = GRID_SIZE * GRID_SIZE;
 const LIVE_FETCH_LIMIT = 144;
+const FILLED_CELL_RATIO = 0.35;
 
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
@@ -84,6 +85,15 @@ function clamp(value, min, max) {
 
 function randomBetween(min, max) {
   return min + Math.random() * (max - min);
+}
+
+function shuffle(array) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
 
 function formatFileSize(bytes) {
@@ -155,9 +165,9 @@ async function readImageDimensions(file) {
 
 function computeGhostOpacity(totalActiveCount, usedRegionsCount) {
   const start = 1.0;
-  const min = 0.72;
-  const countFade = totalActiveCount * 0.00035;
-  const regionFade = usedRegionsCount * 0.004;
+  const min = 0.78;
+  const countFade = totalActiveCount * 0.0002;
+  const regionFade = usedRegionsCount * 0.002;
   return Math.max(min, start - countFade - regionFade);
 }
 
@@ -183,15 +193,20 @@ function pickBlurClass(index, total) {
 
 function createCellElement(item, index, total) {
   const cell = document.createElement("div");
+
+  if (!item) {
+    cell.className = "grid-cell";
+    cell.style.opacity = "0";
+    return cell;
+  }
+
   const blurClass = item.isLive ? pickBlurClass(index, total) : "is-deep-soft";
   cell.className = `grid-cell ${item.isLive ? "is-live" : "is-demo"} ${blurClass}`;
   cell.style.opacity = "0";
-  cell.style.animationDelay = `${index * 8}ms`;
 
   const img = document.createElement("img");
   img.src = item.src;
   img.alt = "";
-
   cell.appendChild(img);
 
   requestAnimationFrame(() => {
@@ -208,32 +223,34 @@ function createFallbackDemoItem(index) {
   return {
     src: demoImagePool[index % demoImagePool.length],
     isLive: false,
-    opacity: clamp(0.04 + randomBetween(-0.008, 0.01), 0.02, 0.06)
+    opacity: clamp(0.08 + randomBetween(-0.015, 0.015), 0.04, 0.12)
   };
 }
 
 function buildGridItems(liveImages) {
-  const items = [];
+  const items = new Array(GRID_CELL_COUNT).fill(null);
+  const targetFilled = Math.max(1, Math.round(GRID_CELL_COUNT * FILLED_CELL_RATIO));
+  const filledIndexes = shuffle([...Array(GRID_CELL_COUNT).keys()]).slice(0, targetFilled);
 
   if (liveImages.length === 0) {
-    for (let i = 0; i < GRID_CELL_COUNT; i += 1) {
-      items.push(createFallbackDemoItem(i));
-    }
+    filledIndexes.forEach((gridIndex, i) => {
+      items[gridIndex] = createFallbackDemoItem(i);
+    });
     return items;
   }
 
-  for (let i = 0; i < GRID_CELL_COUNT; i += 1) {
+  filledIndexes.forEach((gridIndex, i) => {
     const source = liveImages[i % liveImages.length];
     const sourceAgeIndex = i % liveImages.length;
     const ageFade = getAgeFade(sourceAgeIndex, liveImages.length);
 
-    items.push({
+    items[gridIndex] = {
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.26 + randomBetween(-0.04, 0.04)) * ageFade, 0.08, 0.24),
+      opacity: clamp((0.22 + randomBetween(-0.04, 0.04)) * ageFade, 0.08, 0.22),
       region: source.region || null
-    });
-  }
+    };
+  });
 
   return items;
 }
@@ -251,7 +268,7 @@ function renderGrid(items) {
   });
 
   gridField.appendChild(surface);
-  gridCellsReadout.textContent = String(items.length);
+  gridCellsReadout.textContent = `${items.filter(Boolean).length} / ${items.length}`;
 }
 
 async function loadGridField() {
@@ -284,11 +301,7 @@ async function loadGridField() {
   } catch (error) {
     console.error(error);
 
-    const fallback = [];
-    for (let i = 0; i < GRID_CELL_COUNT; i += 1) {
-      fallback.push(createFallbackDemoItem(i));
-    }
-
+    const fallback = buildGridItems([]);
     renderGrid(fallback);
     updateGhost(0, 0);
     statusText.textContent = "Could not load Firestore traces. Showing demo grid.";
