@@ -13,8 +13,8 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
 
-const MOSAIC_TARGET_COUNT = 100;
-const LIVE_FETCH_LIMIT = 100;
+const MOSAIC_TARGET_COUNT = 200;
+const LIVE_FETCH_LIMIT = 200;
 
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
@@ -88,10 +88,12 @@ function pickRegionForImage(file) {
   if (!file || !file.type) {
     return REGION_ORDER[Math.floor(Math.random() * REGION_ORDER.length)];
   }
+
   const isPortraitLikeName = /portrait|self|face/i.test(file.name);
   if (isPortraitLikeName) {
     return Math.random() > 0.5 ? "left_cheek_zone" : "right_cheek_zone";
   }
+
   return REGION_ORDER[Math.floor(Math.random() * REGION_ORDER.length)];
 }
 
@@ -103,10 +105,12 @@ function getOrientation(width, height) {
 }
 
 function computeGhostOpacityFromState(totalActiveCount, usedRegionsCount) {
-  const start = 0.28;
-  const min = 0.04;
-  const countFade = totalActiveCount * 0.0025;
-  const regionFade = usedRegionsCount * 0.018;
+  const start = 0.42;
+  const min = 0.08;
+
+  const countFade = totalActiveCount * 0.0013;
+  const regionFade = usedRegionsCount * 0.014;
+
   return Math.max(min, start - countFade - regionFade);
 }
 
@@ -144,7 +148,7 @@ function createFragmentElement(item, index) {
   fragment.style.marginTop = `${item.h / -2}px`;
   fragment.style.opacity = item.o;
   fragment.style.transform = `rotate(${item.r}deg)`;
-  fragment.style.animationDelay = `${index * 18}ms`;
+  fragment.style.animationDelay = `${index * 10}ms`;
   fragment.style.zIndex = `${10 + index}`;
 
   const img = document.createElement("img");
@@ -156,7 +160,14 @@ function createFragmentElement(item, index) {
   return fragment;
 }
 
-function createOrganicTraceFromLive(item, index) {
+function getAgeFade(index, total) {
+  if (total <= 1) return 1;
+
+  const normalized = index / (total - 1);
+  return 1 - normalized * 0.45;
+}
+
+function createOrganicTraceFromLive(item, index, totalLive) {
   const regionName = item.region && REGION_LAYOUT[item.region]
     ? item.region
     : REGION_ORDER[index % REGION_ORDER.length];
@@ -180,6 +191,7 @@ function createOrganicTraceFromLive(item, index) {
 
   const jitterX = randomBetween(-region.spreadX, region.spreadX);
   const jitterY = randomBetween(-region.spreadY, region.spreadY);
+  const ageFade = getAgeFade(index, totalLive);
 
   return {
     region: regionName,
@@ -188,7 +200,7 @@ function createOrganicTraceFromLive(item, index) {
     w: Math.round(region.baseW * widthScale * randomBetween(0.84, 1.18)),
     h: Math.round(region.baseH * heightScale * randomBetween(0.84, 1.18)),
     r: randomBetween(-region.rotation, region.rotation),
-    o: clamp(region.opacity + randomBetween(-0.06, 0.10), 0.14, 0.62),
+    o: clamp((region.opacity + randomBetween(-0.06, 0.10)) * ageFade, 0.08, 0.62),
     src: item.imageUrl,
     isLive: true
   };
@@ -206,7 +218,7 @@ function createFallbackDemoTrace(index) {
     w: Math.round(region.baseW * randomBetween(0.86, 1.12)),
     h: Math.round(region.baseH * randomBetween(0.86, 1.12)),
     r: randomBetween(-region.rotation, region.rotation),
-    o: clamp(region.opacity - 0.08 + randomBetween(-0.03, 0.05), 0.12, 0.32),
+    o: clamp(region.opacity - 0.12 + randomBetween(-0.03, 0.05), 0.06, 0.24),
     src: demoSrc,
     isLive: false
   };
@@ -224,7 +236,8 @@ function buildMosaicTraces(liveImages) {
 
   for (let i = 0; i < MOSAIC_TARGET_COUNT; i += 1) {
     const source = liveImages[i % liveImages.length];
-    fragments.push(createOrganicTraceFromLive(source, i));
+    const sourceAgeIndex = i % liveImages.length;
+    fragments.push(createOrganicTraceFromLive(source, sourceAgeIndex, liveImages.length));
   }
 
   return fragments;
