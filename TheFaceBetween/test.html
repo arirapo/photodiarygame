@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Face Between</title>
+  <meta
+    name="description"
+    content="A shared face built from traces, not portraits."
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="tfb-app">
+    <section class="art-stage" aria-label="The artwork">
+      <div class="layer layer-atmosphere" aria-hidden="true"></div>
+
+      <div class="layer layer-ghost-base" id="ghost-base-layer" aria-hidden="true">
+        <img src="assets/ghost-base.jpg" alt="" id="ghost-base-image" />
+      </div>
+
+      <div class="layer layer-mosaic" id="mosaic-layer" aria-hidden="true"></div>
+
+      <div class="layer layer-veil" aria-hidden="true"></div>
+
+      <div class="art-caption" id="art-caption">
+        <p class="caption-line">A shared face built from traces, not portraits.</p>
+      </div>
+    </section>
+
+    <aside class="tfb-ui" aria-label="Participation">
+      <div class="ui-inner">
+        <p class="eyebrow">The Face Between</p>
+        <h1>Ghost base prototype</h1>
+
+        <p class="intro">
+          A face is already here, faintly. It will slowly give way as new traces arrive.
+        </p>
+
+        <p class="prompt-label">Prompt</p>
+        <p class="prompt" id="prompt-text">
+          Photograph a surface that feels like a memory.
+        </p>
+
+        <form id="upload-form" class="upload-form">
+          <label class="file-label" for="image-input">Offer a trace</label>
+          <input type="file" id="image-input" accept="image/*" />
+
+          <label class="word-label" for="word-input">One word (optional)</label>
+          <input
+            type="text"
+            id="word-input"
+            maxlength="40"
+            placeholder="hush"
+            autocomplete="off"
+          />
+
+          <button type="submit" class="submit-button">Enter the field</button>
+        </form>
+
+        <p class="status" id="status-text">Prototype only. Upload is not connected yet.</p>
+
+        <div class="stats" id="stats">
+          <p><span class="stats-label">Active traces</span> <span id="trace-count">12</span></p>
+          <p><span class="stats-label">Ghost opacity</span> <span id="ghost-opacity-readout">0.22</span></p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
