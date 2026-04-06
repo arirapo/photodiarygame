@@ -156,10 +156,8 @@ async function readImageDimensions(file) {
 function computeGhostOpacity(totalActiveCount, usedRegionsCount) {
   const start = 1.0;
   const min = 0.72;
-
   const countFade = totalActiveCount * 0.00035;
   const regionFade = usedRegionsCount * 0.004;
-
   return Math.max(min, start - countFade - regionFade);
 }
 
@@ -202,7 +200,7 @@ function createFallbackDemoItem(index) {
   return {
     src: demoImagePool[index % demoImagePool.length],
     isLive: false,
-    opacity: clamp(0.02 + randomBetween(-0.006, 0.012), 0.01, 0.05)
+    opacity: clamp(0.03 + randomBetween(-0.01, 0.01), 0.01, 0.05)
   };
 }
 
@@ -224,7 +222,7 @@ function buildGridItems(liveImages) {
     items.push({
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.075 + randomBetween(-0.02, 0.02)) * ageFade, 0.02, 0.11),
+      opacity: clamp((0.20 + randomBetween(-0.03, 0.03)) * ageFade, 0.05, 0.20),
       region: source.region || null
     });
   }
