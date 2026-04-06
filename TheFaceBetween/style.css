@@ -69,12 +69,14 @@ body {
   pointer-events: none;
 }
 
+
+
 .layer-ghost-base img {
   width: min(72vw, 760px);
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  filter: blur(2px) saturate(0.84) contrast(0.88) brightness(0.98);
+  filter: none;
   user-select: none;
   -webkit-user-drag: none;
 }
