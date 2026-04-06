@@ -104,19 +104,24 @@ body {
   animation: cellIn 1.6s ease forwards;
   border-radius: 8px;
   isolation: isolate;
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0.72) 72%, rgba(0, 0, 0, 0.14) 90%, transparent 100%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0.72) 72%, rgba(0, 0, 0, 0.14) 90%, transparent 100%);
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0.72) 72%,
+    rgba(0, 0, 0, 0.14) 90%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0.72) 72%,
+    rgba(0, 0, 0, 0.14) 90%,
+    transparent 100%
+  );
 }
 
 .grid-cell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 72%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
-  mix-blend-mode: soft-light;
-  pointer-events: none;
+  content: none;
 }
 
 .grid-cell img {
@@ -124,8 +129,8 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.72) contrast(0.9) brightness(1.04);
-  transform: scale(1.03);
+  filter: saturate(0.68) contrast(0.88) brightness(1.04);
+  transform: scale(1.02);
 }
 
 .grid-cell.is-live {
