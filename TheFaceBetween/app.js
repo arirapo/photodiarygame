@@ -1,6 +1,9 @@
-import { db, storage } from "./firebase-config.js";
-
-console.log("firebase import ok", db, storage);
+import { storage } from "./firebase-config.js";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
 
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
@@ -22,7 +25,7 @@ const prompts = [
 const demoTraces = [
   { region: "upper_field", x: 50, y: 21, w: 84, h: 62, r: -2, o: 0.34, img: 0 },
   { region: "left_eye_zone", x: 40, y: 36, w: 70, h: 58, r: 1.2, o: 0.42, img: 1 },
-  { region: "right_eye_zone", x: 61, y: 36, w: 72, h: 56, r: -1.5, o: 0.4, img: 2 },
+  { region: "right_eye_zone", x: 61, y: 36, w: 72, h: 56, r: -1.5, o: 0.40, img: 2 },
   { region: "center_bridge", x: 50, y: 47, w: 64, h: 86, r: 0.4, o: 0.44, img: 3 },
   { region: "left_cheek_zone", x: 36, y: 54, w: 92, h: 78, r: -2.4, o: 0.38, img: 4 },
   { region: "right_cheek_zone", x: 64, y: 54, w: 96, h: 78, r: 2.1, o: 0.38, img: 5 },
@@ -41,6 +44,7 @@ const statusText = document.getElementById("status-text");
 const traceCount = document.getElementById("trace-count");
 const ghostOpacityReadout = document.getElementById("ghost-opacity-readout");
 const uploadForm = document.getElementById("upload-form");
+const imageInput = document.getElementById("image-input");
 
 function choosePrompt() {
   const prompt = prompts[Math.floor(Math.random() * prompts.length)];
@@ -88,9 +92,35 @@ function updateGhost(count) {
   traceCount.textContent = String(count);
 }
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
   event.preventDefault();
-  statusText.textContent = "Firebase import works. Upload logic comes next.";
+
+  const file = imageInput.files && imageInput.files[0];
+  if (!file) {
+    statusText.textContent = "Choose an image first.";
+    return;
+  }
+
+  try {
+    statusText.textContent = "Uploading trace to Storage...";
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileId = `${Date.now()}-${safeName}`;
+    const storagePath = `thefacebetween/uploads/${fileId}`;
+    const storageRef = ref(storage, storagePath);
+
+    await uploadBytes(storageRef, file, {
+      contentType: file.type || "image/jpeg"
+    });
+
+    const downloadURL = await getDownloadURL(storageRef);
+
+    statusText.textContent = `Upload ok: ${downloadURL}`;
+    uploadForm.reset();
+  } catch (error) {
+    console.error(error);
+    statusText.textContent = "Storage upload failed. Check Storage rules.";
+  }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
