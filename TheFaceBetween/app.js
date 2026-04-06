@@ -105,11 +105,11 @@ function getOrientation(width, height) {
 }
 
 function computeGhostOpacityFromState(totalActiveCount, usedRegionsCount) {
-  const start = 0.42;
-  const min = 0.08;
+  const start = 0.72;
+  const min = 0.18;
 
-  const countFade = totalActiveCount * 0.0013;
-  const regionFade = usedRegionsCount * 0.014;
+  const countFade = totalActiveCount * 0.0010;
+  const regionFade = usedRegionsCount * 0.010;
 
   return Math.max(min, start - countFade - regionFade);
 }
@@ -149,7 +149,7 @@ function createFragmentElement(item, index) {
   fragment.style.opacity = item.o;
   fragment.style.transform = `rotate(${item.r}deg)`;
   fragment.style.animationDelay = `${index * 10}ms`;
-  fragment.style.zIndex = `${10 + index}`;
+  fragment.style.zIndex = `${item.z}`;
 
   const img = document.createElement("img");
   img.src = item.src;
@@ -162,7 +162,6 @@ function createFragmentElement(item, index) {
 
 function getAgeFade(index, total) {
   if (total <= 1) return 1;
-
   const normalized = index / (total - 1);
   return 1 - normalized * 0.45;
 }
@@ -202,7 +201,9 @@ function createOrganicTraceFromLive(item, index, totalLive) {
     r: randomBetween(-region.rotation, region.rotation),
     o: clamp((region.opacity + randomBetween(-0.06, 0.10)) * ageFade, 0.08, 0.62),
     src: item.imageUrl,
-    isLive: true
+    isLive: true,
+    ageIndex: index,
+    z: 1000 + (totalLive - index)
   };
 }
 
@@ -220,7 +221,8 @@ function createFallbackDemoTrace(index) {
     r: randomBetween(-region.rotation, region.rotation),
     o: clamp(region.opacity - 0.12 + randomBetween(-0.03, 0.05), 0.06, 0.24),
     src: demoSrc,
-    isLive: false
+    isLive: false,
+    z: 50 + index
   };
 }
 
