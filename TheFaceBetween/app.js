@@ -34,16 +34,16 @@ const prompts = [
 ];
 
 const REGION_LAYOUT = {
-  upper_field: { centerX: 50, centerY: 22, spreadX: 10, spreadY: 6, baseW: 78, baseH: 56, opacity: 0.30, rotation: 2 },
-  left_eye_zone: { centerX: 40, centerY: 36, spreadX: 6, spreadY: 4, baseW: 66, baseH: 52, opacity: 0.42, rotation: 2 },
-  right_eye_zone: { centerX: 60, centerY: 36, spreadX: 6, spreadY: 4, baseW: 66, baseH: 52, opacity: 0.42, rotation: 2 },
-  center_bridge: { centerX: 50, centerY: 48, spreadX: 4, spreadY: 8, baseW: 62, baseH: 82, opacity: 0.40, rotation: 1.2 },
-  left_cheek_zone: { centerX: 37, centerY: 56, spreadX: 8, spreadY: 7, baseW: 88, baseH: 70, opacity: 0.36, rotation: 2.5 },
-  right_cheek_zone: { centerX: 63, centerY: 56, spreadX: 8, spreadY: 7, baseW: 88, baseH: 70, opacity: 0.36, rotation: 2.5 },
-  mouth_zone: { centerX: 50, centerY: 67, spreadX: 7, spreadY: 4, baseW: 112, baseH: 48, opacity: 0.44, rotation: 1.5 },
-  lower_field: { centerX: 50, centerY: 82, spreadX: 9, spreadY: 6, baseW: 106, baseH: 72, opacity: 0.28, rotation: 2 },
-  outer_shadow_left: { centerX: 26, centerY: 71, spreadX: 6, spreadY: 8, baseW: 78, baseH: 90, opacity: 0.22, rotation: 2 },
-  outer_shadow_right: { centerX: 74, centerY: 71, spreadX: 6, spreadY: 8, baseW: 78, baseH: 90, opacity: 0.22, rotation: 2 }
+  upper_field: { centerX: 50, centerY: 22, spreadX: 10, spreadY: 6, baseW: 78, baseH: 56, opacity: 0.22, rotation: 2 },
+  left_eye_zone: { centerX: 40, centerY: 36, spreadX: 6, spreadY: 4, baseW: 66, baseH: 52, opacity: 0.28, rotation: 2 },
+  right_eye_zone: { centerX: 60, centerY: 36, spreadX: 6, spreadY: 4, baseW: 66, baseH: 52, opacity: 0.28, rotation: 2 },
+  center_bridge: { centerX: 50, centerY: 48, spreadX: 4, spreadY: 8, baseW: 62, baseH: 82, opacity: 0.24, rotation: 1.2 },
+  left_cheek_zone: { centerX: 37, centerY: 56, spreadX: 8, spreadY: 7, baseW: 88, baseH: 70, opacity: 0.22, rotation: 2.5 },
+  right_cheek_zone: { centerX: 63, centerY: 56, spreadX: 8, spreadY: 7, baseW: 88, baseH: 70, opacity: 0.22, rotation: 2.5 },
+  mouth_zone: { centerX: 50, centerY: 67, spreadX: 7, spreadY: 4, baseW: 112, baseH: 48, opacity: 0.26, rotation: 1.5 },
+  lower_field: { centerX: 50, centerY: 82, spreadX: 9, spreadY: 6, baseW: 106, baseH: 72, opacity: 0.18, rotation: 2 },
+  outer_shadow_left: { centerX: 26, centerY: 71, spreadX: 6, spreadY: 8, baseW: 78, baseH: 90, opacity: 0.14, rotation: 2 },
+  outer_shadow_right: { centerX: 74, centerY: 71, spreadX: 6, spreadY: 8, baseW: 78, baseH: 90, opacity: 0.14, rotation: 2 }
 };
 
 const REGION_ORDER = [
@@ -105,11 +105,11 @@ function getOrientation(width, height) {
 }
 
 function computeGhostOpacityFromState(totalActiveCount, usedRegionsCount) {
-  const start = 0.72;
-  const min = 0.18;
+  const start = 0.86;
+  const min = 0.28;
 
-  const countFade = totalActiveCount * 0.0010;
-  const regionFade = usedRegionsCount * 0.010;
+  const countFade = totalActiveCount * 0.0009;
+  const regionFade = usedRegionsCount * 0.008;
 
   return Math.max(min, start - countFade - regionFade);
 }
@@ -139,7 +139,7 @@ function handleFileSelection() {
 
 function createFragmentElement(item, index) {
   const fragment = document.createElement("div");
-  fragment.className = "fragment";
+  fragment.className = `fragment ${item.isLive ? "is-live" : "is-demo"} ${item.blurClass || ""}`;
   fragment.style.left = `${item.x}%`;
   fragment.style.top = `${item.y}%`;
   fragment.style.width = `${item.w}px`;
@@ -148,7 +148,7 @@ function createFragmentElement(item, index) {
   fragment.style.marginTop = `${item.h / -2}px`;
   fragment.style.opacity = item.o;
   fragment.style.transform = `rotate(${item.r}deg)`;
-  fragment.style.animationDelay = `${index * 10}ms`;
+  fragment.style.animationDelay = `${index * 8}ms`;
   fragment.style.zIndex = `${item.z}`;
 
   const img = document.createElement("img");
@@ -163,10 +163,18 @@ function createFragmentElement(item, index) {
 function getAgeFade(index, total) {
   if (total <= 1) return 1;
   const normalized = index / (total - 1);
-  return 1 - normalized * 0.45;
+  return 1 - normalized * 0.55;
 }
 
-function createOrganicTraceFromLive(item, index, totalLive) {
+function pickBlurClass(ageIndex, total) {
+  const normalized = total <= 1 ? 0 : ageIndex / (total - 1);
+
+  if (normalized > 0.72) return "is-deep-soft";
+  if (normalized > 0.38) return "is-soft";
+  return "";
+}
+
+function createOrganicTraceFromLive(item, index, totalLive, loopIndex) {
   const regionName = item.region && REGION_LAYOUT[item.region]
     ? item.region
     : REGION_ORDER[index % REGION_ORDER.length];
@@ -178,14 +186,14 @@ function createOrganicTraceFromLive(item, index, totalLive) {
   let heightScale = 1;
 
   if (orientation === "landscape") {
-    widthScale = 1.16;
-    heightScale = 0.88;
+    widthScale = 1.14;
+    heightScale = 0.9;
   } else if (orientation === "portrait") {
-    widthScale = 0.88;
-    heightScale = 1.16;
+    widthScale = 0.9;
+    heightScale = 1.14;
   } else if (orientation === "square") {
-    widthScale = 0.94;
-    heightScale = 0.94;
+    widthScale = 0.96;
+    heightScale = 0.96;
   }
 
   const jitterX = randomBetween(-region.spreadX, region.spreadX);
@@ -196,14 +204,14 @@ function createOrganicTraceFromLive(item, index, totalLive) {
     region: regionName,
     x: clamp(region.centerX + jitterX, 8, 92),
     y: clamp(region.centerY + jitterY, 8, 92),
-    w: Math.round(region.baseW * widthScale * randomBetween(0.84, 1.18)),
-    h: Math.round(region.baseH * heightScale * randomBetween(0.84, 1.18)),
+    w: Math.round(region.baseW * widthScale * randomBetween(0.88, 1.14)),
+    h: Math.round(region.baseH * heightScale * randomBetween(0.88, 1.14)),
     r: randomBetween(-region.rotation, region.rotation),
-    o: clamp((region.opacity + randomBetween(-0.06, 0.10)) * ageFade, 0.08, 0.62),
+    o: clamp((region.opacity + randomBetween(-0.05, 0.05)) * ageFade, 0.05, 0.34),
     src: item.imageUrl,
     isLive: true,
-    ageIndex: index,
-    z: 1000 + (totalLive - index)
+    blurClass: pickBlurClass(index, totalLive),
+    z: 1200 + (totalLive - index) + (loopIndex % 5)
   };
 }
 
@@ -216,13 +224,14 @@ function createFallbackDemoTrace(index) {
     region: regionName,
     x: clamp(region.centerX + randomBetween(-region.spreadX, region.spreadX), 8, 92),
     y: clamp(region.centerY + randomBetween(-region.spreadY, region.spreadY), 8, 92),
-    w: Math.round(region.baseW * randomBetween(0.86, 1.12)),
-    h: Math.round(region.baseH * randomBetween(0.86, 1.12)),
+    w: Math.round(region.baseW * randomBetween(0.9, 1.08)),
+    h: Math.round(region.baseH * randomBetween(0.9, 1.08)),
     r: randomBetween(-region.rotation, region.rotation),
-    o: clamp(region.opacity - 0.12 + randomBetween(-0.03, 0.05), 0.06, 0.24),
+    o: clamp(region.opacity - 0.1 + randomBetween(-0.02, 0.03), 0.04, 0.16),
     src: demoSrc,
     isLive: false,
-    z: 50 + index
+    blurClass: "is-deep-soft",
+    z: 40 + index
   };
 }
 
@@ -239,7 +248,7 @@ function buildMosaicTraces(liveImages) {
   for (let i = 0; i < MOSAIC_TARGET_COUNT; i += 1) {
     const source = liveImages[i % liveImages.length];
     const sourceAgeIndex = i % liveImages.length;
-    fragments.push(createOrganicTraceFromLive(source, sourceAgeIndex, liveImages.length));
+    fragments.push(createOrganicTraceFromLive(source, sourceAgeIndex, liveImages.length, i));
   }
 
   return fragments;
