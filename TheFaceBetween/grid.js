@@ -185,7 +185,7 @@ function createCellElement(item, index, total) {
   const cell = document.createElement("div");
   const blurClass = item.isLive ? pickBlurClass(index, total) : "is-deep-soft";
   cell.className = `grid-cell ${item.isLive ? "is-live" : "is-demo"} ${blurClass}`;
-  cell.style.opacity = item.opacity;
+  cell.style.opacity = "0";
   cell.style.animationDelay = `${index * 8}ms`;
 
   const img = document.createElement("img");
@@ -193,6 +193,14 @@ function createCellElement(item, index, total) {
   img.alt = "";
 
   cell.appendChild(img);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      cell.style.opacity = String(item.opacity);
+      cell.classList.add("is-ready");
+    });
+  });
+
   return cell;
 }
 
