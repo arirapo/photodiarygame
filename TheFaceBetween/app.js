@@ -1,10 +1,10 @@
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
-  "assets/demo/demo-2.jpg",
-  "assets/demo/demo-3.jpg",
-  "assets/demo/demo-4.jpg",
-  "assets/demo/demo-5.jpg",
-  "assets/demo/demo-6.jpg"
+  "assets/demo/IMG_6694.jpeg",
+  "assets/demo/IMG_6947.jpeg",
+  "assets/demo/IMG_7413.jpeg",
+  "assets/demo/IMG_7516.jpeg",
+  "assets/demo/IMG_7806.jpeg"
 ];
 
 const prompts = [
