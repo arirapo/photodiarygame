@@ -247,7 +247,7 @@ function buildGridItems(liveImages) {
     items[gridIndex] = {
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.22 + randomBetween(-0.04, 0.04)) * ageFade, 0.08, 0.22),
+      opacity: clamp((0.26 + randomBetween(-0.04, 0.04)) * ageFade, 0.10, 0.26),
       region: source.region || null
     };
   });
