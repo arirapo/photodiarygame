@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Face Between — Grid Study</title>
+  <meta
+    name="description"
+    content="A grid-based study for The Face Between."
+  />
+  <link rel="stylesheet" href="grid.css" />
+</head>
+<body>
+  <main class="tfb-grid-app">
+    <section class="grid-stage" aria-label="The artwork">
+      <div class="layer layer-atmosphere" aria-hidden="true"></div>
+
+      <div class="layer layer-ghost-base" id="ghost-base-layer" aria-hidden="true">
+        <img src="assets/IMG_1646.jpeg" alt="" id="ghost-base-image" />
+      </div>
+
+      <div class="layer layer-grid-field" id="grid-field" aria-hidden="true"></div>
+
+      <div class="layer layer-veil" aria-hidden="true"></div>
+
+      <div class="art-caption">
+        <p class="caption-line">A shared face built from traces, not portraits.</p>
+      </div>
+    </section>
+
+    <aside class="tfb-ui" aria-label="Participation">
+      <div class="ui-inner">
+        <p class="eyebrow">The Face Between</p>
+        <h1>Grid study</h1>
+
+        <p class="intro">
+          A woven field of traces arranged on a hidden map.
+        </p>
+
+        <p class="prompt-label">Prompt</p>
+        <p class="prompt" id="prompt-text">
+          Photograph a surface that feels like a memory.
+        </p>
+
+        <form id="upload-form" class="upload-form">
+          <label class="file-label" for="image-input">Offer a trace</label>
+          <input type="file" id="image-input" accept="image/*" />
+
+          <label class="word-label" for="word-input">One word (optional)</label>
+          <input
+            type="text"
+            id="word-input"
+            maxlength="40"
+            placeholder="hush"
+            autocomplete="off"
+          />
+
+          <button type="submit" class="submit-button">Enter the field</button>
+        </form>
+
+        <p class="status" id="status-text">Loading grid field...</p>
+
+        <div class="stats">
+          <p><span class="stats-label">Active traces</span> <span id="trace-count">0</span></p>
+          <p><span class="stats-label">Ghost opacity</span> <span id="ghost-opacity-readout">0.00</span></p>
+          <p><span class="stats-label">Grid cells</span> <span id="grid-cells-readout">0</span></p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="grid.js"></script>
+</body>
+</html>
