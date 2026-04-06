@@ -154,10 +154,10 @@ async function readImageDimensions(file) {
 }
 
 function computeGhostOpacity(totalActiveCount, usedRegionsCount) {
-  const start = 0.78;
-  const min = 0.24;
-  const countFade = totalActiveCount * 0.0014;
-  const regionFade = usedRegionsCount * 0.012;
+  const start = 0.92;
+  const min = 0.40;
+  const countFade = totalActiveCount * 0.0010;
+  const regionFade = usedRegionsCount * 0.008;
   return Math.max(min, start - countFade - regionFade);
 }
 
@@ -171,7 +171,7 @@ function updateGhost(totalActiveCount, usedRegionsCount = 0) {
 function getAgeFade(index, total) {
   if (total <= 1) return 1;
   const normalized = index / (total - 1);
-  return 1 - normalized * 0.45;
+  return 1 - normalized * 0.5;
 }
 
 function pickBlurClass(index, total) {
@@ -200,7 +200,7 @@ function createFallbackDemoItem(index) {
   return {
     src: demoImagePool[index % demoImagePool.length],
     isLive: false,
-    opacity: clamp(0.035 + randomBetween(-0.01, 0.02), 0.02, 0.08)
+    opacity: clamp(0.02 + randomBetween(-0.006, 0.012), 0.01, 0.05)
   };
 }
 
@@ -222,7 +222,7 @@ function buildGridItems(liveImages) {
     items.push({
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.12 + randomBetween(-0.03, 0.03)) * ageFade, 0.035, 0.16),
+      opacity: clamp((0.075 + randomBetween(-0.02, 0.02)) * ageFade, 0.02, 0.11),
       region: source.region || null
     });
   }
