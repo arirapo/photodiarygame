@@ -12,7 +12,7 @@
   --line: rgba(14, 17, 22, 0.12);
   --panel: rgba(255, 255, 255, 0.18);
   --panel-strong: rgba(255, 255, 255, 0.3);
-  --ghost-opacity: 0.4;
+  --ghost-opacity: 0.55;
   --veil-opacity: 0.08;
   --grid-size: 12;
   --grid-gap: 0px;
@@ -76,7 +76,7 @@ body {
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  filter: blur(0.6px) saturate(0.95) contrast(0.98) brightness(1);
+  filter: blur(0.4px) saturate(0.98) contrast(1) brightness(1.02);
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -104,8 +104,8 @@ body {
   animation: cellIn 1.6s ease forwards;
   border-radius: 8px;
   isolation: isolate;
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 54%, rgba(0, 0, 0, 0.76) 74%, rgba(0, 0, 0, 0.16) 90%, transparent 100%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 54%, rgba(0, 0, 0, 0.76) 74%, rgba(0, 0, 0, 0.16) 90%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0.72) 72%, rgba(0, 0, 0, 0.14) 90%, transparent 100%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0.72) 72%, rgba(0, 0, 0, 0.14) 90%, transparent 100%);
 }
 
 .grid-cell::after {
@@ -113,8 +113,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 72%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
   mix-blend-mode: soft-light;
   pointer-events: none;
 }
@@ -124,8 +124,8 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.78) contrast(0.92) brightness(1.02);
-  transform: scale(1.04);
+  filter: saturate(0.72) contrast(0.9) brightness(1.04);
+  transform: scale(1.03);
 }
 
 .grid-cell.is-live {
@@ -137,11 +137,11 @@ body {
 }
 
 .grid-cell.is-soft {
-  filter: blur(0.7px);
+  filter: blur(0.8px);
 }
 
 .grid-cell.is-deep-soft {
-  filter: blur(1.3px);
+  filter: blur(1.5px);
 }
 
 .layer-veil {
