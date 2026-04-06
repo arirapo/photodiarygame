@@ -16,7 +16,7 @@ import {
 const GRID_SIZE = 12;
 const GRID_CELL_COUNT = GRID_SIZE * GRID_SIZE;
 const LIVE_FETCH_LIMIT = 144;
-const FILLED_CELL_RATIO = 0.35;
+const FILLED_CELL_RATIO = 1;
 
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
