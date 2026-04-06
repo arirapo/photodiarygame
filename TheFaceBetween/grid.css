@@ -129,11 +129,11 @@ body {
 }
 
 .grid-cell.is-live {
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
 }
 
 .grid-cell.is-demo {
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
 }
 
 .grid-cell.is-soft {
