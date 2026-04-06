@@ -208,7 +208,7 @@ function createFallbackDemoItem(index) {
   return {
     src: demoImagePool[index % demoImagePool.length],
     isLive: false,
-    opacity: clamp(0.006 + randomBetween(-0.002, 0.003), 0.003, 0.012)
+    opacity: clamp(0.02 + randomBetween(-0.005, 0.008), 0.01, 0.04)
   };
 }
 
@@ -230,7 +230,7 @@ function buildGridItems(liveImages) {
     items.push({
       src: source.imageUrl,
       isLive: true,
-      opacity: clamp((0.035 + randomBetween(-0.008, 0.008)) * ageFade, 0.008, 0.04),
+      opacity: clamp((0.12 + randomBetween(-0.025, 0.025)) * ageFade, 0.03, 0.12),
       region: source.region || null
     });
   }
