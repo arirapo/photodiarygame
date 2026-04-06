@@ -104,8 +104,8 @@ body {
   animation: cellIn 1.6s ease forwards;
   border-radius: 8px;
   isolation: isolate;
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 62%, rgba(0, 0, 0, 0.86) 78%, rgba(0, 0, 0, 0.22) 94%, transparent 100%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 62%, rgba(0, 0, 0, 0.86) 78%, rgba(0, 0, 0, 0.22) 94%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 54%, rgba(0, 0, 0, 0.76) 74%, rgba(0, 0, 0, 0.16) 90%, transparent 100%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 54%, rgba(0, 0, 0, 0.76) 74%, rgba(0, 0, 0, 0.16) 90%, transparent 100%);
 }
 
 .grid-cell::after {
@@ -124,8 +124,8 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.86) contrast(0.95) brightness(0.99);
-  transform: scale(1.06);
+  filter: saturate(0.78) contrast(0.92) brightness(1.02);
+  transform: scale(1.04);
 }
 
 .grid-cell.is-live {
@@ -133,7 +133,7 @@ body {
 }
 
 .grid-cell.is-demo {
-  mix-blend-mode: soft-light;
+  mix-blend-mode: screen;
 }
 
 .grid-cell.is-soft {
