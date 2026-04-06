@@ -1,3 +1,15 @@
+import { db, storage } from "./firebase-config.js";
+import {
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
+
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
   "assets/demo/IMG_6694.jpeg",
@@ -38,10 +50,13 @@ const traceCount = document.getElementById("trace-count");
 const ghostOpacityReadout = document.getElementById("ghost-opacity-readout");
 const uploadForm = document.getElementById("upload-form");
 const imageInput = document.getElementById("image-input");
+const wordInput = document.getElementById("word-input");
+
+let currentPrompt = prompts[0];
 
 function choosePrompt() {
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-  promptText.textContent = prompt;
+  currentPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+  promptText.textContent = currentPrompt;
 }
 
 function computeGhostOpacity(count) {
@@ -85,18 +100,46 @@ function updateGhost(count) {
   traceCount.textContent = String(count);
 }
 
-function handlePrototypeSubmit(event) {
+async function handlePrototypeSubmit(event) {
   event.preventDefault();
 
-  const hasFile = imageInput.files && imageInput.files.length > 0;
-
-  if (!hasFile) {
-    statusText.textContent = "Choose an image first. Firebase upload will be connected next.";
+  const file = imageInput.files && imageInput.files[0];
+  if (!file) {
+    statusText.textContent = "Choose an image first.";
     return;
   }
 
-  statusText.textContent = "Prototype only. The upload pipeline is not connected yet.";
-  uploadForm.reset();
+  try {
+    statusText.textContent = "Uploading trace...";
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileId = `${Date.now()}-${safeName}`;
+    const storagePath = `thefacebetween/uploads/${fileId}`;
+    const storageRef = ref(storage, storagePath);
+
+    await uploadBytes(storageRef, file, {
+      contentType: file.type || "image/jpeg"
+    });
+
+    const downloadURL = await getDownloadURL(storageRef);
+
+    await addDoc(collection(db, "thefacebetween_traces"), {
+      imageUrl: downloadURL,
+      storagePath,
+      originalName: file.name,
+      word: wordInput.value.trim() || "",
+      promptText: currentPrompt,
+      createdAt: serverTimestamp(),
+      status: "active"
+    });
+
+    statusText.textContent = "Your trace has entered the field.";
+    uploadForm.reset();
+    choosePrompt();
+  } catch (error) {
+    console.error(error);
+    statusText.textContent = "Upload failed. Check Firebase config, rules, and file paths.";
+  }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
