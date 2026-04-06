@@ -45,6 +45,7 @@ const traceCount = document.getElementById("trace-count");
 const ghostOpacityReadout = document.getElementById("ghost-opacity-readout");
 const uploadForm = document.getElementById("upload-form");
 const imageInput = document.getElementById("image-input");
+const wordInput = document.getElementById("word-input");
 
 function choosePrompt() {
   const prompt = prompts[Math.floor(Math.random() * prompts.length)];
@@ -92,6 +93,14 @@ function updateGhost(count) {
   traceCount.textContent = String(count);
 }
 
+function formatFileSize(bytes) {
+  if (!bytes && bytes !== 0) return "";
+  if (bytes < 1024 * 1024) {
+    return `${Math.round(bytes / 1024)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 async function handleSubmit(event) {
   event.preventDefault();
 
@@ -115,12 +124,25 @@ async function handleSubmit(event) {
 
     const downloadURL = await getDownloadURL(storageRef);
 
-    statusText.textContent = `Upload ok: ${downloadURL}`;
+    statusText.textContent = `Upload ok. File stored.`;
+    console.log("Download URL:", downloadURL);
     uploadForm.reset();
   } catch (error) {
     console.error(error);
     statusText.textContent = "Storage upload failed. Check Storage rules.";
   }
+}
+
+function handleFileSelection() {
+  const file = imageInput.files && imageInput.files[0];
+
+  if (!file) {
+    statusText.textContent = "No image selected.";
+    return;
+  }
+
+  const sizeText = formatFileSize(file.size);
+  statusText.textContent = `Selected: ${file.name}${sizeText ? " (" + sizeText + ")" : ""}`;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -129,4 +151,5 @@ window.addEventListener("DOMContentLoaded", () => {
   updateGhost(demoTraces.length);
 });
 
+imageInput.addEventListener("change", handleFileSelection);
 uploadForm.addEventListener("submit", handleSubmit);
