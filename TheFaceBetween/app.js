@@ -2,7 +2,11 @@ import { db, storage } from "./firebase-config.js";
 import {
   collection,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 import {
   ref,
@@ -62,35 +66,8 @@ function choosePrompt() {
 function computeGhostOpacity(count) {
   const start = 0.28;
   const min = 0.04;
-  const fade = count * 0.005;
+  const fade = count * 0.01;
   return Math.max(min, start - fade);
-}
-
-function renderDemoFragments(items) {
-  mosaicLayer.innerHTML = "";
-
-  items.forEach((item, index) => {
-    const fragment = document.createElement("div");
-    fragment.className = "fragment";
-    fragment.style.left = `${item.x}%`;
-    fragment.style.top = `${item.y}%`;
-    fragment.style.width = `${item.w}px`;
-    fragment.style.height = `${item.h}px`;
-    fragment.style.marginLeft = `${item.w / -2}px`;
-    fragment.style.marginTop = `${item.h / -2}px`;
-    fragment.style.opacity = item.o;
-    fragment.style.transform = `rotate(${item.r}deg)`;
-    fragment.style.animationDelay = `${index * 70}ms`;
-    fragment.style.zIndex = `${10 + index}`;
-
-    const img = document.createElement("img");
-    img.src = demoImagePool[item.img % demoImagePool.length];
-    img.alt = "";
-    img.loading = "lazy";
-
-    fragment.appendChild(img);
-    mosaicLayer.appendChild(fragment);
-  });
 }
 
 function updateGhost(count) {
@@ -120,6 +97,102 @@ function handleFileSelection() {
   statusText.textContent = `Selected: ${file.name}${sizeText ? " (" + sizeText + ")" : ""}`;
 }
 
+function createFragmentElement(item, index) {
+  const fragment = document.createElement("div");
+  fragment.className = "fragment";
+  fragment.style.left = `${item.x}%`;
+  fragment.style.top = `${item.y}%`;
+  fragment.style.width = `${item.w}px`;
+  fragment.style.height = `${item.h}px`;
+  fragment.style.marginLeft = `${item.w / -2}px`;
+  fragment.style.marginTop = `${item.h / -2}px`;
+  fragment.style.opacity = item.o;
+  fragment.style.transform = `rotate(${item.r}deg)`;
+  fragment.style.animationDelay = `${index * 70}ms`;
+  fragment.style.zIndex = `${10 + index}`;
+
+  const img = document.createElement("img");
+  img.src = item.src;
+  img.alt = "";
+  img.loading = "lazy";
+
+  fragment.appendChild(img);
+  return fragment;
+}
+
+function buildHybridTraces(liveImages) {
+  const built = [];
+  const liveCount = liveImages.length;
+  const totalSlots = demoTraces.length;
+
+  for (let i = 0; i < totalSlots; i += 1) {
+    const slot = demoTraces[i];
+    const hasLive = i < liveCount;
+
+    let src = demoImagePool[slot.img % demoImagePool.length];
+    let opacity = slot.o;
+
+    if (hasLive) {
+      src = liveImages[i].imageUrl;
+      opacity = Math.min(0.6, slot.o + 0.14);
+    }
+
+    built.push({
+      ...slot,
+      src,
+      o: opacity
+    });
+  }
+
+  return built;
+}
+
+function renderFragments(items) {
+  mosaicLayer.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const fragment = createFragmentElement(item, index);
+    mosaicLayer.appendChild(fragment);
+  });
+}
+
+async function loadLiveTraces() {
+  try {
+    const tracesRef = collection(db, "thefacebetween_traces");
+    const q = query(
+      tracesRef,
+      orderBy("createdAt", "desc"),
+      limit(demoTraces.length)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const liveImages = snapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((item) => item.status === "active" && item.imageUrl);
+
+    const hybrid = buildHybridTraces(liveImages);
+    renderFragments(hybrid);
+    updateGhost(liveImages.length);
+
+    if (liveImages.length > 0) {
+      statusText.textContent = `${liveImages.length} live trace${liveImages.length === 1 ? "" : "s"} in the field.`;
+    } else {
+      statusText.textContent = "No live traces yet. Demo field still visible.";
+    }
+  } catch (error) {
+    console.error(error);
+    renderFragments(
+      demoTraces.map((slot) => ({
+        ...slot,
+        src: demoImagePool[slot.img % demoImagePool.length]
+      }))
+    );
+    updateGhost(0);
+    statusText.textContent = "Could not load Firestore traces. Showing demo field.";
+  }
+}
+
 async function handleSubmit(event) {
   event.preventDefault();
 
@@ -147,7 +220,7 @@ async function handleSubmit(event) {
 
     await addDoc(collection(db, "thefacebetween_traces"), {
       imageUrl: downloadURL,
-      storagePath: storagePath,
+      storagePath,
       originalName: file.name,
       word: wordInput.value.trim() || "",
       promptText: currentPrompt,
@@ -158,16 +231,17 @@ async function handleSubmit(event) {
     statusText.textContent = "Your trace has entered the field.";
     uploadForm.reset();
     choosePrompt();
+
+    await loadLiveTraces();
   } catch (error) {
     console.error(error);
     statusText.textContent = "Upload or Firestore write failed. Check rules.";
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   choosePrompt();
-  renderDemoFragments(demoTraces);
-  updateGhost(demoTraces.length);
+  await loadLiveTraces();
 });
 
 imageInput.addEventListener("change", handleFileSelection);
