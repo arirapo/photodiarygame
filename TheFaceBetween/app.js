@@ -1,4 +1,9 @@
-import { storage } from "./firebase-config.js";
+import { db, storage } from "./firebase-config.js";
+import {
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 import {
   ref,
   uploadBytes,
@@ -47,9 +52,11 @@ const uploadForm = document.getElementById("upload-form");
 const imageInput = document.getElementById("image-input");
 const wordInput = document.getElementById("word-input");
 
+let currentPrompt = prompts[0];
+
 function choosePrompt() {
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-  promptText.textContent = prompt;
+  currentPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+  promptText.textContent = currentPrompt;
 }
 
 function computeGhostOpacity(count) {
@@ -101,6 +108,18 @@ function formatFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function handleFileSelection() {
+  const file = imageInput.files && imageInput.files[0];
+
+  if (!file) {
+    statusText.textContent = "No image selected.";
+    return;
+  }
+
+  const sizeText = formatFileSize(file.size);
+  statusText.textContent = `Selected: ${file.name}${sizeText ? " (" + sizeText + ")" : ""}`;
+}
+
 async function handleSubmit(event) {
   event.preventDefault();
 
@@ -124,25 +143,25 @@ async function handleSubmit(event) {
 
     const downloadURL = await getDownloadURL(storageRef);
 
-    statusText.textContent = `Upload ok. File stored.`;
-    console.log("Download URL:", downloadURL);
+    statusText.textContent = "Writing trace to Firestore...";
+
+    await addDoc(collection(db, "thefacebetween_traces"), {
+      imageUrl: downloadURL,
+      storagePath: storagePath,
+      originalName: file.name,
+      word: wordInput.value.trim() || "",
+      promptText: currentPrompt,
+      createdAt: serverTimestamp(),
+      status: "active"
+    });
+
+    statusText.textContent = "Your trace has entered the field.";
     uploadForm.reset();
+    choosePrompt();
   } catch (error) {
     console.error(error);
-    statusText.textContent = "Storage upload failed. Check Storage rules.";
+    statusText.textContent = "Upload or Firestore write failed. Check rules.";
   }
-}
-
-function handleFileSelection() {
-  const file = imageInput.files && imageInput.files[0];
-
-  if (!file) {
-    statusText.textContent = "No image selected.";
-    return;
-  }
-
-  const sizeText = formatFileSize(file.size);
-  statusText.textContent = `Selected: ${file.name}${sizeText ? " (" + sizeText + ")" : ""}`;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
