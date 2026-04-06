@@ -1,16 +1,10 @@
-const demoTraces = [
-  { src: "assets/ghost-base.jpg", region: "upper_field", x: 50, y: 21, w: 84, h: 62, r: -2, o: 0.22 },
-  { src: "assets/ghost-base.jpg", region: "left_eye_zone", x: 40, y: 36, w: 70, h: 58, r: 1.2, o: 0.2 },
-  { src: "assets/ghost-base.jpg", region: "right_eye_zone", x: 61, y: 36, w: 72, h: 56, r: -1.5, o: 0.2 },
-  { src: "assets/ghost-base.jpg", region: "center_bridge", x: 50, y: 47, w: 64, h: 86, r: 0.4, o: 0.24 },
-  { src: "assets/ghost-base.jpg", region: "left_cheek_zone", x: 36, y: 54, w: 92, h: 78, r: -2.4, o: 0.2 },
-  { src: "assets/ghost-base.jpg", region: "right_cheek_zone", x: 64, y: 54, w: 96, h: 78, r: 2.1, o: 0.2 },
-  { src: "assets/ghost-base.jpg", region: "mouth_zone", x: 50, y: 67, w: 120, h: 52, r: -0.6, o: 0.24 },
-  { src: "assets/ghost-base.jpg", region: "lower_field", x: 50, y: 82, w: 110, h: 78, r: 0.7, o: 0.18 },
-  { src: "assets/ghost-base.jpg", region: "outer_shadow_left", x: 26, y: 71, w: 82, h: 96, r: -1.2, o: 0.16 },
-  { src: "assets/ghost-base.jpg", region: "outer_shadow_right", x: 74, y: 71, w: 82, h: 96, r: 1.5, o: 0.16 },
-  { src: "assets/ghost-base.jpg", region: "upper_field", x: 54, y: 28, w: 62, h: 50, r: -1.1, o: 0.18 },
-  { src: "assets/ghost-base.jpg", region: "left_cheek_zone", x: 43, y: 60, w: 58, h: 52, r: 0.4, o: 0.14 }
+const demoImagePool = [
+  "assets/demo/demo-1.jpg",
+  "assets/demo/demo-2.jpg",
+  "assets/demo/demo-3.jpg",
+  "assets/demo/demo-4.jpg",
+  "assets/demo/demo-5.jpg",
+  "assets/demo/demo-6.jpg"
 ];
 
 const prompts = [
@@ -21,7 +15,21 @@ const prompts = [
   "Photograph something that could become a mouth, without being one."
 ];
 
-const stage = document.querySelector(".art-stage");
+const demoTraces = [
+  { region: "upper_field", x: 50, y: 21, w: 84, h: 62, r: -2, o: 0.34, img: 0 },
+  { region: "left_eye_zone", x: 40, y: 36, w: 70, h: 58, r: 1.2, o: 0.42, img: 1 },
+  { region: "right_eye_zone", x: 61, y: 36, w: 72, h: 56, r: -1.5, o: 0.4, img: 2 },
+  { region: "center_bridge", x: 50, y: 47, w: 64, h: 86, r: 0.4, o: 0.44, img: 3 },
+  { region: "left_cheek_zone", x: 36, y: 54, w: 92, h: 78, r: -2.4, o: 0.38, img: 4 },
+  { region: "right_cheek_zone", x: 64, y: 54, w: 96, h: 78, r: 2.1, o: 0.38, img: 5 },
+  { region: "mouth_zone", x: 50, y: 67, w: 120, h: 52, r: -0.6, o: 0.46, img: 2 },
+  { region: "lower_field", x: 50, y: 82, w: 110, h: 78, r: 0.7, o: 0.32, img: 0 },
+  { region: "outer_shadow_left", x: 26, y: 71, w: 82, h: 96, r: -1.2, o: 0.26, img: 1 },
+  { region: "outer_shadow_right", x: 74, y: 71, w: 82, h: 96, r: 1.5, o: 0.26, img: 4 },
+  { region: "upper_field", x: 54, y: 28, w: 62, h: 50, r: -1.1, o: 0.28, img: 3 },
+  { region: "left_cheek_zone", x: 43, y: 60, w: 58, h: 52, r: 0.4, o: 0.24, img: 5 }
+];
+
 const mosaicLayer = document.getElementById("mosaic-layer");
 const ghostLayer = document.getElementById("ghost-base-layer");
 const promptText = document.getElementById("prompt-text");
@@ -61,8 +69,9 @@ function renderDemoFragments(items) {
     fragment.style.zIndex = `${10 + index}`;
 
     const img = document.createElement("img");
-    img.src = item.src;
+    img.src = demoImagePool[item.img % demoImagePool.length];
     img.alt = "";
+    img.loading = "lazy";
 
     fragment.appendChild(img);
     mosaicLayer.appendChild(fragment);
