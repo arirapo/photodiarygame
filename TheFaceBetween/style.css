@@ -65,7 +65,7 @@ body {
   display: grid;
   place-items: center;
   opacity: var(--ghost-opacity);
-  transition: opacity 1.2s ease;
+  transition: opacity 1.6s ease;
   pointer-events: none;
 }
 
@@ -74,7 +74,7 @@ body {
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  filter: blur(1.6px) saturate(0.88) contrast(0.9);
+  filter: blur(2px) saturate(0.84) contrast(0.88) brightness(0.98);
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -218,6 +218,7 @@ h1 {
 .status {
   margin: 0 0 22px;
   font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
 .stats {
@@ -238,12 +239,29 @@ h1 {
   overflow: hidden;
   opacity: 0;
   transform-origin: center center;
-  animation: fragmentIn 1.4s ease forwards;
+  animation: fragmentIn 1.8s ease forwards;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 10px 30px rgba(0, 0, 0, 0.035);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(1px);
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 10px 28px rgba(0, 0, 0, 0.035);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(1.5px);
+  border-radius: 1px;
+  transition:
+    opacity 1.2s ease,
+    transform 1.2s ease,
+    box-shadow 1.2s ease;
+  isolation: isolate;
+}
+
+.fragment::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0));
+  pointer-events: none;
+  mix-blend-mode: soft-light;
 }
 
 .fragment img {
@@ -251,7 +269,7 @@ h1 {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.88) contrast(0.96) brightness(0.98);
+  filter: saturate(0.9) contrast(0.96) brightness(0.985);
 }
 
 @keyframes breathe {
@@ -269,7 +287,7 @@ h1 {
 @keyframes fragmentIn {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.98);
+    transform: translateY(10px) scale(0.97);
   }
   to {
     opacity: 1;
