@@ -154,10 +154,12 @@ async function readImageDimensions(file) {
 }
 
 function computeGhostOpacity(totalActiveCount, usedRegionsCount) {
-  const start = 0.92;
-  const min = 0.40;
-  const countFade = totalActiveCount * 0.0010;
-  const regionFade = usedRegionsCount * 0.008;
+  const start = 1.0;
+  const min = 0.72;
+
+  const countFade = totalActiveCount * 0.00035;
+  const regionFade = usedRegionsCount * 0.004;
+
   return Math.max(min, start - countFade - regionFade);
 }
 
