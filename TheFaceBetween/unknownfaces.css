@@ -1,0 +1,153 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --page-gray: #808080;
+  --ghost-opacity: 0.82;
+  --veil-opacity: 0.04;
+  --surface-width: min(72vw, 820px);
+  --surface-ratio: 3 / 4;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--page-gray);
+}
+
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.unknownfaces-app {
+  min-height: 100vh;
+}
+
+.installation-stage {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.layer-background {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.08), transparent 24%),
+    radial-gradient(circle at 50% 76%, rgba(0, 0, 0, 0.08), transparent 30%),
+    linear-gradient(180deg, #888888 0%, #7a7a7a 100%);
+}
+
+.layer-ghost-base {
+  display: grid;
+  place-items: center;
+  opacity: var(--ghost-opacity);
+  pointer-events: none;
+}
+
+.layer-ghost-base img {
+  width: var(--surface-width);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: blur(0.35px) saturate(0.98) contrast(1) brightness(1.02);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.layer-grid-field {
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.layer-veil {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, var(--veil-opacity)) 0%, rgba(255, 255, 255, 0) 28%),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 24%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.grid-surface {
+  position: relative;
+  width: var(--surface-width);
+  aspect-ratio: var(--surface-ratio);
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size, 12), 1fr);
+  grid-template-rows: repeat(var(--grid-size, 12), 1fr);
+  gap: 0;
+}
+
+.grid-cell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  isolation: isolate;
+  transform: scale(0.985);
+  transition:
+    opacity 0.9s ease,
+    transform 1.2s ease,
+    filter 1.2s ease;
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0.72) 72%,
+    rgba(0, 0, 0, 0.14) 90%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0.72) 72%,
+    rgba(0, 0, 0, 0.14) 90%,
+    transparent 100%
+  );
+}
+
+.grid-cell.is-ready {
+  transform: scale(1);
+}
+
+.grid-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.68) contrast(0.88) brightness(1.04);
+  transform: scale(1.02);
+}
+
+.grid-cell.is-live {
+  mix-blend-mode: normal;
+}
+
+.grid-cell.is-demo {
+  mix-blend-mode: normal;
+}
+
+.grid-cell.is-soft {
+  filter: blur(0.8px);
+}
+
+.grid-cell.is-deep-soft {
+  filter: blur(1.5px);
+}
+
+@media (max-width: 980px) {
+  :root {
+    --surface-width: min(90vw, 640px);
+  }
+}
