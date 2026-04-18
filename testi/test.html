@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firebase Admin Test</title>
+</head>
+<body>
+  <h1>Firebase Admin Test</h1>
+
+  <button id="loginBtn">Sign in</button>
+  <button id="checkBtn">Check admin claim</button>
+  <button id="writeFsBtn">Write Firestore</button>
+  <button id="writeStorageBtn">Write Storage</button>
+
+  <pre id="out"></pre>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadString
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const out = document.getElementById("out");
+
+    function log(msg) {
+      out.textContent += msg + "\n";
+    }
+
+    document.getElementById("loginBtn").onclick = async () => {
+      try {
+        const email = prompt("Admin email:");
+        const password = prompt("Admin password:");
+
+        if (!email || !password) {
+          log("Login cancelled.");
+          return;
+        }
+
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        log("Signed in: " + cred.user.email);
+      } catch (err) {
+        log("Login error: " + err.message);
+      }
+    };
+
+    document.getElementById("checkBtn").onclick = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          log("No user signed in.");
+          return;
+        }
+
+        const tokenResult = await user.getIdTokenResult(true);
+        log("UID: " + user.uid);
+        log("Claims: " + JSON.stringify(tokenResult.claims, null, 2));
+      } catch (err) {
+        log("Claim check error: " + err.message);
+      }
+    };
+
+    document.getElementById("writeFsBtn").onclick = async () => {
+      try {
+        const id = "test-" + Date.now();
+        await setDoc(doc(db, "test", id), {
+          message: "Admin Firestore write OK",
+          createdAt: serverTimestamp()
+        });
+        log("Firestore write OK");
+      } catch (err) {
+        log("Firestore write error: " + err.message);
+      }
+    };
+
+    document.getElementById("writeStorageBtn").onclick = async () => {
+      try {
+        const fileRef = ref(storage, "traces/admin-test-" + Date.now() + ".txt");
+        await uploadString(fileRef, "Admin Storage write OK");
+        log("Storage write OK");
+      } catch (err) {
+        log("Storage write error: " + err.message);
+      }
+    };
+  </script>
+</body>
+</html>
