@@ -20,6 +20,9 @@ import {
   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
+console.log("qr-generator.js loaded");
+alert("qr-generator.js loaded");
+
 // 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
