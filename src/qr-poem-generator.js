@@ -1,7 +1,24 @@
 import QRCode from "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  getIdTokenResult
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -16,6 +33,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
 const state = {
   mode: "text",
@@ -43,6 +61,13 @@ const resultMeta = document.querySelector("#resultMeta");
 const statusEl = document.querySelector("#status");
 const downloadBtn = document.querySelector("#downloadBtn");
 const poemOutput = document.querySelector("#poemOutput");
+
+// Admin UI
+const adminEmailInput = document.querySelector("#adminEmail");
+const adminPasswordInput = document.querySelector("#adminPassword");
+const adminSignInBtn = document.querySelector("#adminSignInBtn");
+const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
+const adminAuthStatus = document.querySelector("#adminAuthStatus");
 
 function uid() {
   return crypto.randomUUID
@@ -314,6 +339,55 @@ function getInputData() {
   throw new Error("Unknown mode.");
 }
 
+async function getAdminStatus(forceRefresh = false) {
+  const user = auth.currentUser;
+  if (!user) {
+    return {
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    };
+  }
+
+  const tokenResult = await getIdTokenResult(user, forceRefresh);
+  return {
+    signedIn: true,
+    isAdmin: tokenResult?.claims?.admin === true,
+    email: user.email || null,
+    uid: user.uid
+  };
+}
+
+function updateAdminUi(status) {
+  if (!status?.signedIn) {
+    adminAuthStatus.textContent = "Not signed in.";
+    adminSignInBtn.disabled = false;
+    adminSignOutBtn.disabled = true;
+    return;
+  }
+
+  if (status.isAdmin) {
+    adminAuthStatus.textContent = `Signed in as admin: ${status.email || status.uid}`;
+  } else {
+    adminAuthStatus.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
+  }
+
+  adminSignInBtn.disabled = false;
+  adminSignOutBtn.disabled = false;
+}
+
+async function requireAdmin() {
+  const status = await getAdminStatus(true);
+  if (!status.signedIn) {
+    throw new Error("Please sign in as admin first.");
+  }
+  if (!status.isAdmin) {
+    throw new Error("This signed-in account does not have admin rights.");
+  }
+  return status;
+}
+
 tabs.forEach(tab => {
   tab.addEventListener("click", () => setMode(tab.dataset.mode));
 });
@@ -339,6 +413,84 @@ downloadBtn.addEventListener("click", () => {
   link.click();
 });
 
+adminSignInBtn.addEventListener("click", async () => {
+  const email = adminEmailInput.value.trim();
+  const password = adminPasswordInput.value;
+
+  if (!email) {
+    setStatus("Enter admin email.", "warn");
+    return;
+  }
+
+  if (!password) {
+    setStatus("Enter admin password.", "warn");
+    return;
+  }
+
+  adminSignInBtn.disabled = true;
+  setStatus("Signing in...");
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    const status = await getAdminStatus(true);
+    updateAdminUi(status);
+
+    if (!status.isAdmin) {
+      setStatus("Signed in, but this account is not admin.", "warn");
+      return;
+    }
+
+    adminPasswordInput.value = "";
+    setStatus("Admin sign-in successful.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus(err?.message || "Sign-in failed.", "warn");
+  } finally {
+    adminSignInBtn.disabled = false;
+  }
+});
+
+adminSignOutBtn.addEventListener("click", async () => {
+  adminSignOutBtn.disabled = true;
+  setStatus("Signing out...");
+
+  try {
+    await signOut(auth);
+    adminPasswordInput.value = "";
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+    setStatus("Signed out.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus(err?.message || "Sign-out failed.", "warn");
+  } finally {
+    adminSignOutBtn.disabled = false;
+  }
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+    return;
+  }
+
+  try {
+    const status = await getAdminStatus(false);
+    updateAdminUi(status);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 createBtn.addEventListener("click", async () => {
   createBtn.disabled = true;
   downloadBtn.classList.add("hidden");
@@ -358,6 +510,7 @@ createBtn.addEventListener("click", async () => {
     let colorData = null;
 
     if (input.type === "image") {
+      await requireAdmin();
       setStatus("Uploading source image…");
       sourceImageUrl = await uploadSourceImage(storageId, input.rawValue);
       qrData = sourceImageUrl;
@@ -374,6 +527,8 @@ createBtn.addEventListener("click", async () => {
     setStatus("Rendering QR code…");
     await drawQr(qrData);
     poemOutput.textContent = poem || "No poem generated.";
+
+    await requireAdmin();
 
     setStatus("Uploading QR image…");
     const qrImageUrl = await uploadQrImage(storageId);
@@ -396,6 +551,7 @@ createBtn.addEventListener("click", async () => {
     const docRef = await addDoc(collection(db, "qr_poems"), payload);
 
     renderMeta(`
+      <div class="small">Signed in as: ${esc(auth.currentUser?.email || auth.currentUser?.uid || "")}</div>
       <div><strong>Type:</strong> ${esc(input.type)}</div>
       <div><strong>Document id:</strong> <code>${esc(docRef.id)}</code></div>
       <div><strong>QR data:</strong> <code>${esc(qrData)}</code></div>
@@ -423,6 +579,12 @@ async function init() {
   poemOutput.textContent = "No poem yet.";
   renderMeta('<div class="small">No QR code yet.</div>');
   setMode("text");
+  updateAdminUi({
+    signedIn: false,
+    isAdmin: false,
+    email: null,
+    uid: null
+  });
 }
 
 init();
