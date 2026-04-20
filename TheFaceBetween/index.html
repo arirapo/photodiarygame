@@ -16,7 +16,7 @@
       <div class="layer layer-atmosphere" aria-hidden="true"></div>
 
       <div class="layer layer-ghost-base" id="ghost-base-layer" aria-hidden="true">
-<img src="assets/IMG_1646.jpeg" alt="" id="ghost-base-image" />
+        <img src="assets/IMG_1646.jpeg" alt="" id="ghost-base-image" />
       </div>
 
       <div class="layer layer-mosaic" id="mosaic-layer" aria-hidden="true"></div>
@@ -36,6 +36,32 @@
         <p class="intro">
           A face is already here, faintly. It will slowly give way as new traces arrive.
         </p>
+
+        <div class="admin-panel">
+          <p class="prompt-label">Admin</p>
+          <p class="status" id="admin-auth-status">Not signed in.</p>
+
+          <div class="upload-form">
+            <label class="word-label" for="admin-email">Admin email</label>
+            <input
+              type="email"
+              id="admin-email"
+              autocomplete="username"
+              placeholder="admin@example.com"
+            />
+
+            <label class="word-label" for="admin-password">Admin password</label>
+            <input
+              type="password"
+              id="admin-password"
+              autocomplete="current-password"
+              placeholder="Password"
+            />
+
+            <button type="button" class="submit-button" id="admin-sign-in-btn">Sign in</button>
+            <button type="button" class="submit-button secondary" id="admin-sign-out-btn">Sign out</button>
+          </div>
+        </div>
 
         <p class="prompt-label">Prompt</p>
         <p class="prompt" id="prompt-text">
@@ -68,6 +94,6 @@
     </aside>
   </main>
 
-<script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=2"></script>
 </body>
 </html>
