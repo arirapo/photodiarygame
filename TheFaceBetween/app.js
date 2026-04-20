@@ -19,8 +19,10 @@ import {
   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-const MOSAIC_TARGET_COUNT = 200;
-const LIVE_FETCH_LIMIT = 200;
+const GRID_SIZE = 12;
+const GRID_CELL_COUNT = GRID_SIZE * GRID_SIZE;
+const LIVE_FETCH_LIMIT = 144;
+const FILLED_CELL_RATIO = 1;
 
 const demoImagePool = [
   "assets/demo/demo-1.jpg",
@@ -39,19 +41,6 @@ const prompts = [
   "Photograph something that could become a mouth, without being one."
 ];
 
-const REGION_LAYOUT = {
-  upper_field: { centerX: 50, centerY: 22, spreadX: 10, spreadY: 6, baseW: 78, baseH: 56, opacity: 0.22, rotation: 2 },
-  left_eye_zone: { centerX: 40, centerY: 36, spreadX: 6, spreadY: 4, baseW: 66, baseH: 52, opacity: 0.28, rotation: 2 },
-  right_eye_zone: { centerX: 60, centerY: 36, spreadX: 6, spreadY: 4, baseW: 66, baseH: 52, opacity: 0.28, rotation: 2 },
-  center_bridge: { centerX: 50, centerY: 48, spreadX: 4, spreadY: 8, baseW: 62, baseH: 82, opacity: 0.24, rotation: 1.2 },
-  left_cheek_zone: { centerX: 37, centerY: 56, spreadX: 8, spreadY: 7, baseW: 88, baseH: 70, opacity: 0.22, rotation: 2.5 },
-  right_cheek_zone: { centerX: 63, centerY: 56, spreadX: 8, spreadY: 7, baseW: 88, baseH: 70, opacity: 0.22, rotation: 2.5 },
-  mouth_zone: { centerX: 50, centerY: 67, spreadX: 7, spreadY: 4, baseW: 112, baseH: 48, opacity: 0.26, rotation: 1.5 },
-  lower_field: { centerX: 50, centerY: 82, spreadX: 9, spreadY: 6, baseW: 106, baseH: 72, opacity: 0.18, rotation: 2 },
-  outer_shadow_left: { centerX: 26, centerY: 71, spreadX: 6, spreadY: 8, baseW: 78, baseH: 90, opacity: 0.14, rotation: 2 },
-  outer_shadow_right: { centerX: 74, centerY: 71, spreadX: 6, spreadY: 8, baseW: 78, baseH: 90, opacity: 0.14, rotation: 2 }
-};
-
 const REGION_ORDER = [
   "upper_field",
   "left_eye_zone",
@@ -65,12 +54,26 @@ const REGION_ORDER = [
   "outer_shadow_right"
 ];
 
-const mosaicLayer = document.getElementById("mosaic-layer");
+const REGION_ZONES = {
+  upper_field: { cols: [3, 8], rows: [0, 1] },
+  left_eye_zone: { cols: [3, 4], rows: [2, 3] },
+  right_eye_zone: { cols: [7, 8], rows: [2, 3] },
+  center_bridge: { cols: [5, 6], rows: [3, 5] },
+  left_cheek_zone: { cols: [2, 4], rows: [4, 7] },
+  right_cheek_zone: { cols: [7, 9], rows: [4, 7] },
+  mouth_zone: { cols: [4, 7], rows: [7, 8] },
+  lower_field: { cols: [4, 7], rows: [9, 11] },
+  outer_shadow_left: { cols: [0, 2], rows: [6, 10] },
+  outer_shadow_right: { cols: [9, 11], rows: [6, 10] }
+};
+
+const gridField = document.getElementById("grid-field");
 const ghostLayer = document.getElementById("ghost-base-layer");
 const promptText = document.getElementById("prompt-text");
 const statusText = document.getElementById("status-text");
 const traceCount = document.getElementById("trace-count");
 const ghostOpacityReadout = document.getElementById("ghost-opacity-readout");
+const gridCellsReadout = document.getElementById("grid-cells-readout");
 const uploadForm = document.getElementById("upload-form");
 const imageInput = document.getElementById("image-input");
 const wordInput = document.getElementById("word-input");
@@ -96,6 +99,32 @@ function randomBetween(min, max) {
   return min + Math.random() * (max - min);
 }
 
+function shuffle(array) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function formatFileSize(bytes) {
+  if (!bytes && bytes !== 0) return "";
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function handleFileSelection() {
+  const file = imageInput.files && imageInput.files[0];
+  if (!file) {
+    statusText.textContent = "No image selected.";
+    return;
+  }
+
+  const sizeText = formatFileSize(file.size);
+  statusText.textContent = `Selected: ${file.name}${sizeText ? " (" + sizeText + ")" : ""}`;
+}
+
 function pickRegionForImage(file) {
   if (!file || !file.type) {
     return REGION_ORDER[Math.floor(Math.random() * REGION_ORDER.length)];
@@ -114,206 +143,6 @@ function getOrientation(width, height) {
   if (width > height) return "landscape";
   if (height > width) return "portrait";
   return "square";
-}
-
-function computeGhostOpacityFromState(totalActiveCount, usedRegionsCount) {
-  const start = 0.86;
-  const min = 0.28;
-
-  const countFade = totalActiveCount * 0.0009;
-  const regionFade = usedRegionsCount * 0.008;
-
-  return Math.max(min, start - countFade - regionFade);
-}
-
-function updateGhost(totalActiveCount, usedRegionsCount = 0) {
-  const opacity = computeGhostOpacityFromState(totalActiveCount, usedRegionsCount);
-  ghostLayer.style.opacity = opacity.toFixed(3);
-  ghostOpacityReadout.textContent = opacity.toFixed(2);
-  traceCount.textContent = String(totalActiveCount);
-}
-
-function formatFileSize(bytes) {
-  if (!bytes && bytes !== 0) return "";
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function handleFileSelection() {
-  const file = imageInput.files && imageInput.files[0];
-  if (!file) {
-    statusText.textContent = "No image selected.";
-    return;
-  }
-  const sizeText = formatFileSize(file.size);
-  statusText.textContent = `Selected: ${file.name}${sizeText ? " (" + sizeText + ")" : ""}`;
-}
-
-function createFragmentElement(item, index) {
-  const fragment = document.createElement("div");
-  fragment.className = `fragment ${item.isLive ? "is-live" : "is-demo"} ${item.blurClass || ""}`;
-  fragment.style.left = `${item.x}%`;
-  fragment.style.top = `${item.y}%`;
-  fragment.style.width = `${item.w}px`;
-  fragment.style.height = `${item.h}px`;
-  fragment.style.marginLeft = `${item.w / -2}px`;
-  fragment.style.marginTop = `${item.h / -2}px`;
-  fragment.style.opacity = item.o;
-  fragment.style.transform = `rotate(${item.r}deg)`;
-  fragment.style.animationDelay = `${index * 8}ms`;
-  fragment.style.zIndex = `${item.z}`;
-
-  const img = document.createElement("img");
-  img.src = item.src;
-  img.alt = "";
-  img.loading = "lazy";
-
-  fragment.appendChild(img);
-  return fragment;
-}
-
-function getAgeFade(index, total) {
-  if (total <= 1) return 1;
-  const normalized = index / (total - 1);
-  return 1 - normalized * 0.55;
-}
-
-function pickBlurClass(ageIndex, total) {
-  const normalized = total <= 1 ? 0 : ageIndex / (total - 1);
-
-  if (normalized > 0.72) return "is-deep-soft";
-  if (normalized > 0.38) return "is-soft";
-  return "";
-}
-
-function createOrganicTraceFromLive(item, index, totalLive, loopIndex) {
-  const regionName = item.region && REGION_LAYOUT[item.region]
-    ? item.region
-    : REGION_ORDER[index % REGION_ORDER.length];
-
-  const region = REGION_LAYOUT[regionName];
-  const orientation = item.orientation || "unknown";
-
-  let widthScale = 1;
-  let heightScale = 1;
-
-  if (orientation === "landscape") {
-    widthScale = 1.14;
-    heightScale = 0.9;
-  } else if (orientation === "portrait") {
-    widthScale = 0.9;
-    heightScale = 1.14;
-  } else if (orientation === "square") {
-    widthScale = 0.96;
-    heightScale = 0.96;
-  }
-
-  const jitterX = randomBetween(-region.spreadX, region.spreadX);
-  const jitterY = randomBetween(-region.spreadY, region.spreadY);
-  const ageFade = getAgeFade(index, totalLive);
-
-  return {
-    region: regionName,
-    x: clamp(region.centerX + jitterX, 8, 92),
-    y: clamp(region.centerY + jitterY, 8, 92),
-    w: Math.round(region.baseW * widthScale * randomBetween(0.88, 1.14)),
-    h: Math.round(region.baseH * heightScale * randomBetween(0.88, 1.14)),
-    r: randomBetween(-region.rotation, region.rotation),
-    o: clamp((region.opacity + randomBetween(-0.05, 0.05)) * ageFade, 0.05, 0.34),
-    src: item.imageUrl,
-    isLive: true,
-    blurClass: pickBlurClass(index, totalLive),
-    z: 1200 + (totalLive - index) + (loopIndex % 5)
-  };
-}
-
-function createFallbackDemoTrace(index) {
-  const regionName = REGION_ORDER[index % REGION_ORDER.length];
-  const region = REGION_LAYOUT[regionName];
-  const demoSrc = demoImagePool[index % demoImagePool.length];
-
-  return {
-    region: regionName,
-    x: clamp(region.centerX + randomBetween(-region.spreadX, region.spreadX), 8, 92),
-    y: clamp(region.centerY + randomBetween(-region.spreadY, region.spreadY), 8, 92),
-    w: Math.round(region.baseW * randomBetween(0.9, 1.08)),
-    h: Math.round(region.baseH * randomBetween(0.9, 1.08)),
-    r: randomBetween(-region.rotation, region.rotation),
-    o: clamp(region.opacity - 0.1 + randomBetween(-0.02, 0.03), 0.04, 0.16),
-    src: demoSrc,
-    isLive: false,
-    blurClass: "is-deep-soft",
-    z: 40 + index
-  };
-}
-
-function buildMosaicTraces(liveImages) {
-  const fragments = [];
-
-  if (liveImages.length === 0) {
-    for (let i = 0; i < MOSAIC_TARGET_COUNT; i += 1) {
-      fragments.push(createFallbackDemoTrace(i));
-    }
-    return fragments;
-  }
-
-  for (let i = 0; i < MOSAIC_TARGET_COUNT; i += 1) {
-    const source = liveImages[i % liveImages.length];
-    const sourceAgeIndex = i % liveImages.length;
-    fragments.push(createOrganicTraceFromLive(source, sourceAgeIndex, liveImages.length, i));
-  }
-
-  return fragments;
-}
-
-function renderFragments(items) {
-  mosaicLayer.innerHTML = "";
-  items.forEach((item, index) => {
-    mosaicLayer.appendChild(createFragmentElement(item, index));
-  });
-}
-
-async function loadLiveTraces() {
-  try {
-    const tracesRef = collection(db, "thefacebetween_traces");
-    const q = query(
-      tracesRef,
-      orderBy("createdAt", "desc")
-    );
-
-    const snapshot = await getDocs(q);
-
-    const allActive = snapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
-      .filter((item) => item.status === "active" && item.imageUrl);
-
-    const visibleLive = allActive.slice(0, LIVE_FETCH_LIMIT);
-
-    const usedRegions = new Set(
-      allActive
-        .map((item) => item.region)
-        .filter((region) => region && REGION_LAYOUT[region])
-    );
-
-    const mosaic = buildMosaicTraces(visibleLive);
-    renderFragments(mosaic);
-    updateGhost(allActive.length, usedRegions.size);
-
-    if (allActive.length > 0) {
-      statusText.textContent = `${allActive.length} live trace${allActive.length === 1 ? "" : "s"} in the field.`;
-    } else {
-      statusText.textContent = "No live traces yet. Demo field still visible.";
-    }
-  } catch (error) {
-    console.error(error);
-    const fallback = [];
-    for (let i = 0; i < MOSAIC_TARGET_COUNT; i += 1) {
-      fallback.push(createFallbackDemoTrace(i));
-    }
-    renderFragments(fallback);
-    updateGhost(0, 0);
-    statusText.textContent = "Could not load Firestore traces. Showing demo field.";
-  }
 }
 
 async function readImageDimensions(file) {
@@ -344,6 +173,151 @@ async function readImageDimensions(file) {
 
     img.src = objectUrl;
   });
+}
+
+function computeGhostOpacity(totalActiveCount, usedRegionsCount) {
+  const start = 1.0;
+  const min = 0.78;
+  const countFade = totalActiveCount * 0.0002;
+  const regionFade = usedRegionsCount * 0.002;
+  return Math.max(min, start - countFade - regionFade);
+}
+
+function updateGhost(totalActiveCount, usedRegionsCount = 0) {
+  const opacity = computeGhostOpacity(totalActiveCount, usedRegionsCount);
+  ghostLayer.style.opacity = opacity.toFixed(3);
+  ghostOpacityReadout.textContent = opacity.toFixed(2);
+  traceCount.textContent = String(totalActiveCount);
+}
+
+function getAgeFade(index, total) {
+  if (total <= 1) return 1;
+  const normalized = index / (total - 1);
+  return 1 - normalized * 0.45;
+}
+
+function pickBlurClass(index, total) {
+  const normalized = total <= 1 ? 0 : index / (total - 1);
+  if (normalized > 0.72) return "is-deep-soft";
+  if (normalized > 0.38) return "is-soft";
+  return "";
+}
+
+function createCellElement(item, index, total) {
+  const cell = document.createElement("div");
+
+  if (!item) {
+    cell.className = "grid-cell";
+    cell.style.opacity = "0";
+    return cell;
+  }
+
+  const blurClass = item.isLive ? pickBlurClass(index, total) : "is-deep-soft";
+  cell.className = `grid-cell ${item.isLive ? "is-live" : "is-demo"} ${blurClass}`;
+  cell.style.opacity = "0";
+
+  const img = document.createElement("img");
+  img.src = item.src;
+  img.alt = "";
+  cell.appendChild(img);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      cell.style.opacity = String(item.opacity);
+      cell.classList.add("is-ready");
+    });
+  });
+
+  return cell;
+}
+
+function createFallbackDemoItem(index) {
+  return {
+    src: demoImagePool[index % demoImagePool.length],
+    isLive: false,
+    opacity: clamp(0.08 + randomBetween(-0.015, 0.015), 0.04, 0.12)
+  };
+}
+
+function buildGridItems(liveImages) {
+  const items = new Array(GRID_CELL_COUNT).fill(null);
+  const targetFilled = Math.max(1, Math.round(GRID_CELL_COUNT * FILLED_CELL_RATIO));
+  const filledIndexes = shuffle([...Array(GRID_CELL_COUNT).keys()]).slice(0, targetFilled);
+
+  if (liveImages.length === 0) {
+    filledIndexes.forEach((gridIndex, i) => {
+      items[gridIndex] = createFallbackDemoItem(i);
+    });
+    return items;
+  }
+
+  filledIndexes.forEach((gridIndex, i) => {
+    const source = liveImages[i % liveImages.length];
+    const sourceAgeIndex = i % liveImages.length;
+    const ageFade = getAgeFade(sourceAgeIndex, liveImages.length);
+
+    items[gridIndex] = {
+      src: source.imageUrl,
+      isLive: true,
+      opacity: clamp((0.26 + randomBetween(-0.04, 0.04)) * ageFade, 0.10, 0.26),
+      region: source.region || null
+    };
+  });
+
+  return items;
+}
+
+function renderGrid(items) {
+  gridField.innerHTML = "";
+
+  const surface = document.createElement("div");
+  surface.className = "grid-surface";
+  surface.style.setProperty("--grid-size", String(GRID_SIZE));
+
+  items.forEach((item, index) => {
+    const cell = createCellElement(item, index, items.length);
+    surface.appendChild(cell);
+  });
+
+  gridField.appendChild(surface);
+  gridCellsReadout.textContent = `${items.filter(Boolean).length} / ${items.length}`;
+}
+
+async function loadGridField() {
+  try {
+    const tracesRef = collection(db, "thefacebetween_traces");
+    const q = query(tracesRef, orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+
+    const allActive = snapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((item) => item.status === "active" && item.imageUrl);
+
+    const visibleLive = allActive.slice(0, LIVE_FETCH_LIMIT);
+
+    const usedRegions = new Set(
+      allActive
+        .map((item) => item.region)
+        .filter((region) => region && REGION_ZONES[region])
+    );
+
+    const items = buildGridItems(visibleLive);
+    renderGrid(items);
+    updateGhost(allActive.length, usedRegions.size);
+
+    if (allActive.length > 0) {
+      statusText.textContent = `${allActive.length} live trace${allActive.length === 1 ? "" : "s"} in the field.`;
+    } else {
+      statusText.textContent = "No live traces yet. Demo grid still visible.";
+    }
+  } catch (error) {
+    console.error(error);
+
+    const fallback = buildGridItems([]);
+    renderGrid(fallback);
+    updateGhost(0, 0);
+    statusText.textContent = "Could not load Firestore traces. Showing demo grid.";
+  }
 }
 
 async function getAdminStatus(forceRefresh = false) {
@@ -447,7 +421,7 @@ async function handleSubmit(event) {
     uploadForm.reset();
     choosePrompt();
 
-    await loadLiveTraces();
+    await loadGridField();
   } catch (error) {
     console.error(error);
     statusText.textContent = error?.message || "Upload or Firestore write failed.";
@@ -510,7 +484,7 @@ adminSignOutBtn?.addEventListener("click", async () => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   choosePrompt();
-  await loadLiveTraces();
+  await loadGridField();
   updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
 });
 
