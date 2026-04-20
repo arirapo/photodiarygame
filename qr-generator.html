@@ -18,47 +18,102 @@
       </p>
     </section>
 
+    <section class="card stack" aria-labelledby="adminTitle">
+      <div class="section-title" id="adminTitle">Admin</div>
+
+      <div class="stack" style="gap: 0.85rem;">
+        <div id="adminAuthStatus" class="small">
+          Not signed in.
+        </div>
+
+        <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label class="label" for="adminEmail">Admin email</label>
+            <input
+              id="adminEmail"
+              class="input"
+              type="email"
+              autocomplete="username"
+              placeholder="admin@example.com"
+            />
+          </div>
+
+          <div>
+            <label class="label" for="adminPassword">Admin password</label>
+            <input
+              id="adminPassword"
+              class="input"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Password"
+            />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="adminSignInBtn" class="button soft" type="button">Sign in</button>
+          <button id="adminSignOutBtn" class="button soft" type="button">Sign out</button>
+        </div>
+
+        <div class="small">
+          Vain admin-kirjautunut käyttäjä voi tallentaa uusia QR-koodeja Firebaseen.
+        </div>
+      </div>
+    </section>
+
     <section class="layout">
       <section class="card stack">
         <div class="section-title">Input</div>
 
         <div class="mode-tabs">
-          <button class="mode-tab active" data-mode="text">Text</button>
-          <button class="mode-tab" data-mode="url">URL</button>
-          <button class="mode-tab" data-mode="image">Image</button>
+          <button class="mode-tab active" data-mode="text" type="button">Text</button>
+          <button class="mode-tab" data-mode="url" type="button">URL</button>
+          <button class="mode-tab" data-mode="image" type="button">Image</button>
         </div>
 
         <div id="panel-text" class="input-panel">
           <label class="label" for="textInput">Text</label>
-          <textarea id="textInput" class="textarea" placeholder="Write the text you want to encode into a QR code."></textarea>
+          <textarea
+            id="textInput"
+            class="textarea"
+            placeholder="Write the text you want to encode into a QR code."
+          ></textarea>
         </div>
 
         <div id="panel-url" class="input-panel hidden">
           <label class="label" for="urlInput">URL</label>
-          <input id="urlInput" class="input" type="url" placeholder="https://example.com" />
+          <input
+            id="urlInput"
+            class="input"
+            type="url"
+            placeholder="https://example.com"
+          />
         </div>
 
         <div id="panel-image" class="input-panel hidden stack">
           <label class="label" for="imageInput">Image</label>
           <input id="imageInput" class="input" type="file" accept="image/*" />
+
           <div id="imagePreviewWrap" class="preview hidden">
             <img id="imagePreview" alt="Image preview" />
           </div>
+
           <div class="small">
             Kuvasta luodaan ensin linkki Firebase Storageen. QR-koodi koodaa tuon kuvalinkin.
           </div>
         </div>
 
         <div class="actions">
-          <button id="createBtn" class="button primary">Create QR Code</button>
+          <button id="createBtn" class="button primary" type="button">Create QR Code</button>
           <a href="qr-gallery.html" class="button soft">Open QR Gallery</a>
         </div>
 
-        <div id="status" class="status"></div>
+        <div id="status" class="status" aria-live="polite"></div>
       </section>
 
       <section class="card stack">
         <div class="section-title">Result</div>
+
         <div class="qr-wrap">
           <canvas id="qrCanvas" width="320" height="320"></canvas>
         </div>
@@ -68,7 +123,7 @@
         </div>
 
         <div class="actions">
-          <button id="downloadBtn" class="button hidden">Download PNG</button>
+          <button id="downloadBtn" class="button hidden" type="button">Download PNG</button>
         </div>
       </section>
     </section>
