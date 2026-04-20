@@ -37,6 +37,8 @@
     .aforism{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.2rem,2.5vw,1.6rem);line-height:1.7;white-space:pre-line}
     .meta{display:grid;gap:8px;color:var(--muted);font-size:.94rem}.tags{display:flex;gap:8px;flex-wrap:wrap}
     .tag{display:inline-flex;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.5)}.small{font-size:.9rem;color:var(--muted)}.footer-note{margin-top:28px;color:var(--muted);font-size:.9rem}.thin{font-weight:500}
+    .admin-row{display:flex;gap:12px;flex-wrap:wrap}
+    .input{width:100%;max-width:320px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.52);color:var(--ink);padding:12px 14px}
   </style>
 </head>
 <body>
@@ -47,6 +49,13 @@ import * as exifr from "https://cdn.jsdelivr.net/npm/exifr/dist/lite.esm.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  getIdTokenResult
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -61,7 +70,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
-const state = { step:0, selectedFile:null, previewUrl:null, exif:null, color:null, poem:"", savedDocId:null, bank:null };
+const auth = getAuth(app);
+
+const state = {
+  step: 0,
+  selectedFile: null,
+  previewUrl: null,
+  exif: null,
+  color: null,
+  poem: "",
+  savedDocId: null,
+  bank: null
+};
 
 const steps = [
   { key:"pause", label:"A", title:"Pause", subtitle:"Open before looking.", points:[
@@ -153,6 +173,61 @@ function generatePoem(color, bank){
   return uniqueLines.join("\n");
 }
 
+async function getAdminStatus(forceRefresh = false) {
+  const user = auth.currentUser;
+  if (!user) {
+    return {
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    };
+  }
+
+  const tokenResult = await getIdTokenResult(user, forceRefresh);
+  return {
+    signedIn: true,
+    isAdmin: tokenResult?.claims?.admin === true,
+    email: user.email || null,
+    uid: user.uid
+  };
+}
+
+function updateAdminUi(status) {
+  const line = document.querySelector("#adminAuthStatus");
+  const signInBtn = document.querySelector("#adminSignInBtn");
+  const signOutBtn = document.querySelector("#adminSignOutBtn");
+
+  if (!line || !signInBtn || !signOutBtn) return;
+
+  if (!status?.signedIn) {
+    line.textContent = "Not signed in.";
+    signInBtn.disabled = false;
+    signOutBtn.disabled = true;
+    return;
+  }
+
+  if (status.isAdmin) {
+    line.textContent = `Signed in as admin: ${status.email || status.uid}`;
+  } else {
+    line.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
+  }
+
+  signInBtn.disabled = false;
+  signOutBtn.disabled = false;
+}
+
+async function requireAdmin() {
+  const status = await getAdminStatus(true);
+  if (!status.signedIn) {
+    throw new Error("Please sign in as admin first.");
+  }
+  if (!status.isAdmin) {
+    throw new Error("This signed-in account does not have admin rights.");
+  }
+  return status;
+}
+
 function render(){
   const step=steps[state.step], isCapture=state.step===2, canNext=state.step<2;
   const phaseInfo = step.points.map(([title,body]) => `<div class="point"><strong>${esc(title)}</strong><div class="notice">${esc(body)}</div></div>`).join("");
@@ -164,6 +239,21 @@ function render(){
         <h1>Nalanda Miksang<br/>practice flow</h1>
         <p class="lead">Kolmivaiheinen havaintoharjoitus. Pysähdy. Huomaa. Kuvaa yksi yksinkertainen kohtaaminen. Lopuksi kuva ja runo tallentuvat samaan Firebase-projektiin kuin photodiarygame.</p>
       </section>
+
+      <section class="card stack">
+        <div class="section-title">Admin</div>
+        <div id="adminAuthStatus" class="small">Not signed in.</div>
+        <div class="admin-row">
+          <input id="adminEmail" class="input" type="email" autocomplete="username" placeholder="Admin email" />
+          <input id="adminPassword" class="input" type="password" autocomplete="current-password" placeholder="Admin password" />
+        </div>
+        <div class="actions">
+          <button class="button soft" id="adminSignInBtn">Sign in</button>
+          <button class="button soft" id="adminSignOutBtn">Sign out</button>
+        </div>
+        <div class="small">Tallennus Firebaseen vaatii admin-kirjautumisen. Runon generointi toimii ilman kirjautumista.</div>
+      </section>
+
       <section class="stack">
         <div class="stepper">
           ${steps.map((s,i)=>`<div class="step ${i===state.step?"active":""}"><div class="label">${esc(s.label)}</div><div class="title">${esc(s.title)}</div></div>`).join("")}
@@ -209,58 +299,205 @@ function render(){
     </main>
   `;
   bind();
+  getAdminStatus(false).then(updateAdminUi).catch(() => {
+    updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
+  });
 }
 
 function bind(){
-  const nextBtn=document.querySelector("#nextBtn"); if(nextBtn) nextBtn.addEventListener("click",()=>{state.step=Math.min(2,state.step+1); render();});
-  const backBtn=document.querySelector("#backBtn"); if(backBtn) backBtn.addEventListener("click",()=>{state.step=Math.max(0,state.step-1); render();});
-  const fileInput=document.querySelector("#fileInput");
-  if(fileInput){ fileInput.addEventListener("change",(e)=>{ const file=e.target.files?.[0]; if(!file) return; if(state.previewUrl) URL.revokeObjectURL(state.previewUrl); state.selectedFile=file; state.previewUrl=URL.createObjectURL(file); state.poem=""; state.savedDocId=null; render(); }); }
-  const analyzeBtn=document.querySelector("#analyzeBtn");
-  if(analyzeBtn){ analyzeBtn.addEventListener("click", async ()=>{ const status=document.querySelector("#captureStatus"); if(!state.selectedFile || !state.bank) return; analyzeBtn.disabled=true; if(status){ status.textContent="Reading image and generating poem…"; status.className="status"; }
-    try{
-      const [exif,color]=await Promise.all([readExif(state.selectedFile), analyzeImageColors(state.selectedFile)]);
-      state.exif=exif; state.color=color; state.poem=generatePoem(color, state.bank); render();
-      const s=document.querySelector("#captureStatus"); if(s){ s.textContent="Poem ready."; s.className="status ok"; }
-    }catch(err){
-      console.error(err); if(status){ status.textContent="Generation failed."; status.className="status warn"; } analyzeBtn.disabled=false;
-    }
-  });}
-  const saveBtn=document.querySelector("#saveBtn");
-  if(saveBtn){ saveBtn.addEventListener("click", async ()=>{ const status=document.querySelector("#captureStatus"); if(!state.selectedFile || !state.poem) return; saveBtn.disabled=true; if(status){ status.textContent="Uploading image and saving session…"; status.className="status"; }
-    try{
-      const id=uid(); const ext=state.selectedFile.name.includes(".") ? state.selectedFile.name.split(".").pop().toLowerCase() : "jpg";
-      const path=`miksang/${id}/image.${ext && ext.length < 8 ? ext : "jpg"}`;
-      const storageRef=ref(storage,path);
-      await uploadBytes(storageRef,state.selectedFile,{contentType:state.selectedFile.type || "image/jpeg"});
-      const imageUrl=await getDownloadURL(storageRef);
-      const docRef=await addDoc(collection(db,"miksang_sessions"),{
-        createdAt: serverTimestamp(),
-        imageUrl, aforism: state.poem, mode:"miksang",
-        phaseData:{ pauseSeen:true, noticeSeen:true, captureDone:true },
-        exif:{
-          dateISO: state.exif?.date ? state.exif.date.toISOString() : null,
-          cameraMake: state.exif?.cameraMake || null,
-          cameraModel: state.exif?.cameraModel || null,
-          gps: state.exif?.gps || null,
-          iso: state.exif?.iso || null,
-          focalLength: state.exif?.focalLength || null
-        },
-        color:{
-          averageRgb: state.color?.averageRgb || null,
-          hsl: state.color?.hsl || null,
-          hueLabel: state.color?.hueLabel || null,
-          brightnessLabel: state.color?.brightnessLabel || null
+  const nextBtn=document.querySelector("#nextBtn");
+  if(nextBtn) nextBtn.addEventListener("click",()=>{state.step=Math.min(2,state.step+1); render();});
+
+  const backBtn=document.querySelector("#backBtn");
+  if(backBtn) backBtn.addEventListener("click",()=>{state.step=Math.max(0,state.step-1); render();});
+
+  const adminSignInBtn = document.querySelector("#adminSignInBtn");
+  if (adminSignInBtn) {
+    adminSignInBtn.addEventListener("click", async () => {
+      const emailInput = document.querySelector("#adminEmail");
+      const passwordInput = document.querySelector("#adminPassword");
+      const email = emailInput?.value.trim() || "";
+      const password = passwordInput?.value || "";
+
+      if (!email) {
+        const status = document.querySelector("#captureStatus");
+        if (status) { status.textContent = "Enter admin email."; status.className = "status warn"; }
+        return;
+      }
+
+      if (!password) {
+        const status = document.querySelector("#captureStatus");
+        if (status) { status.textContent = "Enter admin password."; status.className = "status warn"; }
+        return;
+      }
+
+      adminSignInBtn.disabled = true;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        const status = await getAdminStatus(true);
+        updateAdminUi(status);
+
+        const captureStatus = document.querySelector("#captureStatus");
+        if (status.isAdmin) {
+          if (passwordInput) passwordInput.value = "";
+          if (captureStatus) { captureStatus.textContent = "Admin sign-in successful."; captureStatus.className = "status ok"; }
+        } else {
+          if (captureStatus) { captureStatus.textContent = "Signed in, but this account is not admin."; captureStatus.className = "status warn"; }
         }
-      });
-      state.savedDocId=docRef.id; render(); const s=document.querySelector("#captureStatus"); if(s){ s.textContent="Saved to Firebase."; s.className="status ok"; }
-    }catch(err){
-      console.error(err); if(status){ status.textContent="Saving failed. Check rules or connection."; status.className="status warn"; } saveBtn.disabled=false;
-    }
-  });}
+      } catch (err) {
+        console.error(err);
+        const captureStatus = document.querySelector("#captureStatus");
+        if (captureStatus) { captureStatus.textContent = err?.message || "Sign-in failed."; captureStatus.className = "status warn"; }
+      } finally {
+        adminSignInBtn.disabled = false;
+      }
+    });
+  }
+
+  const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
+  if (adminSignOutBtn) {
+    adminSignOutBtn.addEventListener("click", async () => {
+      adminSignOutBtn.disabled = true;
+      try {
+        await signOut(auth);
+        const passwordInput = document.querySelector("#adminPassword");
+        if (passwordInput) passwordInput.value = "";
+        updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
+
+        const captureStatus = document.querySelector("#captureStatus");
+        if (captureStatus) { captureStatus.textContent = "Signed out."; captureStatus.className = "status ok"; }
+      } catch (err) {
+        console.error(err);
+        const captureStatus = document.querySelector("#captureStatus");
+        if (captureStatus) { captureStatus.textContent = err?.message || "Sign-out failed."; captureStatus.className = "status warn"; }
+      } finally {
+        adminSignOutBtn.disabled = false;
+      }
+    });
+  }
+
+  const fileInput=document.querySelector("#fileInput");
+  if(fileInput){
+    fileInput.addEventListener("change",(e)=>{
+      const file=e.target.files?.[0];
+      if(!file) return;
+      if(state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      state.selectedFile=file;
+      state.previewUrl=URL.createObjectURL(file);
+      state.exif=null;
+      state.color=null;
+      state.poem="";
+      state.savedDocId=null;
+      render();
+    });
+  }
+
+  const analyzeBtn=document.querySelector("#analyzeBtn");
+  if(analyzeBtn){
+    analyzeBtn.addEventListener("click", async ()=>{
+      const status=document.querySelector("#captureStatus");
+      if(!state.selectedFile || !state.bank) return;
+      analyzeBtn.disabled=true;
+      if(status){ status.textContent="Reading image and generating poem…"; status.className="status"; }
+      try{
+        const [exif,color]=await Promise.all([readExif(state.selectedFile), analyzeImageColors(state.selectedFile)]);
+        state.exif=exif;
+        state.color=color;
+        state.poem=generatePoem(color, state.bank);
+        render();
+        const s=document.querySelector("#captureStatus");
+        if(s){ s.textContent="Poem ready."; s.className="status ok"; }
+      }catch(err){
+        console.error(err);
+        if(status){ status.textContent="Generation failed."; status.className="status warn"; }
+        analyzeBtn.disabled=false;
+      }
+    });
+  }
+
+  const saveBtn=document.querySelector("#saveBtn");
+  if(saveBtn){
+    saveBtn.addEventListener("click", async ()=>{
+      const status=document.querySelector("#captureStatus");
+      if(!state.selectedFile || !state.poem) return;
+      saveBtn.disabled=true;
+      if(status){ status.textContent="Preparing save…"; status.className="status"; }
+
+      try{
+        await requireAdmin();
+
+        const id=uid();
+        const ext=state.selectedFile.name.includes(".") ? state.selectedFile.name.split(".").pop().toLowerCase() : "jpg";
+        const path=`miksang/${id}/image.${ext && ext.length < 8 ? ext : "jpg"}`;
+        const storageRef=ref(storage,path);
+
+        if(status){ status.textContent="Uploading image and saving session…"; status.className="status"; }
+
+        await uploadBytes(storageRef,state.selectedFile,{contentType:state.selectedFile.type || "image/jpeg"});
+        const imageUrl=await getDownloadURL(storageRef);
+
+        const docRef=await addDoc(collection(db,"miksang_sessions"),{
+          createdAt: serverTimestamp(),
+          imageUrl,
+          aforism: state.poem,
+          mode:"miksang",
+          phaseData:{ pauseSeen:true, noticeSeen:true, captureDone:true },
+          exif:{
+            dateISO: state.exif?.date ? state.exif.date.toISOString() : null,
+            cameraMake: state.exif?.cameraMake || null,
+            cameraModel: state.exif?.cameraModel || null,
+            gps: state.exif?.gps || null,
+            iso: state.exif?.iso || null,
+            focalLength: state.exif?.focalLength || null
+          },
+          color:{
+            averageRgb: state.color?.averageRgb || null,
+            hsl: state.color?.hsl || null,
+            hueLabel: state.color?.hueLabel || null,
+            brightnessLabel: state.color?.brightnessLabel || null
+          }
+        });
+
+        state.savedDocId=docRef.id;
+        render();
+        const s=document.querySelector("#captureStatus");
+        if(s){ s.textContent="Saved to Firebase."; s.className="status ok"; }
+      }catch(err){
+        console.error(err);
+        if(status){ status.textContent=err?.message || "Saving failed."; status.className="status warn"; }
+        saveBtn.disabled=false;
+      }
+    });
+  }
+
   const resetCaptureBtn=document.querySelector("#resetCaptureBtn");
-  if(resetCaptureBtn){ resetCaptureBtn.addEventListener("click",()=>{ if(state.previewUrl) URL.revokeObjectURL(state.previewUrl); state.selectedFile=null; state.previewUrl=null; state.exif=null; state.color=null; state.poem=""; state.savedDocId=null; render(); }); }
+  if(resetCaptureBtn){
+    resetCaptureBtn.addEventListener("click",()=>{
+      if(state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      state.selectedFile=null;
+      state.previewUrl=null;
+      state.exif=null;
+      state.color=null;
+      state.poem="";
+      state.savedDocId=null;
+      render();
+    });
+  }
 }
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
+    return;
+  }
+
+  try {
+    const status = await getAdminStatus(false);
+    updateAdminUi(status);
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 async function init(){
   try{ state.bank = await loadBank(); } catch(err){ console.error(err); }
