@@ -76,6 +76,8 @@
     }
 
     input[type="text"],
+    input[type="email"],
+    input[type="password"],
     textarea,
     select,
     input[type="file"] {
@@ -458,6 +460,24 @@
 
   <main class="wrap">
     <section class="panel">
+      <h2>Admin</h2>
+      <div id="adminAuthStatus" class="small">Not signed in.</div>
+
+      <label for="adminEmail">Admin email</label>
+      <input id="adminEmail" type="email" autocomplete="username" placeholder="admin@example.com" />
+
+      <label for="adminPassword">Admin password</label>
+      <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password" />
+
+      <div class="btn-row">
+        <button id="adminSignInBtn" type="button">Sign in</button>
+        <button id="adminSignOutBtn" type="button">Sign out</button>
+      </div>
+
+      <div class="note">Tallennus Firebaseen vaatii admin-kirjautumisen. Esikatselu, suotimet ja galleria toimivat ilman kirjautumista.</div>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">
+
       <h2>Lisää uusi kuva</h2>
 
       <label for="imageFile">Kuvatiedosto</label>
@@ -636,6 +656,13 @@
       uploadBytes,
       getDownloadURL
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signOut,
+      getIdTokenResult
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -650,6 +677,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
+    const auth = getAuth(app);
 
     const imageFile = document.getElementById("imageFile");
     const author = document.getElementById("author");
@@ -697,6 +725,12 @@
     const modalTags = document.getElementById("modalTags");
     const modalSaved = document.getElementById("modalSaved");
     const modalExif = document.getElementById("modalExif");
+
+    const adminAuthStatus = document.getElementById("adminAuthStatus");
+    const adminEmail = document.getElementById("adminEmail");
+    const adminPassword = document.getElementById("adminPassword");
+    const adminSignInBtn = document.getElementById("adminSignInBtn");
+    const adminSignOutBtn = document.getElementById("adminSignOutBtn");
 
     let currentImage = null;
     let currentExif = {};
@@ -1030,7 +1064,7 @@
       const paper = { r: 247, g: 241, b: 229 };
 
       const s = Math.max(0, Math.min(100, strength)) / 100;
-      const levels = Math.max(2, Math.round(6 - s * 3)); // 6 -> 3
+      const levels = Math.max(2, Math.round(6 - s * 3));
       const grainAmp = 0.02 + s * 0.12;
       const contrastBoost = 1 + s * 0.45;
 
@@ -1176,6 +1210,55 @@
       });
     }
 
+    async function getAdminStatus(forceRefresh = false) {
+      const user = auth.currentUser;
+      if (!user) {
+        return {
+          signedIn: false,
+          isAdmin: false,
+          email: null,
+          uid: null
+        };
+      }
+
+      const tokenResult = await getIdTokenResult(user, forceRefresh);
+      return {
+        signedIn: true,
+        isAdmin: tokenResult?.claims?.admin === true,
+        email: user.email || null,
+        uid: user.uid
+      };
+    }
+
+    function updateAdminUi(status) {
+      if (!status?.signedIn) {
+        adminAuthStatus.textContent = "Not signed in.";
+        adminSignInBtn.disabled = false;
+        adminSignOutBtn.disabled = true;
+        return;
+      }
+
+      if (status.isAdmin) {
+        adminAuthStatus.textContent = `Signed in as admin: ${status.email || status.uid}`;
+      } else {
+        adminAuthStatus.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
+      }
+
+      adminSignInBtn.disabled = false;
+      adminSignOutBtn.disabled = false;
+    }
+
+    async function requireAdmin() {
+      const status = await getAdminStatus(true);
+      if (!status.signedIn) {
+        throw new Error("Please sign in as admin first.");
+      }
+      if (!status.isAdmin) {
+        throw new Error("This signed-in account does not have admin rights.");
+      }
+      return status;
+    }
+
     async function saveToFirebase() {
       if (!originalFile || !currentImage) {
         setStatus("Valitse ensin kuva.", "error");
@@ -1193,6 +1276,8 @@
       }
 
       try {
+        await requireAdmin();
+
         saveBtn.disabled = true;
         setStatus("Tallennetaan kuvaa Firebase Storageen ja metadataa Firestoreen...");
 
@@ -1377,6 +1462,74 @@
       });
     }
 
+    adminSignInBtn.addEventListener("click", async () => {
+      const email = adminEmail.value.trim();
+      const password = adminPassword.value;
+
+      if (!email) {
+        setStatus("Enter admin email.", "error");
+        return;
+      }
+
+      if (!password) {
+        setStatus("Enter admin password.", "error");
+        return;
+      }
+
+      adminSignInBtn.disabled = true;
+      setStatus("Signing in...");
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        const status = await getAdminStatus(true);
+        updateAdminUi(status);
+
+        if (!status.isAdmin) {
+          setStatus("Signed in, but this account is not admin.", "error");
+          return;
+        }
+
+        adminPassword.value = "";
+        setStatus("Admin sign-in successful.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus(err?.message || "Sign-in failed.", "error");
+      } finally {
+        adminSignInBtn.disabled = false;
+      }
+    });
+
+    adminSignOutBtn.addEventListener("click", async () => {
+      adminSignOutBtn.disabled = true;
+      setStatus("Signing out...");
+
+      try {
+        await signOut(auth);
+        adminPassword.value = "";
+        updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+        setStatus("Signed out.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus(err?.message || "Sign-out failed.", "error");
+      } finally {
+        adminSignOutBtn.disabled = false;
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+        return;
+      }
+
+      try {
+        const status = await getAdminStatus(false);
+        updateAdminUi(status);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
     imageFile.addEventListener("change", (e) => {
       const file = e.target.files?.[0];
       handleFile(file);
@@ -1419,6 +1572,7 @@
     updateActiveFiltersIndicator();
     renderPreview();
     startGalleryListener();
+    updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
   </script>
 </body>
 </html>
