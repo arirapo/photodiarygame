@@ -37,6 +37,32 @@
           A woven field of traces arranged on a hidden map.
         </p>
 
+        <div class="admin-panel">
+          <p class="prompt-label">Admin</p>
+          <p class="status" id="admin-auth-status">Not signed in.</p>
+
+          <form class="upload-form" onsubmit="return false;">
+            <label class="word-label" for="admin-email">Admin email</label>
+            <input
+              type="email"
+              id="admin-email"
+              autocomplete="username"
+              placeholder="admin@example.com"
+            />
+
+            <label class="word-label" for="admin-password">Admin password</label>
+            <input
+              type="password"
+              id="admin-password"
+              autocomplete="current-password"
+              placeholder="Password"
+            />
+
+            <button type="button" class="submit-button" id="admin-sign-in-btn">Sign in</button>
+            <button type="button" class="submit-button secondary" id="admin-sign-out-btn">Sign out</button>
+          </form>
+        </div>
+
         <p class="prompt-label">Prompt</p>
         <p class="prompt" id="prompt-text">
           Photograph a surface that feels like a memory.
@@ -69,6 +95,6 @@
     </aside>
   </main>
 
-  <script type="module" src="grid.js"></script>
+  <script type="module" src="grid.js?v=2"></script>
 </body>
 </html>
