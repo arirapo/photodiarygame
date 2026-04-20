@@ -21,9 +21,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 console.log("qr-generator.js loaded");
-alert("qr-generator.js loaded");
 
-// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
   authDomain: "photodiarygame.firebaseapp.com",
@@ -39,15 +37,12 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
 
-// STATE
 const state = {
   mode: "text",
   imageFile: null,
-  previewUrl: null,
-  isAdmin: false
+  previewUrl: null
 };
 
-// ELEMENTS
 const tabs = document.querySelectorAll(".mode-tab");
 const panels = {
   text: document.querySelector("#panel-text"),
@@ -67,14 +62,21 @@ const statusEl = document.querySelector("#status");
 const meta = document.querySelector("#resultMeta");
 const downloadBtn = document.querySelector("#downloadBtn");
 
-// Admin UI
 const adminEmailInput = document.querySelector("#adminEmail");
 const adminPasswordInput = document.querySelector("#adminPassword");
 const adminSignInBtn = document.querySelector("#adminSignInBtn");
 const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
 const adminAuthStatus = document.querySelector("#adminAuthStatus");
 
-// HELPERS
+if (
+  !textInput || !urlInput || !imageInput || !previewWrap || !previewImg ||
+  !createBtn || !canvas || !statusEl || !meta || !downloadBtn ||
+  !adminEmailInput || !adminPasswordInput || !adminSignInBtn ||
+  !adminSignOutBtn || !adminAuthStatus
+) {
+  throw new Error("qr-generator.js: HTML element missing.");
+}
+
 function setStatus(msg, type = "") {
   statusEl.textContent = msg;
   statusEl.className = type ? `status ${type}` : "status";
@@ -93,14 +95,17 @@ function uid() {
 }
 
 async function drawQR(data) {
-  await QRCode.toCanvas(canvas, data, { width: 320 });
+  await QRCode.toCanvas(canvas, data, {
+    width: 320,
+    margin: 2
+  });
 }
 
 function canvasToBlob() {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (!blob) {
-        reject(new Error("QR canvas could not be converted to a blob."));
+        reject(new Error("QR canvas could not be converted to blob."));
         return;
       }
       resolve(blob);
@@ -130,6 +135,13 @@ function escapeHtml(str) {
   });
 }
 
+function revokePreviewUrl() {
+  if (state.previewUrl) {
+    URL.revokeObjectURL(state.previewUrl);
+    state.previewUrl = null;
+  }
+}
+
 async function getAdminStatus(forceRefresh = false) {
   const user = auth.currentUser;
   if (!user) {
@@ -142,6 +154,7 @@ async function getAdminStatus(forceRefresh = false) {
   }
 
   const tokenResult = await getIdTokenResult(user, forceRefresh);
+
   return {
     signedIn: true,
     isAdmin: tokenResult?.claims?.admin === true,
@@ -151,44 +164,25 @@ async function getAdminStatus(forceRefresh = false) {
 }
 
 function updateAdminUi(status) {
-  state.isAdmin = Boolean(status?.isAdmin);
-
-  if (!status?.signedIn) {
+  if (!status.signedIn) {
     adminAuthStatus.textContent = "Not signed in.";
     adminSignInBtn.disabled = false;
     adminSignOutBtn.disabled = true;
-    createBtn.disabled = false;
     return;
   }
 
   if (status.isAdmin) {
     adminAuthStatus.textContent = `Signed in as admin: ${status.email || status.uid}`;
-    adminSignInBtn.disabled = true;
-    adminSignOutBtn.disabled = false;
   } else {
     adminAuthStatus.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
-    adminSignInBtn.disabled = false;
-    adminSignOutBtn.disabled = false;
   }
 
-  createBtn.disabled = false;
-  console.log("AUTH STATUS", status);
-}
-
-function setResultMetaDefault() {
-  meta.innerHTML = `<div class="small">No QR code yet.</div>`;
-}
-
-function revokePreviewUrl() {
-  if (state.previewUrl) {
-    URL.revokeObjectURL(state.previewUrl);
-    state.previewUrl = null;
-  }
+  adminSignInBtn.disabled = false;
+  adminSignOutBtn.disabled = false;
 }
 
 async function requireAdmin() {
   const status = await getAdminStatus(true);
-  console.log("REQUIRE ADMIN STATUS", status);
 
   if (!status.signedIn) {
     throw new Error("Please sign in as admin first.");
@@ -196,10 +190,10 @@ async function requireAdmin() {
   if (!status.isAdmin) {
     throw new Error("This signed-in account does not have admin rights.");
   }
+
   return status;
 }
 
-// EVENTS
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => setMode(tab.dataset.mode));
 });
@@ -247,7 +241,6 @@ adminSignInBtn.addEventListener("click", async () => {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-
     const status = await getAdminStatus(true);
     updateAdminUi(status);
 
@@ -261,12 +254,6 @@ adminSignInBtn.addEventListener("click", async () => {
   } catch (err) {
     console.error(err);
     setStatus(err?.message || "Sign-in failed.", "warn");
-    updateAdminUi({
-      signedIn: false,
-      isAdmin: false,
-      email: null,
-      uid: null
-    });
   } finally {
     adminSignInBtn.disabled = false;
   }
@@ -310,23 +297,13 @@ onAuthStateChanged(auth, async (user) => {
     updateAdminUi(status);
   } catch (err) {
     console.error(err);
-    updateAdminUi({
-      signedIn: true,
-      isAdmin: false,
-      email: user.email || null,
-      uid: user.uid
-    });
   }
 });
 
-// MAIN
 createBtn.addEventListener("click", async () => {
   try {
     createBtn.disabled = true;
     setStatus("");
-    await requireAdmin();
-
-    setStatus("Processing...");
 
     let data = "";
     let type = state.mode;
@@ -337,12 +314,16 @@ createBtn.addEventListener("click", async () => {
     if (type === "text") {
       data = textInput.value.trim();
       if (!data) throw new Error("Empty text.");
+      await drawQR(data);
+      setStatus("QR created. Sign in as admin to save.", "ok");
     }
 
     if (type === "url") {
       data = urlInput.value.trim();
       if (!data) throw new Error("Empty URL.");
       if (!isValidUrl(data)) throw new Error("Invalid URL.");
+      await drawQR(data);
+      setStatus("QR created. Sign in as admin to save.", "ok");
     }
 
     if (type === "image") {
@@ -350,6 +331,8 @@ createBtn.addEventListener("click", async () => {
       if (!state.imageFile.type.startsWith("image/")) {
         throw new Error("Selected file is not an image.");
       }
+
+      await requireAdmin();
 
       const imageExt = state.imageFile.name.includes(".")
         ? state.imageFile.name.split(".").pop().toLowerCase()
@@ -362,9 +345,12 @@ createBtn.addEventListener("click", async () => {
 
       sourceImageUrl = await getDownloadURL(imageRef);
       data = sourceImageUrl;
+      await drawQR(data);
     }
 
-    await drawQR(data);
+    if (type === "text" || type === "url") {
+      await requireAdmin();
+    }
 
     const blob = await canvasToBlob();
     const qrRef = ref(storage, `qr/${id}_qr.png`);
@@ -389,6 +375,7 @@ createBtn.addEventListener("click", async () => {
       <div class="small">Signed in as: ${escapeHtml(status.email || status.uid)}</div>
       <div>Type: ${escapeHtml(type)}</div>
       <div><a href="qr-gallery.html">Open gallery</a></div>
+      <div><a href="${escapeHtml(qrUrl)}" target="_blank" rel="noopener">Open QR image</a></div>
     `;
   } catch (err) {
     console.error(err);
@@ -399,7 +386,7 @@ createBtn.addEventListener("click", async () => {
 });
 
 setMode("text");
-setResultMetaDefault();
+meta.innerHTML = `<div class="small">No QR code yet.</div>`;
 updateAdminUi({
   signedIn: false,
   isAdmin: false,
