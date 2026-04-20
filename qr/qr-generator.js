@@ -169,6 +169,7 @@ function updateAdminUi(status) {
   }
 
   createBtn.disabled = false;
+  console.log("AUTH STATUS", status);
 }
 
 function setResultMetaDefault() {
@@ -184,6 +185,8 @@ function revokePreviewUrl() {
 
 async function requireAdmin() {
   const status = await getAdminStatus(true);
+  console.log("REQUIRE ADMIN STATUS", status);
+
   if (!status.signedIn) {
     throw new Error("Please sign in as admin first.");
   }
