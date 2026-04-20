@@ -40,8 +40,8 @@ const auth = getAuth(app);
 const state = {
   mode: "text",
   imageFile: null,
-  preview: null,
-  adminChecked: false
+  previewUrl: null,
+  isAdmin: false
 };
 
 // ELEMENTS
@@ -64,17 +64,24 @@ const statusEl = document.querySelector("#status");
 const meta = document.querySelector("#resultMeta");
 const downloadBtn = document.querySelector("#downloadBtn");
 
+// Admin UI
+const adminEmailInput = document.querySelector("#adminEmail");
+const adminPasswordInput = document.querySelector("#adminPassword");
+const adminSignInBtn = document.querySelector("#adminSignInBtn");
+const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
+const adminAuthStatus = document.querySelector("#adminAuthStatus");
+
 // HELPERS
 function setStatus(msg, type = "") {
   statusEl.textContent = msg;
-  statusEl.className = type ? "status " + type : "status";
+  statusEl.className = type ? `status ${type}` : "status";
 }
 
 function setMode(mode) {
   state.mode = mode;
   tabs.forEach((t) => t.classList.toggle("active", t.dataset.mode === mode));
-  Object.entries(panels).forEach(([k, p]) => {
-    p.classList.toggle("hidden", k !== mode);
+  Object.entries(panels).forEach(([key, panel]) => {
+    panel.classList.toggle("hidden", key !== mode);
   });
 }
 
@@ -90,12 +97,21 @@ function canvasToBlob() {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (!blob) {
-        reject(new Error("QR canvas could not be converted to blob."));
+        reject(new Error("QR canvas could not be converted to a blob."));
         return;
       }
       resolve(blob);
     }, "image/png");
   });
+}
+
+function isValidUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function escapeHtml(str) {
@@ -111,122 +127,198 @@ function escapeHtml(str) {
   });
 }
 
-function isValidUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 async function getAdminStatus(forceRefresh = false) {
   const user = auth.currentUser;
-  if (!user) return { signedIn: false, isAdmin: false, email: null };
+  if (!user) {
+    return {
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    };
+  }
 
   const tokenResult = await getIdTokenResult(user, forceRefresh);
-  const isAdmin = tokenResult?.claims?.admin === true;
-
   return {
     signedIn: true,
-    isAdmin,
-    email: user.email || null
+    isAdmin: tokenResult?.claims?.admin === true,
+    email: user.email || null,
+    uid: user.uid
   };
 }
 
-async function ensureAdmin() {
-  let status = await getAdminStatus(true);
+function updateAdminUi(status) {
+  state.isAdmin = Boolean(status?.isAdmin);
+
+  if (!status?.signedIn) {
+    adminAuthStatus.textContent = "Not signed in.";
+    adminSignInBtn.disabled = false;
+    adminSignOutBtn.disabled = true;
+    createBtn.disabled = false;
+    return;
+  }
 
   if (status.isAdmin) {
-    state.adminChecked = true;
-    return auth.currentUser;
+    adminAuthStatus.textContent = `Signed in as admin: ${status.email || status.uid}`;
+    adminSignInBtn.disabled = true;
+    adminSignOutBtn.disabled = false;
+  } else {
+    adminAuthStatus.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
+    adminSignInBtn.disabled = false;
+    adminSignOutBtn.disabled = false;
   }
 
-  const email = window.prompt("Admin email:");
-  if (!email) {
-    throw new Error("Admin sign-in cancelled.");
-  }
-
-  const password = window.prompt("Admin password:");
-  if (!password) {
-    throw new Error("Admin sign-in cancelled.");
-  }
-
-  await signInWithEmailAndPassword(auth, email.trim(), password);
-
-  status = await getAdminStatus(true);
-
-  if (!status.isAdmin) {
-    await signOut(auth);
-    throw new Error("Signed in, but this account does not have admin rights.");
-  }
-
-  state.adminChecked = true;
-  return auth.currentUser;
+  createBtn.disabled = false;
 }
 
-function updateAuthUi(user, isAdmin = false) {
-  const authLine = user
-    ? `Signed in: ${escapeHtml(user.email || user.uid)}${isAdmin ? " (admin)" : ""}`
-    : "Not signed in.";
+function setResultMetaDefault() {
+  meta.innerHTML = `<div class="small">No QR code yet.</div>`;
+}
 
-  const existing = meta.querySelector(".auth-line");
-  if (existing) existing.remove();
+function revokePreviewUrl() {
+  if (state.previewUrl) {
+    URL.revokeObjectURL(state.previewUrl);
+    state.previewUrl = null;
+  }
+}
 
-  const div = document.createElement("div");
-  div.className = "small auth-line";
-  div.innerHTML = authLine;
-  meta.prepend(div);
+async function requireAdmin() {
+  const status = await getAdminStatus(true);
+  if (!status.signedIn) {
+    throw new Error("Please sign in as admin first.");
+  }
+  if (!status.isAdmin) {
+    throw new Error("This signed-in account does not have admin rights.");
+  }
+  return status;
 }
 
 // EVENTS
 tabs.forEach((tab) => {
-  tab.onclick = () => setMode(tab.dataset.mode);
+  tab.addEventListener("click", () => setMode(tab.dataset.mode));
 });
 
-imageInput.onchange = (e) => {
-  const file = e.target.files[0];
+imageInput.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  revokePreviewUrl();
+
   if (!file) {
     state.imageFile = null;
-    previewWrap.classList.add("hidden");
     previewImg.removeAttribute("src");
+    previewWrap.classList.add("hidden");
     return;
   }
 
   state.imageFile = file;
-  const url = URL.createObjectURL(file);
-  previewImg.src = url;
+  state.previewUrl = URL.createObjectURL(file);
+  previewImg.src = state.previewUrl;
   previewWrap.classList.remove("hidden");
-};
+});
 
-downloadBtn.onclick = () => {
+downloadBtn.addEventListener("click", () => {
   const a = document.createElement("a");
   a.href = canvas.toDataURL("image/png");
   a.download = "qr.png";
   a.click();
-};
+});
+
+adminSignInBtn.addEventListener("click", async () => {
+  const email = adminEmailInput.value.trim();
+  const password = adminPasswordInput.value;
+
+  if (!email) {
+    setStatus("Enter admin email.", "warn");
+    return;
+  }
+
+  if (!password) {
+    setStatus("Enter admin password.", "warn");
+    return;
+  }
+
+  adminSignInBtn.disabled = true;
+  setStatus("Signing in...");
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+
+    const status = await getAdminStatus(true);
+    updateAdminUi(status);
+
+    if (!status.isAdmin) {
+      setStatus("Signed in, but this account is not admin.", "warn");
+      return;
+    }
+
+    adminPasswordInput.value = "";
+    setStatus("Admin sign-in successful.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus(err?.message || "Sign-in failed.", "warn");
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+  } finally {
+    adminSignInBtn.disabled = false;
+  }
+});
+
+adminSignOutBtn.addEventListener("click", async () => {
+  adminSignOutBtn.disabled = true;
+  setStatus("Signing out...");
+
+  try {
+    await signOut(auth);
+    adminPasswordInput.value = "";
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+    setStatus("Signed out.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus(err?.message || "Sign-out failed.", "warn");
+  } finally {
+    adminSignOutBtn.disabled = false;
+  }
+});
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    updateAuthUi(null, false);
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
     return;
   }
 
   try {
     const status = await getAdminStatus(false);
-    updateAuthUi(user, status.isAdmin);
-  } catch {
-    updateAuthUi(user, false);
+    updateAdminUi(status);
+  } catch (err) {
+    console.error(err);
+    updateAdminUi({
+      signedIn: true,
+      isAdmin: false,
+      email: user.email || null,
+      uid: user.uid
+    });
   }
 });
 
 // MAIN
-createBtn.onclick = async () => {
+createBtn.addEventListener("click", async () => {
   try {
     createBtn.disabled = true;
-    setStatus("Checking admin access...");
-
-    await ensureAdmin();
+    setStatus("");
+    await requireAdmin();
 
     setStatus("Processing...");
 
@@ -252,6 +344,62 @@ createBtn.onclick = async () => {
       if (!state.imageFile.type.startsWith("image/")) {
         throw new Error("Selected file is not an image.");
       }
+
+      const imageExt = state.imageFile.name.includes(".")
+        ? state.imageFile.name.split(".").pop().toLowerCase()
+        : "jpg";
+
+      const imageRef = ref(storage, `qr/${id}.${imageExt}`);
+      await uploadBytes(imageRef, state.imageFile, {
+        contentType: state.imageFile.type
+      });
+
+      sourceImageUrl = await getDownloadURL(imageRef);
+      data = sourceImageUrl;
+    }
+
+    await drawQR(data);
+
+    const blob = await canvasToBlob();
+    const qrRef = ref(storage, `qr/${id}_qr.png`);
+    await uploadBytes(qrRef, blob, {
+      contentType: "image/png"
+    });
+    const qrUrl = await getDownloadURL(qrRef);
+
+    await addDoc(collection(db, "qr_codes"), {
+      createdAt: serverTimestamp(),
+      type,
+      qrData: data,
+      qrImageUrl: qrUrl,
+      sourceImageUrl
+    });
+
+    setStatus("Saved ✔", "ok");
+    downloadBtn.classList.remove("hidden");
+
+    const status = await getAdminStatus(false);
+    meta.innerHTML = `
+      <div class="small">Signed in as: ${escapeHtml(status.email || status.uid)}</div>
+      <div>Type: ${escapeHtml(type)}</div>
+      <div><a href="qr-gallery.html">Open gallery</a></div>
+    `;
+  } catch (err) {
+    console.error(err);
+    setStatus(err?.message || "Saving failed.", "warn");
+  } finally {
+    createBtn.disabled = false;
+  }
+});
+
+setMode("text");
+setResultMetaDefault();
+updateAdminUi({
+  signedIn: false,
+  isAdmin: false,
+  email: null,
+  uid: null
+});
 
       const refPath = ref(storage, `qr/${id}.jpg`);
       await uploadBytes(refPath, state.imageFile, {
