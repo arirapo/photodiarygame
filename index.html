@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photodiarygame</title>
+  <meta name="description" content="Experimental web works." />
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --text: #f2f1eb;
+      --muted: rgba(242, 241, 235, 0.58);
+      --line: rgba(242, 241, 235, 0.12);
+      --accent: #d6cfb2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    main {
+      width: min(100%, 760px);
+    }
+
+    .frame {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 2.2rem 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.8rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 6vw, 5.4rem);
+      font-weight: 500;
+      letter-spacing: -0.04em;
+      line-height: 0.96;
+    }
+
+    p {
+      margin: 1.1rem 0 0;
+      max-width: 34rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .links {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 120ms ease, color 120ms ease;
+    }
+
+    a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="frame">
+      <p class="eyebrow">experimental web works</p>
+      <h1>Photodiarygame</h1>
+      <p>
+        A space for image, text, trace, sound, and poetic interaction.
+      </p>
+
+      <nav class="links" aria-label="Site links">
+        <a href="https://photodiary.gallery/">photodiary.gallery</a>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>
