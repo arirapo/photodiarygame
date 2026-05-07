@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Neon Cat's Cradle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #02030a;
+      font-family: system-ui, sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #video {
+      display: none;
+    }
+
+    #info {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      color: rgba(255,255,255,0.65);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .scanlines {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.035),
+        rgba(255,255,255,0.035) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      mix-blend-mode: overlay;
+      opacity: 0.35;
+    }
+  </style>
+</head>
+
+<body>
+  <video id="video" playsinline></video>
+  <div id="info">waiting for hands...</div>
+  <div class="scanlines"></div>
+
+<script>
+let videoElement;
+let handsResults = null;
+let particles = [];
+
+const fingerTips = [4, 8, 12, 16, 20];
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
+
+  videoElement = document.getElementById("video");
+
+  const hands = new Hands({
+    locateFile: (file) => {
+      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+    }
+  });
+
+  hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.65,
+    minTrackingConfidence: 0.65
+  });
+
+  hands.onResults((results) => {
+    handsResults = results;
+  });
+
+  const camera = new Camera(videoElement, {
+    onFrame: async () => {
+      await hands.send({ image: videoElement });
+    },
+    width: 1280,
+    height: 720
+  });
+
+  camera.start();
+}
+
+function draw() {
+  background(2, 3, 10);
+
+  drawVideoBackground();
+
+  if (
+    handsResults &&
+    handsResults.multiHandLandmarks &&
+    handsResults.multiHandLandmarks.length > 0
+  ) {
+    document.getElementById("info").innerText = "hands detected";
+
+    const hands = handsResults.multiHandLandmarks;
+
+    drawLandmarks(hands);
+
+    if (hands.length >= 2) {
+      drawCatCradle(hands[0], hands[1]);
+    }
+  } else {
+    document.getElementById("info").innerText = "waiting for hands...";
+  }
+
+  updateParticles();
+  drawVignette();
+}
+
+function drawVideoBackground() {
+  if (!videoElement || videoElement.readyState < 2) return;
+
+  push();
+  translate(width, 0);
+  scale(-1, 1);
+
+  tint(60, 80);
+  image(videoElement, 0, 0, width, height);
+  pop();
+
+  noTint();
+
+  fill(0, 0, 20, 145);
+  rect(0, 0, width, height);
+}
+
+function toScreen(lm) {
+  return {
+    x: width - lm.x * width,
+    y: lm.y * height,
+    z: lm.z
+  };
+}
+
+function drawLandmarks(hands) {
+  for (const hand of hands) {
+    for (const lm of hand) {
+      const p = toScreen(lm);
+
+      drawingContext.shadowBlur = 20;
+      drawingContext.shadowColor = "cyan";
+
+      noStroke();
+      fill(0, 255, 255, 180);
+      circle(p.x, p.y, 6);
+
+      drawingContext.shadowBlur = 0;
+    }
+  }
+}
+
+function drawCatCradle(handA, handB) {
+  for (let i = 0; i < fingerTips.length; i++) {
+    const a = toScreen(handA[fingerTips[i]]);
+    const b = toScreen(handB[fingerTips[i]]);
+
+    const d = dist(a.x, a.y, b.x, b.y);
+    const tension = constrain(map(d, 80, width * 0.9, 0, 1), 0, 1);
+
+    const thickness = lerp(2, 9, tension);
+    const glow = lerp(20, 60, tension);
+
+    const colors = [
+      ["cyan", "magenta"],
+      ["magenta", "yellow"],
+      ["yellow", "cyan"],
+      ["cyan", "yellow"],
+      ["magenta", "cyan"]
+    ];
+
+    drawNeonLine(
+      a.x, a.y,
+      b.x, b.y,
+      thickness,
+      glow,
+      colors[i][0],
+      colors[i][1]
+    );
+
+    if (d < 45) {
+      createSpark((a.x + b.x) / 2, (a.y + b.y) / 2);
+    }
+  }
+
+  drawCrossStrings(handA, handB);
+}
+
+function drawCrossStrings(handA, handB) {
+  const pairs = [
+    [4, 8],
+    [8, 12],
+    [12, 16],
+    [16, 20],
+    [20, 4]
+  ];
+
+  for (const pair of pairs) {
+    const a = toScreen(handA[pair[0]]);
+    const b = toScreen(handB[pair[1]]);
+
+    drawNeonLine(
+      a.x, a.y,
+      b.x, b.y,
+      1.5,
+      25,
+      "rgba(0,255,255,0.8)",
+      "rgba(255,0,255,0.8)"
+    );
+  }
+}
+
+function drawNeonLine(x1, y1, x2, y2, weight, glow, colorA, colorB) {
+  const ctx = drawingContext;
+  const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+  gradient.addColorStop(0, colorA);
+  gradient.addColorStop(0.5, "white");
+  gradient.addColorStop(1, colorB);
+
+  ctx.save();
+  ctx.shadowBlur = glow;
+  ctx.shadowColor = colorA;
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = weight;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+
+  const wave = sin(frameCount * 0.04 + x1 * 0.01) * 18;
+
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(midX, midY + wave, x2, y2);
+  ctx.stroke();
+
+  ctx.restore();
+
+  stroke(255, 180);
+  strokeWeight(0.8);
+  line(x1, y1, x2, y2);
+}
+
+function createSpark(x, y) {
+  if (particles.length > 160) return;
+
+  for (let i = 0; i < 4; i++) {
+    particles.push({
+      x,
+      y,
+      vx: random(-2.2, 2.2),
+      vy: random(-2.2, 2.2),
+      life: 35,
+      size: random(2, 6)
+    });
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+
+    const alpha = map(p.life, 0, 35, 0, 220);
+
+    drawingContext.shadowBlur = 18;
+    drawingContext.shadowColor = "yellow";
+
+    noStroke();
+    fill(255, 240, 80, alpha);
+    circle(p.x, p.y, p.size);
+
+    drawingContext.shadowBlur = 0;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+    }
+  }
+}
+
+function drawVignette() {
+  noFill();
+
+  for (let i = 0; i < 80; i++) {
+    stroke(0, 0, 0, i * 2.2);
+    rect(i, i, width - i * 2, height - i * 2);
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+</script>
+</body>
+</html>
