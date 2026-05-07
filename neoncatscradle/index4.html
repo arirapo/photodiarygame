@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>The Cradle Between</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #010204;
+  font-family: sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+#info {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  color: rgba(255,255,255,0.45);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  z-index: 20;
+  pointer-events: none;
+}
+
+#poem {
+  position: fixed;
+  top: 8vh;
+  width: 100%;
+  text-align: center;
+
+  color: rgba(255,255,255,0.25);
+
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  font-weight: 300;
+
+  z-index: 20;
+  pointer-events: none;
+
+  transition: opacity 2s ease;
+}
+
+#startButton {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 30;
+
+  background: rgba(5, 8, 20, 0.92);
+
+  color: white;
+
+  border: 1px solid rgba(0,255,255,0.4);
+
+  border-radius: 999px;
+
+  padding: 16px 28px;
+
+  font-size: 15px;
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+
+  box-shadow: 0 0 40px rgba(0,255,255,0.18);
+}
+
+.scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+
+  z-index: 10;
+
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03),
+    rgba(255,255,255,0.03) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+
+  mix-blend-mode: overlay;
+  opacity: 0.25;
+}
+</style>
+</head>
+
+<body>
+
+<button id="startButton">Enter</button>
+
+<div id="info">waiting</div>
+
+<div id="poem"></div>
+
+<div class="scanlines"></div>
+
+<script>
+
+let video;
+let hands;
+let handResults = null;
+let started = false;
+
+let particles = [];
+let trails = [];
+
+const fingerTips = [4, 8, 12, 16, 20];
+
+const texts = [
+  "a trace appears between gestures",
+  "memory moves through the hands",
+  "threads of presence",
+  "the body remembers",
+  "light connects what disappears",
+  "a temporary constellation",
+  "touch without touching",
+  "between movement and memory",
+  "the trace continues",
+  "something remains"
+];
+
+function setup() {
+
+  createCanvas(windowWidth, windowHeight);
+
+  pixelDensity(1);
+
+  background(1,2,4);
+
+  const btn =
+    document.getElementById("startButton");
+
+  btn.addEventListener("click", async () => {
+
+    btn.style.display = "none";
+
+    await startExperience();
+
+    randomPoem();
+
+    setInterval(randomPoem, 12000);
+  });
+}
+
+async function startExperience() {
+
+  try {
+
+    video = createCapture({
+      video: {
+        facingMode: "user",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    });
+
+    video.size(width, height);
+
+    video.elt.setAttribute(
+      "playsinline",
+      true
+    );
+
+    video.hide();
+
+    hands = new Hands({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 0,
+      minDetectionConfidence: 0.45,
+      minTrackingConfidence: 0.45
+    });
+
+    hands.onResults((results) => {
+      handResults = results;
+    });
+
+    started = true;
+
+    detectLoop();
+
+  } catch(err) {
+
+    console.error(err);
+
+    document.getElementById("info").innerText =
+      "camera error";
+  }
+}
+
+async function detectLoop() {
+
+  if (
+    started &&
+    video &&
+    video.elt &&
+    video.elt.readyState >= 2
+  ) {
+
+    try {
+
+      await hands.send({
+        image: video.elt
+      });
+
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  requestAnimationFrame(detectLoop);
+}
+
+function draw() {
+
+  fill(1,2,4,18);
+
+  noStroke();
+
+  rect(0,0,width,height);
+
+  drawVideoGhost();
+
+  if (
+    handResults &&
+    handResults.multiHandLandmarks &&
+    handResults.multiHandLandmarks.length > 0
+  ) {
+
+    const detectedHands =
+      handResults.multiHandLandmarks;
+
+    document.getElementById("info").innerText =
+      detectedHands.length + " hand(s)";
+
+    drawLandmarks(detectedHands);
+
+    if (detectedHands.length >= 2) {
+
+      drawCradle(
+        detectedHands[0],
+        detectedHands[1]
+      );
+    }
+  }
+
+  updateTrails();
+
+  updateParticles();
+
+  drawVignette();
+}
+
+function drawVideoGhost() {
+
+  if (!video) return;
+
+  push();
+
+  translate(width,0);
+
+  scale(-1,1);
+
+  tint(60,35);
+
+  image(video,0,0,width,height);
+
+  pop();
+}
+
+function toScreen(lm) {
+
+  return {
+    x: width - lm.x * width,
+    y: lm.y * height
+  };
+}
+
+function drawLandmarks(handsArray) {
+
+  for (const hand of handsArray) {
+
+    for (const lm of hand) {
+
+      const p = toScreen(lm);
+
+      drawingContext.shadowBlur = 20;
+
+      drawingContext.shadowColor = "cyan";
+
+      noStroke();
+
+      fill(0,255,255,120);
+
+      circle(p.x,p.y,5);
+
+      drawingContext.shadowBlur = 0;
+    }
+  }
+}
+
+function drawCradle(handA, handB) {
+
+  for (let i = 0; i < fingerTips.length; i++) {
+
+    const a =
+      toScreen(handA[fingerTips[i]]);
+
+    const b =
+      toScreen(handB[fingerTips[i]]);
+
+    const d =
+      dist(a.x,a.y,b.x,b.y);
+
+    const glow =
+      map(d,0,width,15,70);
+
+    const thickness =
+      map(d,0,width,1.5,8);
+
+    drawNeonCurve(
+      a.x,a.y,
+      b.x,b.y,
+      thickness,
+      glow,
+      i
+    );
+
+    trails.push({
+      x1:a.x,
+      y1:a.y,
+      x2:b.x,
+      y2:b.y,
+      alpha:90,
+      hue:i
+    });
+
+    if (d < 60) {
+
+      createSpark(
+        (a.x+b.x)/2,
+        (a.y+b.y)/2
+      );
+    }
+  }
+}
+
+function drawNeonCurve(
+  x1,y1,
+  x2,y2,
+  weight,
+  glow,
+  hueIndex
+) {
+
+  const ctx = drawingContext;
+
+  const colors = [
+    ["cyan","magenta"],
+    ["magenta","yellow"],
+    ["yellow","cyan"],
+    ["cyan","white"],
+    ["magenta","cyan"]
+  ];
+
+  const gradient =
+    ctx.createLinearGradient(
+      x1,y1,x2,y2
+    );
+
+  gradient.addColorStop(
+    0,
+    colors[hueIndex][0]
+  );
+
+  gradient.addColorStop(
+    1,
+    colors[hueIndex][1]
+  );
+
+  const midX = (x1+x2)/2;
+
+  const midY = (y1+y2)/2;
+
+  const wave =
+    sin(frameCount*0.03+x1*0.01)*18;
+
+  ctx.save();
+
+  ctx.shadowBlur = glow;
+
+  ctx.shadowColor =
+    colors[hueIndex][0];
+
+  ctx.strokeStyle = gradient;
+
+  ctx.lineWidth = weight;
+
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+
+  ctx.moveTo(x1,y1);
+
+  ctx.quadraticCurveTo(
+    midX,
+    midY+wave,
+    x2,
+    y2
+  );
+
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function updateTrails() {
+
+  for (
+    let i = trails.length-1;
+    i >= 0;
+    i--
+  ) {
+
+    const t = trails[i];
+
+    t.alpha -= 0.4;
+
+    if (t.alpha <= 0) {
+
+      trails.splice(i,1);
+
+      continue;
+    }
+
+    strokeWeight(1);
+
+    noFill();
+
+    stroke(
+      180,
+      220,
+      255,
+      t.alpha
+    );
+
+    line(
+      t.x1,
+      t.y1,
+      t.x2,
+      t.y2
+    );
+  }
+}
+
+function createSpark(x,y) {
+
+  if (particles.length > 200) return;
+
+  for (let i=0;i<4;i++) {
+
+    particles.push({
+
+      x,
+      y,
+
+      vx: random(-2.5,2.5),
+
+      vy: random(-2.5,2.5),
+
+      life: 40,
+
+      size: random(2,5)
+    });
+  }
+}
+
+function updateParticles() {
+
+  for (
+    let i=particles.length-1;
+    i>=0;
+    i--
+  ) {
+
+    const p = particles[i];
+
+    p.x += p.vx;
+
+    p.y += p.vy;
+
+    p.life--;
+
+    const alpha =
+      map(p.life,0,40,0,180);
+
+    drawingContext.shadowBlur = 20;
+
+    drawingContext.shadowColor =
+      "white";
+
+    noStroke();
+
+    fill(
+      255,
+      240,
+      180,
+      alpha
+    );
+
+    circle(
+      p.x,
+      p.y,
+      p.size
+    );
+
+    drawingContext.shadowBlur = 0;
+
+    if (p.life <= 0) {
+
+      particles.splice(i,1);
+    }
+  }
+}
+
+function drawVignette() {
+
+  noFill();
+
+  for (let i=0;i<80;i++) {
+
+    stroke(0,0,0,i*2);
+
+    rect(
+      i,
+      i,
+      width-i*2,
+      height-i*2
+    );
+  }
+}
+
+function randomPoem() {
+
+  const poem =
+    document.getElementById("poem");
+
+  poem.style.opacity = 0;
+
+  setTimeout(() => {
+
+    poem.innerText =
+      random(texts);
+
+    poem.style.opacity = 1;
+
+  },1000);
+}
+
+function windowResized() {
+
+  resizeCanvas(
+    windowWidth,
+    windowHeight
+  );
+}
+
+</script>
+
+</body>
+</html>
