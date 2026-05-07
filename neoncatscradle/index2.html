@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Neon Cat's Cradle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #02030a;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #info {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    #startButton {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 30;
+      background: rgba(5, 8, 20, 0.9);
+      color: white;
+      border: 1px solid rgba(0,255,255,0.5);
+      border-radius: 999px;
+      padding: 16px 28px;
+      font-size: 15px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      box-shadow: 0 0 30px rgba(0,255,255,0.25);
+    }
+
+    .scanlines {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.035),
+        rgba(255,255,255,0.035) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      mix-blend-mode: overlay;
+      opacity: 0.35;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="startButton">Start Camera</button>
+  <div id="info">tap start camera</div>
+  <div class="scanlines"></div>
+
+<script>
+let video;
+let hands;
+let handResults = null;
+let cameraStarted = false;
+let particles = [];
+
+const fingerTips = [4, 8, 12, 16, 20];
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
+
+  const btn = document.getElementById("startButton");
+  btn.addEventListener("click", async () => {
+    btn.style.display = "none";
+    await startCameraAndHands();
+  });
+}
+
+async function startCameraAndHands() {
+  try {
+    document.getElementById("info").innerText = "starting camera...";
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    });
+
+    video = document.createElement("video");
+    video.srcObject = stream;
+    video.playsInline = true;
+    video.muted = true;
+    video.autoplay = true;
+
+    await video.play();
+
+    hands = new Hands({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+      }
+    });
+
+    hands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 0,
+      minDetectionConfidence: 0.45,
+      minTrackingConfidence: 0.45
+    });
+
+    hands.onResults((results) => {
+      handResults = results;
+    });
+
+    cameraStarted = true;
+    document.getElementById("info").innerText = "camera on — looking for hands";
+
+    detectLoop();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("info").innerText = "camera error";
+  }
+}
+
+async function detectLoop() {
+  if (cameraStarted && video && video.readyState >= 2 && hands) {
+    try {
+      await hands.send({ image: video });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  requestAnimationFrame(detectLoop);
+}
+
+function draw() {
+  background(2, 3, 10);
+
+  drawVideoBackground();
+
+  if (
+    handResults &&
+    handResults.multiHandLandmarks &&
+    handResults.multiHandLandmarks.length > 0
+  ) {
+    document.getElementById("info").innerText =
+      handResults.multiHandLandmarks.length + " hand(s) detected";
+
+    const detectedHands = handResults.multiHandLandmarks;
+
+    drawLandmarks(detectedHands);
+
+    if (detectedHands.length >= 2) {
+      drawCatCradle(detectedHands[0], detectedHands[1]);
+    }
+  } else if (cameraStarted) {
+    document.getElementById("info").innerText = "camera on — looking for hands";
+  }
+
+  updateParticles();
+  drawVignette();
+}
+
+function drawVideoBackground() {
+  if (!video || video.readyState < 2) return;
+
+  push();
+  translate(width, 0);
+  scale(-1, 1);
+
+  tint(65, 80);
+  image(video, 0, 0, width, height);
+
+  pop();
+
+  noTint();
+
+  fill(0, 0, 18, 165);
+  noStroke();
+  rect(0, 0, width, height);
+}
+
+function toScreen(lm) {
+  return {
+    x: width - lm.x * width,
+    y: lm.y * height,
+    z: lm.z
+  };
+}
+
+function drawLandmarks(handsArray) {
+  for (const hand of handsArray) {
+    for (const lm of hand) {
+      const p = toScreen(lm);
+
+      drawingContext.shadowBlur = 18;
+      drawingContext.shadowColor = "cyan";
+
+      noStroke();
+      fill(0, 255, 255, 175);
+      circle(p.x, p.y, 6);
+
+      drawingContext.shadowBlur = 0;
+    }
+  }
+}
+
+function drawCatCradle(handA, handB) {
+  for (let i = 0; i < fingerTips.length; i++) {
+    const a = toScreen(handA[fingerTips[i]]);
+    const b = toScreen(handB[fingerTips[i]]);
+
+    const d = dist(a.x, a.y, b.x, b.y);
+    const tension = constrain(map(d, 80, width * 0.9, 0, 1), 0, 1);
+
+    const thickness = lerp(2, 9, tension);
+    const glow = lerp(20, 65, tension);
+
+    const colors = [
+      ["cyan", "magenta"],
+      ["magenta", "yellow"],
+      ["yellow", "cyan"],
+      ["cyan", "yellow"],
+      ["magenta", "cyan"]
+    ];
+
+    drawNeonCurve(
+      a.x, a.y,
+      b.x, b.y,
+      thickness,
+      glow,
+      colors[i][0],
+      colors[i][1]
+    );
+
+    if (d < 45) {
+      createSpark((a.x + b.x) / 2, (a.y + b.y) / 2);
+    }
+  }
+
+  drawCrossStrings(handA, handB);
+}
+
+function drawCrossStrings(handA, handB) {
+  const pairs = [
+    [4, 8],
+    [8, 12],
+    [12, 16],
+    [16, 20],
+    [20, 4]
+  ];
+
+  for (const pair of pairs) {
+    const a = toScreen(handA[pair[0]]);
+    const b = toScreen(handB[pair[1]]);
+
+    drawNeonCurve(
+      a.x, a.y,
+      b.x, b.y,
+      1.5,
+      24,
+      "rgba(0,255,255,0.7)",
+      "rgba(255,0,255,0.7)"
+    );
+  }
+}
+
+function drawNeonCurve(x1, y1, x2, y2, weight, glow, colorA, colorB) {
+  const ctx = drawingContext;
+
+  const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+  gradient.addColorStop(0, colorA);
+  gradient.addColorStop(0.5, "white");
+  gradient.addColorStop(1, colorB);
+
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  const wave = sin(frameCount * 0.04 + x1 * 0.01) * 16;
+
+  ctx.save();
+  ctx.shadowBlur = glow;
+  ctx.shadowColor = colorA;
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = weight;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(midX, midY + wave, x2, y2);
+  ctx.stroke();
+
+  ctx.restore();
+
+  stroke(255, 170);
+  strokeWeight(0.75);
+  line(x1, y1, x2, y2);
+}
+
+function createSpark(x, y) {
+  if (particles.length > 140) return;
+
+  for (let i = 0; i < 3; i++) {
+    particles.push({
+      x,
+      y,
+      vx: random(-2.2, 2.2),
+      vy: random(-2.2, 2.2),
+      life: 32,
+      size: random(2, 6)
+    });
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vx *= 0.96;
+    p.vy *= 0.96;
+    p.life--;
+
+    const alpha = map(p.life, 0, 32, 0, 220);
+
+    drawingContext.shadowBlur = 18;
+    drawingContext.shadowColor = "yellow";
+
+    noStroke();
+    fill(255, 240, 80, alpha);
+    circle(p.x, p.y, p.size);
+
+    drawingContext.shadowBlur = 0;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+    }
+  }
+}
+
+function drawVignette() {
+  noFill();
+
+  for (let i = 0; i < 70; i++) {
+    stroke(0, 0, 0, i * 2.3);
+    rect(i, i, width - i * 2, height - i * 2);
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+</script>
+</body>
+</html>
