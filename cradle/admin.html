@@ -54,8 +54,10 @@ button.delete {
 }
 
 #status {
-  opacity: 0.65;
+  opacity: 0.72;
   font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .grid {
@@ -155,38 +157,88 @@ const db = getFirestore(app);
 
 const storage = getStorage(app);
 
-const grid = document.getElementById("grid");
+const grid =
+  document.getElementById("grid");
 
-const statusEl = document.getElementById("status");
+const statusEl =
+  document.getElementById("status");
 
 document.getElementById("loginBtn")
 .addEventListener("click", async () => {
 
-  const provider =
-    new GoogleAuthProvider();
+  try {
 
-  await signInWithRedirect(
-    auth,
-    provider
-  );
+    statusEl.innerText =
+      "redirecting to google login...";
+
+    const provider =
+      new GoogleAuthProvider();
+
+    await signInWithRedirect(
+      auth,
+      provider
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    statusEl.innerText =
+      "login button error:\n" +
+      err.code + "\n\n" +
+      err.message;
+  }
 });
 
 document.getElementById("logoutBtn")
 .addEventListener("click", async () => {
 
-  await signOut(auth);
+  try {
+
+    await signOut(auth);
+
+    statusEl.innerText =
+      "logged out";
+
+  } catch (err) {
+
+    console.error(err);
+
+    statusEl.innerText =
+      "logout failed:\n" +
+      err.code + "\n\n" +
+      err.message;
+  }
 });
 
 getRedirectResult(auth)
+
+.then((result) => {
+
+  if (
+    result &&
+    result.user
+  ) {
+
+    statusEl.innerText =
+      "redirect login ok:\n" +
+      result.user.email;
+  }
+})
+
 .catch((error) => {
 
   console.error(error);
 
   statusEl.innerText =
-    "login failed";
+    "redirect login failed:\n\n" +
+    error.code + "\n\n" +
+    error.message;
 });
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(
+  auth,
+  async (user) => {
 
   grid.innerHTML = "";
 
@@ -199,7 +251,8 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   statusEl.innerText =
-    "logged in: " + user.email;
+    "logged in:\n" +
+    user.email;
 
   await loadTraces();
 });
@@ -208,108 +261,123 @@ async function loadTraces() {
 
   grid.innerHTML = "";
 
-  const snap =
-    await getDocs(
-      collection(db, "cradle_traces")
-    );
+  try {
 
-  const traces = [];
-
-  snap.forEach((d) => {
-
-    traces.push({
-      id: d.id,
-      ...d.data()
-    });
-  });
-
-  traces.sort((a,b) => {
-
-    return (
-      b.localCreatedAt || ""
-    ).localeCompare(
-      a.localCreatedAt || ""
-    );
-  });
-
-  traces.forEach((trace) => {
-
-    const card =
-      document.createElement("div");
-
-    card.className = "card";
-
-    const img =
-      document.createElement("img");
-
-    img.src = trace.imageUrl;
-
-    const meta =
-      document.createElement("div");
-
-    meta.className = "meta";
-
-    const slug =
-      document.createElement("div");
-
-    slug.className = "slug";
-
-    slug.innerText =
-      trace.slug || trace.id;
-
-    const actions =
-      document.createElement("div");
-
-    actions.className = "actions";
-
-    const openBtn =
-      document.createElement("button");
-
-    openBtn.innerText = "Open";
-
-    openBtn.onclick = () => {
-
-      window.open(
-        `trace.html?id=${trace.slug}`,
-        "_blank"
+    const snap =
+      await getDocs(
+        collection(
+          db,
+          "cradle_traces"
+        )
       );
-    };
 
-    const delBtn =
-      document.createElement("button");
+    const traces = [];
 
-    delBtn.className = "delete";
+    snap.forEach((d) => {
 
-    delBtn.innerText = "Delete";
+      traces.push({
+        id: d.id,
+        ...d.data()
+      });
+    });
 
-    delBtn.onclick = async () => {
+    traces.sort((a,b) => {
 
-      const ok =
-        confirm(
-          "Delete this trace permanently?"
+      return (
+        b.localCreatedAt || ""
+      ).localeCompare(
+        a.localCreatedAt || ""
+      );
+    });
+
+    traces.forEach((trace) => {
+
+      const card =
+        document.createElement("div");
+
+      card.className = "card";
+
+      const img =
+        document.createElement("img");
+
+      img.src = trace.imageUrl;
+
+      const meta =
+        document.createElement("div");
+
+      meta.className = "meta";
+
+      const slug =
+        document.createElement("div");
+
+      slug.className = "slug";
+
+      slug.innerText =
+        trace.slug || trace.id;
+
+      const actions =
+        document.createElement("div");
+
+      actions.className = "actions";
+
+      const openBtn =
+        document.createElement("button");
+
+      openBtn.innerText = "Open";
+
+      openBtn.onclick = () => {
+
+        window.open(
+          `trace.html?id=${trace.slug}`,
+          "_blank"
         );
+      };
 
-      if (!ok) return;
+      const delBtn =
+        document.createElement("button");
 
-      await deleteTrace(trace);
+      delBtn.className = "delete";
 
-      card.remove();
-    };
+      delBtn.innerText = "Delete";
 
-    actions.appendChild(openBtn);
+      delBtn.onclick = async () => {
 
-    actions.appendChild(delBtn);
+        const ok =
+          confirm(
+            "Delete this trace permanently?"
+          );
 
-    meta.appendChild(slug);
+        if (!ok) return;
 
-    meta.appendChild(actions);
+        await deleteTrace(trace);
 
-    card.appendChild(img);
+        card.remove();
+      };
 
-    card.appendChild(meta);
+      actions.appendChild(openBtn);
 
-    grid.appendChild(card);
-  });
+      actions.appendChild(delBtn);
+
+      meta.appendChild(slug);
+
+      meta.appendChild(actions);
+
+      card.appendChild(img);
+
+      card.appendChild(meta);
+
+      grid.appendChild(card);
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    statusEl.innerText =
+      "load failed:\n\n" +
+      err.code + "\n\n" +
+      err.message;
+  }
 }
 
 async function deleteTrace(trace) {
@@ -339,7 +407,9 @@ async function deleteTrace(trace) {
     console.error(err);
 
     alert(
-      "Delete failed. Check Firebase rules / admin rights."
+      "Delete failed:\n\n" +
+      err.code + "\n\n" +
+      err.message
     );
   }
 }
