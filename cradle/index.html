@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Cradle Traces</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #010204;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+canvas { display: block; }
+
+#enterButton {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  background: rgba(5, 8, 20, 0.92);
+  color: white;
+  border: 1px solid rgba(0,255,255,0.45);
+  border-radius: 999px;
+  padding: 16px 34px;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 0 0 40px rgba(0,255,255,0.22);
+}
+
+#countdown {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 25;
+  color: rgba(255,255,255,0.72);
+  font-size: 42px;
+  font-weight: 200;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+#status {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 25;
+  color: rgba(255,255,255,0.42);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+#poem {
+  position: fixed;
+  top: 8vh;
+  width: 100%;
+  text-align: center;
+  z-index: 25;
+  color: rgba(255,255,255,0.24);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  font-weight: 300;
+  pointer-events: none;
+  transition: opacity 2s ease;
+}
+
+#result {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: rgba(1,2,4,0.88);
+  color: white;
+  text-align: center;
+}
+
+#result img {
+  width: min(72vw, 320px);
+  height: auto;
+  margin-top: 22px;
+  opacity: 0.92;
+}
+
+#result a {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  margin-top: 18px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03),
+    rgba(255,255,255,0.03) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.25;
+}
+
+#qrHidden {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+}
+</style>
+</head>
+
+<body>
+
+<button id="enterButton">Enter</button>
+<div id="countdown"></div>
+<div id="status">waiting</div>
+<div id="poem"></div>
+<div class="scanlines"></div>
+
+<div id="result">
+  <div>The trace has been saved.</div>
+  <img id="qrImage" alt="QR code">
+  <a id="traceLink" href="#" target="_blank">open trace</a>
+</div>
+
+<div id="qrHidden"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+  authDomain: "photodiarygame.firebaseapp.com",
+  projectId: "photodiarygame",
+  storageBucket: "photodiarygame.firebasestorage.app",
+  messagingSenderId: "745003978989",
+  appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+  measurementId: "G-1T7CBFRP55"
+};
+
+window.cradleFirebase = {
+  app: initializeApp(firebaseConfig)
+};
+
+window.cradleFirebase.db = getFirestore(window.cradleFirebase.app);
+window.cradleFirebase.storage = getStorage(window.cradleFirebase.app);
+window.cradleFirebase.doc = doc;
+window.cradleFirebase.setDoc = setDoc;
+window.cradleFirebase.serverTimestamp = serverTimestamp;
+window.cradleFirebase.ref = ref;
+window.cradleFirebase.uploadBytes = uploadBytes;
+window.cradleFirebase.getDownloadURL = getDownloadURL;
+</script>
+
+<script>
+let video;
+let hands;
+let handResults = null;
+let started = false;
+let captureStarted = false;
+let hasCaptured = false;
+
+let particles = [];
+let trails = [];
+
+let captureStartTime = 0;
+const captureDuration = 10000;
+
+const fingerTips = [4, 8, 12, 16, 20];
+
+const texts = [
+  "a trace appears between gestures",
+  "memory moves through the hands",
+  "threads of presence",
+  "the body remembers",
+  "light connects what disappears",
+  "a temporary constellation",
+  "touch without touching",
+  "between movement and memory",
+  "the trace continues",
+  "something remains"
+];
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
+  background(1, 2, 4);
+
+  document.getElementById("enterButton").addEventListener("click", async () => {
+    document.getElementById("enterButton").style.display = "none";
+    await startExperience();
+    captureStarted = true;
+    captureStartTime = millis();
+    randomPoem();
+    setInterval(randomPoem, 12000);
+  });
+}
+
+async function startExperience() {
+  document.getElementById("status").innerText = "starting camera";
+
+  video = createCapture({
+    video: {
+      facingMode: "user",
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    },
+    audio: false
+  });
+
+  video.size(width, height);
+  video.elt.setAttribute("playsinline", true);
+  video.hide();
+
+  hands = new Hands({
+    locateFile: (file) =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 0,
+    minDetectionConfidence: 0.45,
+    minTrackingConfidence: 0.45
+  });
+
+  hands.onResults((results) => {
+    handResults = results;
+  });
+
+  started = true;
+  detectLoop();
+}
+
+async function detectLoop() {
+  if (started && video && video.elt && video.elt.readyState >= 2) {
+    try {
+      await hands.send({ image: video.elt });
+    } catch(e) {
+      console.error(e);
+    }
+  }
+  requestAnimationFrame(detectLoop);
+}
+
+function draw() {
+  fill(1, 2, 4, 12);
+  noStroke();
+  rect(0, 0, width, height);
+
+  drawVideoGhost();
+
+  if (
+    handResults &&
+    handResults.multiHandLandmarks &&
+    handResults.multiHandLandmarks.length > 0
+  ) {
+    const detectedHands = handResults.multiHandLandmarks;
+    document.getElementById("status").innerText = detectedHands.length + " hand(s)";
+    drawLandmarks(detectedHands);
+
+    if (detectedHands.length >= 2) {
+      drawCradle(detectedHands[0], detectedHands[1]);
+    }
+  } else if (started) {
+    document.getElementById("status").innerText = "looking for hands";
+  }
+
+  updateTrails();
+  updateParticles();
+  updateCountdown();
+  drawVignette();
+}
+
+function updateCountdown() {
+  if (!captureStarted || hasCaptured) return;
+
+  const elapsed = millis() - captureStartTime;
+  const remaining = max(0, ceil((captureDuration - elapsed) / 1000));
+
+  document.getElementById("countdown").innerText = remaining;
+
+  if (elapsed >= captureDuration) {
+    hasCaptured = true;
+    document.getElementById("countdown").innerText = "";
+    saveTrace();
+  }
+}
+
+function drawVideoGhost() {
+  if (!video) return;
+
+  push();
+  translate(width, 0);
+  scale(-1, 1);
+
+  drawingContext.filter = "blur(7px) contrast(0.85) brightness(1.15)";
+  tint(115, 70);
+  image(video, 0, 0, width, height);
+  drawingContext.filter = "none";
+
+  pop();
+
+  fill(0, 0, 18, 80);
+  noStroke();
+  rect(0, 0, width, height);
+}
+
+function toScreen(lm) {
+  return {
+    x: width - lm.x * width,
+    y: lm.y * height
+  };
+}
+
+function drawLandmarks(handsArray) {
+  for (const hand of handsArray) {
+    for (const lm of hand) {
+      const p = toScreen(lm);
+
+      drawingContext.shadowBlur = 20;
+      drawingContext.shadowColor = "cyan";
+
+      noStroke();
+      fill(0, 255, 255, 125);
+      circle(p.x, p.y, 5);
+
+      drawingContext.shadowBlur = 0;
+    }
+  }
+}
+
+function drawCradle(handA, handB) {
+  for (let i = 0; i < fingerTips.length; i++) {
+    const a = toScreen(handA[fingerTips[i]]);
+    const b = toScreen(handB[fingerTips[i]]);
+
+    const d = dist(a.x, a.y, b.x, b.y);
+    const glow = map(d, 0, width, 18, 80);
+    const thickness = map(d, 0, width, 1.5, 9);
+
+    drawNeonCurve(a.x, a.y, b.x, b.y, thickness, glow, i, 1);
+
+    trails.push({
+      x1: a.x,
+      y1: a.y,
+      x2: b.x,
+      y2: b.y,
+      alpha: 170,
+      hue: i,
+      drift: random(0.05, 0.28),
+      waveSeed: random(1000)
+    });
+
+    if (d < 60) {
+      createSpark((a.x + b.x) / 2, (a.y + b.y) / 2);
+    }
+  }
+}
+
+function drawNeonCurve(x1, y1, x2, y2, weight, glow, hueIndex, intensity) {
+  const ctx = drawingContext;
+
+  const colors = [
+    ["cyan", "magenta"],
+    ["magenta", "yellow"],
+    ["yellow", "cyan"],
+    ["cyan", "white"],
+    ["magenta", "cyan"]
+  ];
+
+  const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+  gradient.addColorStop(0, colors[hueIndex % colors.length][0]);
+  gradient.addColorStop(1, colors[hueIndex % colors.length][1]);
+
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  const wave = sin(frameCount * 0.03 + x1 * 0.01) * 22 * intensity;
+
+  ctx.save();
+  ctx.shadowBlur = glow;
+  ctx.shadowColor = colors[hueIndex % colors.length][0];
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = weight;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(midX, midY + wave, x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function updateTrails() {
+  for (let i = trails.length - 1; i >= 0; i--) {
+    const t = trails[i];
+
+    t.alpha -= 0.22;
+    t.y1 += t.drift;
+    t.y2 += t.drift;
+
+    if (t.alpha <= 0) {
+      trails.splice(i, 1);
+      continue;
+    }
+
+    const breath = 0.5 + 0.5 * sin(frameCount * 0.025 + t.waveSeed);
+    const a = t.alpha * (0.55 + breath * 0.45);
+
+    drawingContext.shadowBlur = 12 + breath * 24;
+    drawingContext.shadowColor = "rgba(180,240,255,0.8)";
+
+    noFill();
+    strokeWeight(1.1 + breath * 1.3);
+    stroke(180, 225, 255, a);
+
+    const midX = (t.x1 + t.x2) / 2;
+    const midY = (t.y1 + t.y2) / 2;
+    const wave = sin(frameCount * 0.018 + t.waveSeed) * 18;
+
+    beginShape();
+    vertex(t.x1, t.y1);
+    quadraticVertex(midX, midY + wave, t.x2, t.y2);
+    endShape();
+
+    drawingContext.shadowBlur = 0;
+  }
+}
+
+function createSpark(x, y) {
+  if (particles.length > 220) return;
+
+  for (let i = 0; i < 4; i++) {
+    particles.push({
+      x,
+      y,
+      vx: random(-2.5, 2.5),
+      vy: random(-2.5, 2.5),
+      life: 48,
+      size: random(2, 5)
+    });
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vx *= 0.96;
+    p.vy *= 0.96;
+    p.life--;
+
+    const alpha = map(p.life, 0, 48, 0, 190);
+
+    drawingContext.shadowBlur = 22;
+    drawingContext.shadowColor = "white";
+
+    noStroke();
+    fill(255, 240, 180, alpha);
+    circle(p.x, p.y, p.size);
+
+    drawingContext.shadowBlur = 0;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+    }
+  }
+}
+
+async function saveTrace() {
+  document.getElementById("status").innerText = "saving trace";
+
+  try {
+    const slug = createSlug();
+    const imageBlob = await canvasToBlob();
+    const imagePath = `cradle/${slug}.png`;
+
+    const {
+      storage,
+      db,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+      doc,
+      setDoc,
+      serverTimestamp
+    } = window.cradleFirebase;
+
+    const imageRef = ref(storage, imagePath);
+    await uploadBytes(imageRef, imageBlob, { contentType: "image/png" });
+    const imageUrl = await getDownloadURL(imageRef);
+
+    const qrUrl = `${window.location.origin}/cradle/trace.html?id=${slug}`;
+    const qrDataUrl = await createQrDataUrl(qrUrl);
+
+    await setDoc(doc(db, "cradle_traces", slug), {
+      slug,
+      imageUrl,
+      imagePath,
+      qrUrl,
+      qrDataUrl,
+      createdAt: serverTimestamp(),
+      localCreatedAt: new Date().toISOString(),
+      project: "The Cradle Traces — Anonymous Gesture Archive",
+      collectionLabel: "The Cradle Traces — Anonymous Gesture Archive",
+      visibility: "public",
+      archived: false,
+      captureDurationSeconds: 10,
+      canvasWidth: width,
+      canvasHeight: height,
+      metadata: {
+        userAgent: navigator.userAgent,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null
+      }
+    });
+
+    document.getElementById("status").innerText = "saved";
+
+    document.getElementById("qrImage").src = qrDataUrl;
+    document.getElementById("traceLink").href = qrUrl;
+    document.getElementById("result").style.display = "flex";
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("status").innerText = "save failed";
+  }
+}
+
+function canvasToBlob() {
+  return new Promise((resolve, reject) => {
+    const c = document.querySelector("canvas");
+    c.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Canvas export failed"));
+    }, "image/png", 0.92);
+  });
+}
+
+function createQrDataUrl(url) {
+  return new Promise((resolve) => {
+    const holder = document.getElementById("qrHidden");
+    holder.innerHTML = "";
+
+    new QRCode(holder, {
+      text: url,
+      width: 512,
+      height: 512,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+      const canvas = holder.querySelector("canvas");
+      const img = holder.querySelector("img");
+
+      if (canvas) resolve(canvas.toDataURL("image/png"));
+      else if (img) resolve(img.src);
+      else resolve("");
+    }, 250);
+  });
+}
+
+function createSlug() {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let s = "trace-";
+  for (let i = 0; i < 8; i++) {
+    s += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return s;
+}
+
+function drawVignette() {
+  noFill();
+  for (let i = 0; i < 80; i++) {
+    stroke(0, 0, 0, i * 2);
+    rect(i, i, width - i * 2, height - i * 2);
+  }
+}
+
+function randomPoem() {
+  const poem = document.getElementById("poem");
+  poem.style.opacity = 0;
+
+  setTimeout(() => {
+    poem.innerText = random(texts);
+    poem.style.opacity = 1;
+  }, 1000);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+</script>
+
+</body>
+</html>
