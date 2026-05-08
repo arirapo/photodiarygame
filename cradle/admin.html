@@ -6,41 +6,72 @@
 <title>Cradle Admin</title>
 
 <style>
-body {
+html, body {
   margin: 0;
+  padding: 0;
   background: #010204;
   color: white;
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 header {
-  padding: 16px;
   position: sticky;
   top: 0;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  padding: 14px;
+
   background: rgba(1,2,4,0.92);
-  z-index: 10;
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 button {
   background: #111827;
   color: white;
-  border: 1px solid rgba(255,255,255,0.25);
+
+  border: 1px solid rgba(255,255,255,0.18);
+
   border-radius: 999px;
-  padding: 8px 14px;
-  margin: 4px;
+
+  padding: 10px 16px;
+
+  font-size: 13px;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+button.delete {
+  border-color: rgba(255,80,80,0.45);
+  color: #ff9a9a;
+}
+
+#status {
+  opacity: 0.65;
+  font-size: 13px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 10px;
+
   padding: 10px;
 }
 
 .card {
   background: #080b12;
+
   border: 1px solid rgba(255,255,255,0.08);
-  padding: 8px;
+
+  overflow: hidden;
 }
 
 .card img {
@@ -50,16 +81,21 @@ button {
   display: block;
 }
 
+.meta {
+  padding: 10px;
+}
+
 .slug {
   font-size: 11px;
-  opacity: 0.55;
-  margin: 8px 0;
+  opacity: 0.5;
+  margin-bottom: 10px;
   word-break: break-all;
 }
 
-.delete {
-  border-color: rgba(255,80,80,0.6);
-  color: #ff9a9a;
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 </style>
 </head>
@@ -69,17 +105,20 @@ button {
 <header>
   <button id="loginBtn">Login with Google</button>
   <button id="logoutBtn">Logout</button>
-  <span id="status">not logged in</span>
+  <div id="status">not logged in</div>
 </header>
 
 <div id="grid" class="grid"></div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
@@ -109,102 +148,202 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
 const db = getFirestore(app);
+
 const storage = getStorage(app);
 
 const grid = document.getElementById("grid");
+
 const statusEl = document.getElementById("status");
 
-document.getElementById("loginBtn").onclick = async () => {
-  const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
-};
+document.getElementById("loginBtn")
+.addEventListener("click", async () => {
 
-document.getElementById("logoutBtn").onclick = async () => {
+  const provider =
+    new GoogleAuthProvider();
+
+  await signInWithRedirect(
+    auth,
+    provider
+  );
+});
+
+document.getElementById("logoutBtn")
+.addEventListener("click", async () => {
+
   await signOut(auth);
-};
+});
+
+getRedirectResult(auth)
+.catch((error) => {
+
+  console.error(error);
+
+  statusEl.innerText =
+    "login failed";
+});
 
 onAuthStateChanged(auth, async (user) => {
+
   grid.innerHTML = "";
 
   if (!user) {
-    statusEl.innerText = "not logged in";
+
+    statusEl.innerText =
+      "not logged in";
+
     return;
   }
 
-  statusEl.innerText = "logged in: " + user.email;
+  statusEl.innerText =
+    "logged in: " + user.email;
+
   await loadTraces();
 });
 
 async function loadTraces() {
+
   grid.innerHTML = "";
 
-  const snap = await getDocs(collection(db, "cradle_traces"));
+  const snap =
+    await getDocs(
+      collection(db, "cradle_traces")
+    );
 
   const traces = [];
 
   snap.forEach((d) => {
+
     traces.push({
       id: d.id,
       ...d.data()
     });
   });
 
-  traces.sort((a, b) => {
-    return (b.localCreatedAt || "").localeCompare(a.localCreatedAt || "");
+  traces.sort((a,b) => {
+
+    return (
+      b.localCreatedAt || ""
+    ).localeCompare(
+      a.localCreatedAt || ""
+    );
   });
 
   traces.forEach((trace) => {
-    const card = document.createElement("div");
+
+    const card =
+      document.createElement("div");
+
     card.className = "card";
 
-    const img = document.createElement("img");
+    const img =
+      document.createElement("img");
+
     img.src = trace.imageUrl;
 
-    const slug = document.createElement("div");
-    slug.className = "slug";
-    slug.innerText = trace.slug || trace.id;
+    const meta =
+      document.createElement("div");
 
-    const openBtn = document.createElement("button");
+    meta.className = "meta";
+
+    const slug =
+      document.createElement("div");
+
+    slug.className = "slug";
+
+    slug.innerText =
+      trace.slug || trace.id;
+
+    const actions =
+      document.createElement("div");
+
+    actions.className = "actions";
+
+    const openBtn =
+      document.createElement("button");
+
     openBtn.innerText = "Open";
+
     openBtn.onclick = () => {
-      window.open(`trace.html?id=${trace.slug}`, "_blank");
+
+      window.open(
+        `trace.html?id=${trace.slug}`,
+        "_blank"
+      );
     };
 
-    const delBtn = document.createElement("button");
+    const delBtn =
+      document.createElement("button");
+
     delBtn.className = "delete";
+
     delBtn.innerText = "Delete";
+
     delBtn.onclick = async () => {
-      const ok = confirm("Delete this trace permanently?");
+
+      const ok =
+        confirm(
+          "Delete this trace permanently?"
+        );
+
       if (!ok) return;
 
       await deleteTrace(trace);
+
       card.remove();
     };
 
+    actions.appendChild(openBtn);
+
+    actions.appendChild(delBtn);
+
+    meta.appendChild(slug);
+
+    meta.appendChild(actions);
+
     card.appendChild(img);
-    card.appendChild(slug);
-    card.appendChild(openBtn);
-    card.appendChild(delBtn);
+
+    card.appendChild(meta);
 
     grid.appendChild(card);
   });
 }
 
 async function deleteTrace(trace) {
+
   try {
+
     if (trace.imagePath) {
-      await deleteObject(ref(storage, trace.imagePath));
+
+      await deleteObject(
+        ref(
+          storage,
+          trace.imagePath
+        )
+      );
     }
 
-    await deleteDoc(doc(db, "cradle_traces", trace.slug || trace.id));
+    await deleteDoc(
+      doc(
+        db,
+        "cradle_traces",
+        trace.slug || trace.id
+      )
+    );
 
   } catch (err) {
+
     console.error(err);
-    alert("Delete failed. Check Firebase rules / admin rights.");
+
+    alert(
+      "Delete failed. Check Firebase rules / admin rights."
+    );
   }
 }
+
 </script>
 
 </body>
