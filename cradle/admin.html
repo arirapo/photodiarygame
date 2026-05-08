@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cradle Admin</title>
+
+<style>
+body {
+  margin: 0;
+  background: #010204;
+  color: white;
+  font-family: system-ui, sans-serif;
+}
+
+header {
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  background: rgba(1,2,4,0.92);
+  z-index: 10;
+}
+
+button {
+  background: #111827;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  padding: 8px 14px;
+  margin: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.card {
+  background: #080b12;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 8px;
+}
+
+.card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.slug {
+  font-size: 11px;
+  opacity: 0.55;
+  margin: 8px 0;
+  word-break: break-all;
+}
+
+.delete {
+  border-color: rgba(255,80,80,0.6);
+  color: #ff9a9a;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button id="loginBtn">Login with Google</button>
+  <button id="logoutBtn">Logout</button>
+  <span id="status">not logged in</span>
+</header>
+
+<div id="grid" class="grid"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+import {
+  getStorage,
+  ref,
+  deleteObject
+} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+  authDomain: "photodiarygame.firebaseapp.com",
+  projectId: "photodiarygame",
+  storageBucket: "photodiarygame.firebasestorage.app",
+  messagingSenderId: "745003978989",
+  appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+  measurementId: "G-1T7CBFRP55"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const grid = document.getElementById("grid");
+const statusEl = document.getElementById("status");
+
+document.getElementById("loginBtn").onclick = async () => {
+  const provider = new GoogleAuthProvider();
+  await signInWithPopup(auth, provider);
+};
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async (user) => {
+  grid.innerHTML = "";
+
+  if (!user) {
+    statusEl.innerText = "not logged in";
+    return;
+  }
+
+  statusEl.innerText = "logged in: " + user.email;
+  await loadTraces();
+});
+
+async function loadTraces() {
+  grid.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "cradle_traces"));
+
+  const traces = [];
+
+  snap.forEach((d) => {
+    traces.push({
+      id: d.id,
+      ...d.data()
+    });
+  });
+
+  traces.sort((a, b) => {
+    return (b.localCreatedAt || "").localeCompare(a.localCreatedAt || "");
+  });
+
+  traces.forEach((trace) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const img = document.createElement("img");
+    img.src = trace.imageUrl;
+
+    const slug = document.createElement("div");
+    slug.className = "slug";
+    slug.innerText = trace.slug || trace.id;
+
+    const openBtn = document.createElement("button");
+    openBtn.innerText = "Open";
+    openBtn.onclick = () => {
+      window.open(`trace.html?id=${trace.slug}`, "_blank");
+    };
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "delete";
+    delBtn.innerText = "Delete";
+    delBtn.onclick = async () => {
+      const ok = confirm("Delete this trace permanently?");
+      if (!ok) return;
+
+      await deleteTrace(trace);
+      card.remove();
+    };
+
+    card.appendChild(img);
+    card.appendChild(slug);
+    card.appendChild(openBtn);
+    card.appendChild(delBtn);
+
+    grid.appendChild(card);
+  });
+}
+
+async function deleteTrace(trace) {
+  try {
+    if (trace.imagePath) {
+      await deleteObject(ref(storage, trace.imagePath));
+    }
+
+    await deleteDoc(doc(db, "cradle_traces", trace.slug || trace.id));
+
+  } catch (err) {
+    console.error(err);
+    alert("Delete failed. Check Firebase rules / admin rights.");
+  }
+}
+</script>
+
+</body>
+</html>
