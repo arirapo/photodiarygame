@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Cradle Trace</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #010204;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#trace {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  opacity: 0;
+  animation: breathe 18s ease-in-out infinite;
+  transition: opacity 3s ease;
+}
+
+#slug {
+  position: fixed;
+  left: 16px;
+  bottom: 14px;
+  color: rgba(255,255,255,0.22);
+  font: 11px system-ui, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  z-index: 5;
+}
+
+#status {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.35);
+  font: 13px system-ui, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#soundButton {
+  position: fixed;
+  right: 16px;
+  bottom: 14px;
+  z-index: 10;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.38);
+  border-radius: 999px;
+  padding: 8px 13px;
+  font: 11px system-ui, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.025),
+    rgba(255,255,255,0.025) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.22;
+}
+
+.vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  background: radial-gradient(
+    circle at center,
+    transparent 42%,
+    rgba(0,0,0,0.35) 72%,
+    rgba(0,0,0,0.82) 100%
+  );
+}
+
+@keyframes breathe {
+  0%   { transform: scale(1.00); filter: brightness(0.9) contrast(1.02); }
+  50%  { transform: scale(1.045); filter: brightness(1.05) contrast(1.08); }
+  100% { transform: scale(1.00); filter: brightness(0.9) contrast(1.02); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="status">loading trace</div>
+<img id="trace" alt="">
+<div id="slug"></div>
+<button id="soundButton">sound</button>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+
+<audio id="ambient" loop preload="auto">
+  <!-- Vaihda tähän myöhemmin oma ambient-ääni -->
+  <source src="ambient.mp3" type="audio/mpeg">
+</audio>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+  authDomain: "photodiarygame.firebaseapp.com",
+  projectId: "photodiarygame",
+  storageBucket: "photodiarygame.firebasestorage.app",
+  messagingSenderId: "745003978989",
+  appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+  measurementId: "G-1T7CBFRP55"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const slug = params.get("id");
+
+const traceImg = document.getElementById("trace");
+const status = document.getElementById("status");
+const slugEl = document.getElementById("slug");
+
+async function loadTrace() {
+  if (!slug) {
+    status.innerText = "no trace";
+    return;
+  }
+
+  slugEl.innerText = slug;
+
+  try {
+    const ref = doc(db, "cradle_traces", slug);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      status.innerText = "trace not found";
+      return;
+    }
+
+    const data = snap.data();
+
+    traceImg.onload = () => {
+      status.style.display = "none";
+      traceImg.style.opacity = "1";
+    };
+
+    traceImg.src = data.imageUrl;
+
+  } catch (err) {
+    console.error(err);
+    status.innerText = "load failed";
+  }
+}
+
+loadTrace();
+
+const soundButton = document.getElementById("soundButton");
+const ambient = document.getElementById("ambient");
+
+soundButton.addEventListener("click", async () => {
+  try {
+    if (ambient.paused) {
+      ambient.volume = 0.35;
+      await ambient.play();
+      soundButton.innerText = "mute";
+    } else {
+      ambient.pause();
+      soundButton.innerText = "sound";
+    }
+  } catch (e) {
+    console.error(e);
+  }
+});
+</script>
+
+</body>
+</html>
