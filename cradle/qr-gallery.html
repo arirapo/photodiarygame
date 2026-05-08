@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Cradle Traces — QR Grid</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  overflow-x: hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0;
+  width: 100vw;
+}
+
+.item {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: white;
+}
+
+.item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+</style>
+</head>
+
+<body>
+
+<div id="grid" class="grid"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+  authDomain: "photodiarygame.firebaseapp.com",
+  projectId: "photodiarygame",
+  storageBucket: "photodiarygame.firebasestorage.app",
+  messagingSenderId: "745003978989",
+  appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+  measurementId: "G-1T7CBFRP55"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const grid = document.getElementById("grid");
+
+async function loadQrGallery() {
+  const snapshot = await getDocs(collection(db, "cradle_traces"));
+
+  const traces = [];
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.qrDataUrl) traces.push(data);
+  });
+
+  traces.sort((a, b) => {
+    return (a.localCreatedAt || "").localeCompare(b.localCreatedAt || "");
+  });
+
+  traces.forEach((data) => {
+    const item = document.createElement("a");
+    item.className = "item";
+    item.href = `trace.html?id=${data.slug || ""}`;
+
+    const img = document.createElement("img");
+    img.src = data.qrDataUrl;
+    img.alt = "";
+
+    item.appendChild(img);
+    grid.appendChild(item);
+  });
+}
+
+loadQrGallery();
+</script>
+
+</body>
+</html>
