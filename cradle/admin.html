@@ -18,32 +18,22 @@ header {
   position: sticky;
   top: 0;
   z-index: 20;
-
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-
   padding: 14px;
-
   background: rgba(1,2,4,0.92);
-  backdrop-filter: blur(12px);
-
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 button {
   background: #111827;
   color: white;
-
   border: 1px solid rgba(255,255,255,0.18);
-
   border-radius: 999px;
-
   padding: 10px 16px;
-
   font-size: 13px;
-
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -64,15 +54,12 @@ button.delete {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 10px;
-
   padding: 10px;
 }
 
 .card {
   background: #080b12;
-
   border: 1px solid rgba(255,255,255,0.08);
-
   overflow: hidden;
 }
 
@@ -113,14 +100,12 @@ button.delete {
 <div id="grid" class="grid"></div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
 
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
@@ -141,7 +126,7 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
-  authDomain: "photodiarygame.firebaseapp.com"",
+  authDomain: "photodiarygame.firebaseapp.com",
   projectId: "photodiarygame",
   storageBucket: "photodiarygame.firebasestorage.app",
   messagingSenderId: "745003978989",
@@ -150,270 +135,152 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
-
 const storage = getStorage(app);
 
-const grid =
-  document.getElementById("grid");
+const grid = document.getElementById("grid");
+const statusEl = document.getElementById("status");
 
-const statusEl =
-  document.getElementById("status");
-
-document.getElementById("loginBtn")
-.addEventListener("click", async () => {
-
+document.getElementById("loginBtn").addEventListener("click", async () => {
   try {
+    statusEl.innerText = "opening google login...";
 
-    statusEl.innerText =
-      "redirecting to google login...";
+    const provider = new GoogleAuthProvider();
 
-    const provider =
-      new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
 
-    await signInWithRedirect(
-      auth,
-      provider
-    );
+    statusEl.innerText = "logged in:\n" + result.user.email;
 
   } catch (err) {
-
     console.error(err);
 
     statusEl.innerText =
-      "login button error:\n" +
-      err.code + "\n\n" +
-      err.message;
+      "popup login failed:\n\n" +
+      (err.code || "no-code") + "\n\n" +
+      (err.message || err);
   }
 });
 
-document.getElementById("logoutBtn")
-.addEventListener("click", async () => {
-
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   try {
-
     await signOut(auth);
-
-    statusEl.innerText =
-      "logged out";
-
+    grid.innerHTML = "";
+    statusEl.innerText = "logged out";
   } catch (err) {
-
     console.error(err);
-
     statusEl.innerText =
-      "logout failed:\n" +
-      err.code + "\n\n" +
-      err.message;
+      "logout failed:\n\n" +
+      (err.code || "no-code") + "\n\n" +
+      (err.message || err);
   }
 });
 
-getRedirectResult(auth)
-
-.then((result) => {
-
-  if (
-    result &&
-    result.user
-  ) {
-
-    statusEl.innerText =
-      "redirect login ok:\n" +
-      result.user.email;
-  }
-})
-
-.catch((error) => {
-
-  console.error(error);
-
-  statusEl.innerText =
-    "redirect login failed:\n\n" +
-    error.code + "\n\n" +
-    error.message;
-});
-
-onAuthStateChanged(
-  auth,
-  async (user) => {
-
+onAuthStateChanged(auth, async (user) => {
   grid.innerHTML = "";
 
   if (!user) {
-
-    statusEl.innerText =
-      "not logged in";
-
+    statusEl.innerText = "not logged in";
     return;
   }
 
-  statusEl.innerText =
-    "logged in:\n" +
-    user.email;
-
+  statusEl.innerText = "logged in:\n" + user.email;
   await loadTraces();
 });
 
 async function loadTraces() {
-
   grid.innerHTML = "";
 
   try {
-
-    const snap =
-      await getDocs(
-        collection(
-          db,
-          "cradle_traces"
-        )
-      );
+    const snap = await getDocs(collection(db, "cradle_traces"));
 
     const traces = [];
 
     snap.forEach((d) => {
-
       traces.push({
         id: d.id,
         ...d.data()
       });
     });
 
-    traces.sort((a,b) => {
-
-      return (
-        b.localCreatedAt || ""
-      ).localeCompare(
-        a.localCreatedAt || ""
-      );
+    traces.sort((a, b) => {
+      return (b.localCreatedAt || "").localeCompare(a.localCreatedAt || "");
     });
 
     traces.forEach((trace) => {
-
-      const card =
-        document.createElement("div");
-
+      const card = document.createElement("div");
       card.className = "card";
 
-      const img =
-        document.createElement("img");
-
+      const img = document.createElement("img");
       img.src = trace.imageUrl;
 
-      const meta =
-        document.createElement("div");
-
+      const meta = document.createElement("div");
       meta.className = "meta";
 
-      const slug =
-        document.createElement("div");
-
+      const slug = document.createElement("div");
       slug.className = "slug";
+      slug.innerText = trace.slug || trace.id;
 
-      slug.innerText =
-        trace.slug || trace.id;
-
-      const actions =
-        document.createElement("div");
-
+      const actions = document.createElement("div");
       actions.className = "actions";
 
-      const openBtn =
-        document.createElement("button");
-
+      const openBtn = document.createElement("button");
       openBtn.innerText = "Open";
-
       openBtn.onclick = () => {
-
-        window.open(
-          `trace.html?id=${trace.slug}`,
-          "_blank"
-        );
+        window.open(`trace.html?id=${trace.slug || trace.id}`, "_blank");
       };
 
-      const delBtn =
-        document.createElement("button");
-
+      const delBtn = document.createElement("button");
       delBtn.className = "delete";
-
       delBtn.innerText = "Delete";
-
       delBtn.onclick = async () => {
-
-        const ok =
-          confirm(
-            "Delete this trace permanently?"
-          );
-
+        const ok = confirm("Delete this trace permanently?");
         if (!ok) return;
 
         await deleteTrace(trace);
-
         card.remove();
       };
 
       actions.appendChild(openBtn);
-
       actions.appendChild(delBtn);
 
       meta.appendChild(slug);
-
       meta.appendChild(actions);
 
       card.appendChild(img);
-
       card.appendChild(meta);
 
       grid.appendChild(card);
     });
 
   } catch (err) {
-
     console.error(err);
 
     statusEl.innerText =
       "load failed:\n\n" +
-      err.code + "\n\n" +
-      err.message;
+      (err.code || "no-code") + "\n\n" +
+      (err.message || err);
   }
 }
 
 async function deleteTrace(trace) {
-
   try {
-
     if (trace.imagePath) {
-
-      await deleteObject(
-        ref(
-          storage,
-          trace.imagePath
-        )
-      );
+      await deleteObject(ref(storage, trace.imagePath));
     }
 
-    await deleteDoc(
-      doc(
-        db,
-        "cradle_traces",
-        trace.slug || trace.id
-      )
-    );
+    await deleteDoc(doc(db, "cradle_traces", trace.slug || trace.id));
 
   } catch (err) {
-
     console.error(err);
 
     alert(
       "Delete failed:\n\n" +
-      err.code + "\n\n" +
-      err.message
+      (err.code || "no-code") + "\n\n" +
+      (err.message || err)
     );
   }
 }
-
 </script>
 
 </body>
