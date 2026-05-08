@@ -13,6 +13,17 @@ html, body {
   overflow-x: hidden;
 }
 
+#status {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 10;
+  color: rgba(255,255,255,0.45);
+  font: 12px system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -38,15 +49,13 @@ html, body {
 <body>
 
 <div id="grid" class="grid"></div>
+<div id="status">loading</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
 import {
   getFirestore,
   collection,
-  query,
-  where,
-  orderBy,
   getDocs
 } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
@@ -64,35 +73,46 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const grid = document.getElementById("grid");
+const status = document.getElementById("status");
 
 async function loadGallery() {
-  const q = query(
-    collection(db, "cradle_traces"),
-    where("visibility", "==", "public"),
-    where("archived", "==", false),
-    orderBy("createdAt", "asc")
-  );
+  try {
+    const snapshot = await getDocs(collection(db, "cradle_traces"));
 
-  const snapshot = await getDocs(q);
+    const traces = [];
 
-  snapshot.forEach((doc) => {
-    const data = doc.data();
+    snapshot.forEach((doc) => {
+      const data = doc.data();
 
-    if (!data.imageUrl) return;
+      if (data.imageUrl) {
+        traces.push(data);
+      }
+    });
 
-    const item = document.createElement("a");
-    item.className = "item";
-    item.href = `trace.html?id=${data.slug}`;
-    item.setAttribute("aria-label", "Open trace");
+    traces.sort((a, b) => {
+      return (a.localCreatedAt || "").localeCompare(b.localCreatedAt || "");
+    });
 
-    const img = document.createElement("img");
-    img.src = data.imageUrl;
-    img.loading = "lazy";
-    img.alt = "";
+    status.innerText = traces.length + " trace(s)";
 
-    item.appendChild(img);
-    grid.appendChild(item);
-  });
+    traces.forEach((data) => {
+      const item = document.createElement("a");
+      item.className = "item";
+      item.href = `trace.html?id=${data.slug || ""}`;
+
+      const img = document.createElement("img");
+      img.src = data.imageUrl;
+      img.loading = "lazy";
+      img.alt = "";
+
+      item.appendChild(img);
+      grid.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error(err);
+    status.innerText = "load failed";
+  }
 }
 
 loadGallery();
