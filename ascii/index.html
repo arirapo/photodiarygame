@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kalevala Trace Terminal</title>
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #101018 0%, #020205 70%);
+    color: #d8f6ff;
+    font-family: "Courier New", monospace;
+    height: 100%;
+  }
+
+  .screen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .marquee {
+    position: absolute;
+    top: 42%;
+    left: 100%;
+    white-space: nowrap;
+    font-size: clamp(2rem, 7vw, 7rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e6faff;
+    text-shadow:
+      0 0 8px #9df,
+      0 0 22px #6cf,
+      0 0 44px #39f;
+    animation: moveText 18s linear infinite, flicker 2.6s infinite;
+  }
+
+  @keyframes moveText {
+    from { transform: translateX(0); }
+    to { transform: translateX(-150vw); }
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; filter: blur(0); }
+    12% { opacity: 0.45; }
+    18% { opacity: 0.9; }
+    31% { opacity: 0.2; filter: blur(2px); }
+    38% { opacity: 1; }
+    64% { opacity: 0.65; }
+    71% { opacity: 0.95; filter: blur(0); }
+  }
+
+  .figure {
+    position: absolute;
+    font-size: clamp(1rem, 3vw, 2.5rem);
+    color: #b7ffe2;
+    text-shadow:
+      0 0 6px #8ff,
+      0 0 18px #3ff;
+    opacity: 0.75;
+    animation:
+      drift 12s linear infinite,
+      blink 1.7s steps(2, start) infinite;
+    user-select: none;
+  }
+
+  @keyframes drift {
+    from { transform: translateX(110vw) translateY(0); }
+    to { transform: translateX(-20vw) translateY(var(--yshift)); }
+  }
+
+  @keyframes blink {
+    0%, 45% { opacity: 0.1; }
+    50%, 100% { opacity: 0.95; }
+  }
+
+  .noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.025),
+        rgba(255,255,255,0.025) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+    mix-blend-mode: screen;
+    opacity: 0.35;
+  }
+
+  .caption {
+    position: absolute;
+    bottom: 1.2rem;
+    left: 1.2rem;
+    font-size: 0.8rem;
+    color: rgba(220, 255, 255, 0.55);
+    letter-spacing: 0.12em;
+  }
+</style>
+</head>
+
+<body>
+<div class="screen">
+  <div id="text" class="marquee">loading trace...</div>
+  <div id="figures"></div>
+  <div class="noise"></div>
+  <div class="caption">local memory / kalevala fragment / raspberry trace</div>
+</div>
+
+<script>
+const kalevalaLines = [
+  "mieleni minun tekevi",
+  "aivoni ajattelevi",
+  "lähteäni laulamahan",
+  "saa'ani sanelemahan",
+  "sanat suussani sulavat",
+  "puhe'et putoelevat",
+  "kielelleni kerkiävät",
+  "hampahilleni hajoovat",
+  "vaka vanha väinämöinen",
+  "tietäjä iänikuinen",
+  "lauloi laulun mahtavan",
+  "meren sinisen selällä",
+  "ilman pitkän partahalla",
+  "yön ja päivän vaihtehessa",
+  "muisto kulkee varjoissa",
+  "jälki viipyy vedessä"
+];
+
+const asciiFigures = [
+  "(^_^)", "(o_o)", "(-_-)", "(>_<)", "(•_•)",
+  "<|°_°|>", "/\\_/\\", "(=^.^=)", "(* *)",
+  "[@_@]", "{...}", "<trace>", "/o\\", "\\o/",
+  "::::", "////", "\\\\\\\\", "~~~~", "++++",
+  "⟐", "※", "*", ".", ":: memory ::"
+];
+
+const textEl = document.getElementById("text");
+const figuresEl = document.getElementById("figures");
+
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function changeText() {
+  textEl.textContent = randomItem(kalevalaLines);
+  textEl.style.animation = "none";
+  void textEl.offsetWidth;
+  textEl.style.animation = "moveText 18s linear infinite, flicker 2.6s infinite";
+}
+
+function spawnFigure() {
+  const el = document.createElement("div");
+  el.className = "figure";
+  el.textContent = randomItem(asciiFigures);
+
+  el.style.top = Math.random() * 90 + "vh";
+  el.style.left = "100vw";
+  el.style.setProperty("--yshift", (Math.random() * 160 - 80) + "px");
+  el.style.animationDuration =
+    (8 + Math.random() * 18) + "s, " +
+    (0.5 + Math.random() * 2.5) + "s";
+
+  figuresEl.appendChild(el);
+
+  setTimeout(() => {
+    el.remove();
+  }, 26000);
+}
+
+changeText();
+setInterval(changeText, 9000);
+setInterval(spawnFigure, 500);
+
+for (let i = 0; i < 20; i++) {
+  setTimeout(spawnFigure, i * 200);
+}
+</script>
+</body>
+</html>
