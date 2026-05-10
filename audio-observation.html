@@ -193,10 +193,18 @@
         </div>
 
         <div class="actions">
+         <!--
+          
           <button id="adminSignInBtn" class="button soft" type="button">Sign in</button>
           <button id="adminSignOutBtn" class="button soft" type="button">Sign out</button>
+          -->
+
+          <button id="adminSignInBtn" class="button soft" type="button">Login with Google</button>
+<button id="adminSignOutBtn" class="button soft" type="button">Logout</button>
+
         </div>
 
+        
         <div class="small">
           Tallennus Firebaseen vaatii admin-kirjautumisen. Runon generointi ja paikallinen esikatselu toimivat ilman kirjautumista.
         </div>
@@ -261,13 +269,14 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signInWithEmailAndPassword,
-      signOut,
-      getIdTokenResult
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  getIdTokenResult
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -278,7 +287,8 @@
       appId: "1:745003978989:web:727489ba72b34d77af3ce4",
       measurementId: "G-1T7CBFRP55"
     };
-
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
@@ -370,8 +380,7 @@
     const poemOutput = document.querySelector("#poemOutput");
     const resultMeta = document.querySelector("#resultMeta");
 
-    const adminEmailInput = document.querySelector("#adminEmail");
-    const adminPasswordInput = document.querySelector("#adminPassword");
+
     const adminSignInBtn = document.querySelector("#adminSignInBtn");
     const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
     const adminAuthStatus = document.querySelector("#adminAuthStatus");
@@ -584,42 +593,29 @@
       setStatus("Poem generated.", "ok");
     });
 
-    adminSignInBtn.addEventListener("click", async () => {
-      const email = adminEmailInput.value.trim();
-      const password = adminPasswordInput.value;
+   adminSignInBtn.addEventListener("click", async () => {
+  adminSignInBtn.disabled = true;
+  setStatus("Signing in with Google...");
 
-      if (!email) {
-        setStatus("Enter admin email.", "warn");
-        return;
-      }
+  try {
+    await signInWithPopup(auth, provider);
 
-      if (!password) {
-        setStatus("Enter admin password.", "warn");
-        return;
-      }
+    const status = await getAdminStatus(true);
+    updateAdminUi(status);
 
-      adminSignInBtn.disabled = true;
-      setStatus("Signing in...");
+    if (!status.isAdmin) {
+      setStatus("Signed in, but this account is not admin.", "warn");
+      return;
+    }
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        const status = await getAdminStatus(true);
-        updateAdminUi(status);
-
-        if (!status.isAdmin) {
-          setStatus("Signed in, but this account is not admin.", "warn");
-          return;
-        }
-
-        adminPasswordInput.value = "";
-        setStatus("Admin sign-in successful.", "ok");
-      } catch (err) {
-        console.error(err);
-        setStatus(err?.message || "Sign-in failed.", "warn");
-      } finally {
-        adminSignInBtn.disabled = false;
-      }
-    });
+    setStatus("Admin sign-in successful.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus(err?.message || "Sign-in failed.", "warn");
+  } finally {
+    adminSignInBtn.disabled = false;
+  }
+});
 
     adminSignOutBtn.addEventListener("click", async () => {
       adminSignOutBtn.disabled = true;
