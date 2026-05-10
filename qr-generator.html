@@ -22,10 +22,9 @@
       <div class="section-title" id="adminTitle">Admin</div>
 
       <div class="stack" style="gap: 0.85rem;">
-        <div id="adminAuthStatus" class="small">
-          Not signed in.
-        </div>
+        <div id="adminAuthStatus" class="small">Not signed in.</div>
 
+        <!-- Vanha email/password-login jätetty talteen, mutta poistettu käytöstä.
         <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
           <div>
             <label class="label" for="adminEmail">Admin email</label>
@@ -49,10 +48,11 @@
             />
           </div>
         </div>
+        -->
 
         <div class="actions">
-          <button id="adminSignInBtn" class="button soft" type="button">Sign in</button>
-          <button id="adminSignOutBtn" class="button soft" type="button">Sign out</button>
+          <button id="adminSignInBtn" class="button soft" type="button">Login with Google</button>
+          <button id="adminSignOutBtn" class="button soft" type="button">Logout</button>
         </div>
 
         <div class="small">
@@ -127,7 +127,8 @@
         </div>
       </section>
     </section>
-  <script type="module" src="qr/qr-generator.js?v=6"></script>
-  
+  </main>
+
+  <script type="module" src="qr/qr-generator.js?v=7"></script>
 </body>
 </html>
