@@ -15,10 +15,13 @@ import {
 import {
   getAuth,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+console.log("qr-poem-generator Google login version loaded");
 
 const firebaseConfig = {
   apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -34,6 +37,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const state = {
   mode: "text",
@@ -62,9 +66,6 @@ const statusEl = document.querySelector("#status");
 const downloadBtn = document.querySelector("#downloadBtn");
 const poemOutput = document.querySelector("#poemOutput");
 
-// Admin UI
-const adminEmailInput = document.querySelector("#adminEmail");
-const adminPasswordInput = document.querySelector("#adminPassword");
 const adminSignInBtn = document.querySelector("#adminSignInBtn");
 const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
 const adminAuthStatus = document.querySelector("#adminAuthStatus");
@@ -157,14 +158,13 @@ function rgbToHsl(r, g, b) {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
 
-  let h, s;
+  let h;
   const l = (max + min) / 2;
 
   if (max === min) {
-    h = s = 0;
+    h = 0;
   } else {
     const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
     switch (max) {
       case r:
@@ -414,24 +414,12 @@ downloadBtn.addEventListener("click", () => {
 });
 
 adminSignInBtn.addEventListener("click", async () => {
-  const email = adminEmailInput.value.trim();
-  const password = adminPasswordInput.value;
-
-  if (!email) {
-    setStatus("Enter admin email.", "warn");
-    return;
-  }
-
-  if (!password) {
-    setStatus("Enter admin password.", "warn");
-    return;
-  }
-
   adminSignInBtn.disabled = true;
-  setStatus("Signing in...");
+  setStatus("Signing in with Google...");
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithPopup(auth, provider);
+
     const status = await getAdminStatus(true);
     updateAdminUi(status);
 
@@ -440,7 +428,6 @@ adminSignInBtn.addEventListener("click", async () => {
       return;
     }
 
-    adminPasswordInput.value = "";
     setStatus("Admin sign-in successful.", "ok");
   } catch (err) {
     console.error(err);
@@ -456,13 +443,14 @@ adminSignOutBtn.addEventListener("click", async () => {
 
   try {
     await signOut(auth);
-    adminPasswordInput.value = "";
+
     updateAdminUi({
       signedIn: false,
       isAdmin: false,
       email: null,
       uid: null
     });
+
     setStatus("Signed out.", "ok");
   } catch (err) {
     console.error(err);
