@@ -15,7 +15,8 @@ import {
 import {
   getAuth,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -36,6 +37,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const state = {
   mode: "text",
@@ -62,8 +64,6 @@ const statusEl = document.querySelector("#status");
 const meta = document.querySelector("#resultMeta");
 const downloadBtn = document.querySelector("#downloadBtn");
 
-const adminEmailInput = document.querySelector("#adminEmail");
-const adminPasswordInput = document.querySelector("#adminPassword");
 const adminSignInBtn = document.querySelector("#adminSignInBtn");
 const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
 const adminAuthStatus = document.querySelector("#adminAuthStatus");
@@ -71,8 +71,7 @@ const adminAuthStatus = document.querySelector("#adminAuthStatus");
 if (
   !textInput || !urlInput || !imageInput || !previewWrap || !previewImg ||
   !createBtn || !canvas || !statusEl || !meta || !downloadBtn ||
-  !adminEmailInput || !adminPasswordInput || !adminSignInBtn ||
-  !adminSignOutBtn || !adminAuthStatus
+  !adminSignInBtn || !adminSignOutBtn || !adminAuthStatus
 ) {
   throw new Error("qr-generator.js: HTML element missing.");
 }
@@ -223,24 +222,12 @@ downloadBtn.addEventListener("click", () => {
 });
 
 adminSignInBtn.addEventListener("click", async () => {
-  const email = adminEmailInput.value.trim();
-  const password = adminPasswordInput.value;
-
-  if (!email) {
-    setStatus("Enter admin email.", "warn");
-    return;
-  }
-
-  if (!password) {
-    setStatus("Enter admin password.", "warn");
-    return;
-  }
-
   adminSignInBtn.disabled = true;
-  setStatus("Signing in...");
+  setStatus("Signing in with Google...");
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithPopup(auth, provider);
+
     const status = await getAdminStatus(true);
     updateAdminUi(status);
 
@@ -249,7 +236,6 @@ adminSignInBtn.addEventListener("click", async () => {
       return;
     }
 
-    adminPasswordInput.value = "";
     setStatus("Admin sign-in successful.", "ok");
   } catch (err) {
     console.error(err);
@@ -265,13 +251,14 @@ adminSignOutBtn.addEventListener("click", async () => {
 
   try {
     await signOut(auth);
-    adminPasswordInput.value = "";
+
     updateAdminUi({
       signedIn: false,
       isAdmin: false,
       email: null,
       uid: null
     });
+
     setStatus("Signed out.", "ok");
   } catch (err) {
     console.error(err);
@@ -357,6 +344,7 @@ createBtn.addEventListener("click", async () => {
     await uploadBytes(qrRef, blob, {
       contentType: "image/png"
     });
+
     const qrUrl = await getDownloadURL(qrRef);
 
     await addDoc(collection(db, "qr_codes"), {
