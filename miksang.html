@@ -52,9 +52,10 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 import {
   getAuth,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
-  getIdTokenResult
+   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -71,6 +72,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const state = {
   step: 0,
@@ -247,10 +249,18 @@ function render(){
           <input id="adminEmail" class="input" type="email" autocomplete="username" placeholder="Admin email" />
           <input id="adminPassword" class="input" type="password" autocomplete="current-password" placeholder="Admin password" />
         </div>
+
+        <!--
         <div class="actions">
           <button class="button soft" id="adminSignInBtn">Sign in</button>
           <button class="button soft" id="adminSignOutBtn">Sign out</button>
         </div>
+        -->
+
+        <div class="actions">
+  <button class="button soft" id="adminSignInBtn">Login with Google</button>
+  <button class="button soft" id="adminSignOutBtn">Logout</button>
+</div>
         <div class="small">Tallennus Firebaseen vaatii admin-kirjautumisen. Runon generointi toimii ilman kirjautumista.</div>
       </section>
 
@@ -311,48 +321,49 @@ function bind(){
   const backBtn=document.querySelector("#backBtn");
   if(backBtn) backBtn.addEventListener("click",()=>{state.step=Math.max(0,state.step-1); render();});
 
-  const adminSignInBtn = document.querySelector("#adminSignInBtn");
-  if (adminSignInBtn) {
-    adminSignInBtn.addEventListener("click", async () => {
-      const emailInput = document.querySelector("#adminEmail");
-      const passwordInput = document.querySelector("#adminPassword");
-      const email = emailInput?.value.trim() || "";
-      const password = passwordInput?.value || "";
+const adminSignInBtn = document.querySelector("#adminSignInBtn");
 
-      if (!email) {
-        const status = document.querySelector("#captureStatus");
-        if (status) { status.textContent = "Enter admin email."; status.className = "status warn"; }
-        return;
-      }
+if (adminSignInBtn) {
+  adminSignInBtn.addEventListener("click", async () => {
+    const captureStatus = document.querySelector("#captureStatus");
 
-      if (!password) {
-        const status = document.querySelector("#captureStatus");
-        if (status) { status.textContent = "Enter admin password."; status.className = "status warn"; }
-        return;
-      }
+    adminSignInBtn.disabled = true;
 
-      adminSignInBtn.disabled = true;
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        const status = await getAdminStatus(true);
-        updateAdminUi(status);
+    if (captureStatus) {
+      captureStatus.textContent = "Signing in with Google...";
+      captureStatus.className = "status";
+    }
 
-        const captureStatus = document.querySelector("#captureStatus");
-        if (status.isAdmin) {
-          if (passwordInput) passwordInput.value = "";
-          if (captureStatus) { captureStatus.textContent = "Admin sign-in successful."; captureStatus.className = "status ok"; }
-        } else {
-          if (captureStatus) { captureStatus.textContent = "Signed in, but this account is not admin."; captureStatus.className = "status warn"; }
+    try {
+      await signInWithPopup(auth, provider);
+
+      const status = await getAdminStatus(true);
+      updateAdminUi(status);
+
+      if (status.isAdmin) {
+        if (captureStatus) {
+          captureStatus.textContent = "Admin sign-in successful.";
+          captureStatus.className = "status ok";
         }
-      } catch (err) {
-        console.error(err);
-        const captureStatus = document.querySelector("#captureStatus");
-        if (captureStatus) { captureStatus.textContent = err?.message || "Sign-in failed."; captureStatus.className = "status warn"; }
-      } finally {
-        adminSignInBtn.disabled = false;
+      } else {
+        if (captureStatus) {
+          captureStatus.textContent = "Signed in, but this account is not admin.";
+          captureStatus.className = "status warn";
+        }
       }
-    });
-  }
+    } catch (err) {
+      console.error(err);
+
+      if (captureStatus) {
+        captureStatus.textContent =
+          err?.message || "Sign-in failed.";
+        captureStatus.className = "status warn";
+      }
+    } finally {
+      adminSignInBtn.disabled = false;
+    }
+  });
+}
 
   const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
   if (adminSignOutBtn) {
@@ -360,8 +371,7 @@ function bind(){
       adminSignOutBtn.disabled = true;
       try {
         await signOut(auth);
-        const passwordInput = document.querySelector("#adminPassword");
-        if (passwordInput) passwordInput.value = "";
+        
         updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
 
         const captureStatus = document.querySelector("#captureStatus");
