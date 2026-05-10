@@ -107,8 +107,6 @@
     }
 
     input[type="text"],
-    input[type="email"],
-    input[type="password"],
     textarea,
     select {
       width: 100%;
@@ -316,15 +314,9 @@
       <h2>Admin</h2>
       <div id="adminAuthStatus" class="status">Not signed in.</div>
 
-      <label for="adminEmail">Admin email</label>
-      <input id="adminEmail" type="email" autocomplete="username" placeholder="admin@example.com" />
-
-      <label for="adminPassword">Admin password</label>
-      <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password" />
-
       <div class="btn-row">
-        <button id="adminSignInBtn" type="button">Sign in</button>
-        <button id="adminSignOutBtn" type="button">Sign out</button>
+        <button id="adminSignInBtn" type="button">Login with Google</button>
+        <button id="adminSignOutBtn" type="button">Logout</button>
       </div>
 
       <div class="status" id="statusBox">Kirjaudu adminina ennen muokkausta tai poistoa.</div>
@@ -420,7 +412,8 @@
     import {
       getAuth,
       onAuthStateChanged,
-      signInWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
       signOut,
       getIdTokenResult
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -439,6 +432,7 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
     const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     const searchInput = document.getElementById("searchInput");
     const publishedFilter = document.getElementById("publishedFilter");
@@ -467,8 +461,6 @@
     const statusBox = document.getElementById("statusBox");
 
     const adminAuthStatus = document.getElementById("adminAuthStatus");
-    const adminEmail = document.getElementById("adminEmail");
-    const adminPassword = document.getElementById("adminPassword");
     const adminSignInBtn = document.getElementById("adminSignInBtn");
     const adminSignOutBtn = document.getElementById("adminSignOutBtn");
 
@@ -789,24 +781,12 @@
     }
 
     adminSignInBtn.addEventListener("click", async () => {
-      const email = adminEmail.value.trim();
-      const password = adminPassword.value;
-
-      if (!email) {
-        setStatus("Enter admin email.", "error");
-        return;
-      }
-
-      if (!password) {
-        setStatus("Enter admin password.", "error");
-        return;
-      }
-
       adminSignInBtn.disabled = true;
-      setStatus("Signing in...");
+      setStatus("Signing in with Google...");
 
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithPopup(auth, provider);
+
         const status = await getAdminStatus(true);
         updateAdminUi(status);
 
@@ -815,7 +795,6 @@
           return;
         }
 
-        adminPassword.value = "";
         setStatus("Admin sign-in successful.", "ok");
       } catch (err) {
         console.error(err);
@@ -831,8 +810,14 @@
 
       try {
         await signOut(auth);
-        adminPassword.value = "";
-        updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+
+        updateAdminUi({
+          signedIn: false,
+          isAdmin: false,
+          email: null,
+          uid: null
+        });
+
         setStatus("Signed out.", "ok");
       } catch (err) {
         console.error(err);
@@ -864,7 +849,13 @@
     deleteBtn.addEventListener("click", deleteSelectedEntry);
 
     startListener();
-    updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
   </script>
 </body>
 </html>
