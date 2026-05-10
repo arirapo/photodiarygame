@@ -1,4 +1,4 @@
-import { db, storage } from "./firebase-config.js";
+import { db, storage, auth } from "./firebase-config.js";
 import {
   collection,
   addDoc,
@@ -12,6 +12,15 @@ import {
   uploadBytes,
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  getIdTokenResult
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+const provider = new GoogleAuthProvider();
 
 const GRID_SIZE = 12;
 const GRID_CELL_COUNT = GRID_SIZE * GRID_SIZE;
@@ -72,6 +81,10 @@ const uploadForm = document.getElementById("upload-form");
 const imageInput = document.getElementById("image-input");
 const wordInput = document.getElementById("word-input");
 
+const adminAuthStatus = document.getElementById("admin-auth-status");
+const adminSignInBtn = document.getElementById("admin-sign-in-btn");
+const adminSignOutBtn = document.getElementById("admin-sign-out-btn");
+
 let currentPrompt = prompts[0];
 
 function choosePrompt() {
@@ -104,6 +117,7 @@ function formatFileSize(bytes) {
 
 function handleFileSelection() {
   const file = imageInput.files && imageInput.files[0];
+
   if (!file) {
     statusText.textContent = "No image selected.";
     return;
@@ -308,16 +322,75 @@ async function loadGridField() {
   }
 }
 
+async function getAdminStatus(forceRefresh = false) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    return {
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    };
+  }
+
+  const tokenResult = await getIdTokenResult(user, forceRefresh);
+
+  return {
+    signedIn: true,
+    isAdmin: tokenResult?.claims?.admin === true,
+    email: user.email || null,
+    uid: user.uid
+  };
+}
+
+function updateAdminUi(status) {
+  if (!adminAuthStatus || !adminSignInBtn || !adminSignOutBtn) return;
+
+  if (!status?.signedIn) {
+    adminAuthStatus.textContent = "Not signed in.";
+    adminSignInBtn.disabled = false;
+    adminSignOutBtn.disabled = true;
+    return;
+  }
+
+  if (status.isAdmin) {
+    adminAuthStatus.textContent = `Signed in as admin: ${status.email || status.uid}`;
+  } else {
+    adminAuthStatus.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
+  }
+
+  adminSignInBtn.disabled = false;
+  adminSignOutBtn.disabled = false;
+}
+
+async function requireAdmin() {
+  const status = await getAdminStatus(true);
+
+  if (!status.signedIn) {
+    throw new Error("Please sign in as admin first.");
+  }
+
+  if (!status.isAdmin) {
+    throw new Error("This signed-in account does not have admin rights.");
+  }
+
+  return status;
+}
+
 async function handleSubmit(event) {
   event.preventDefault();
 
   const file = imageInput.files && imageInput.files[0];
+
   if (!file) {
     statusText.textContent = "Choose an image first.";
     return;
   }
 
   try {
+    await requireAdmin();
+
     statusText.textContent = "Preparing trace...";
 
     const { width, height, orientation } = await readImageDimensions(file);
@@ -359,13 +432,86 @@ async function handleSubmit(event) {
     await loadGridField();
   } catch (error) {
     console.error(error);
-    statusText.textContent = "Upload or Firestore write failed. Check rules.";
+    statusText.textContent = error?.message || "Upload or Firestore write failed.";
   }
 }
+
+adminSignInBtn?.addEventListener("click", async () => {
+  adminSignInBtn.disabled = true;
+  statusText.textContent = "Signing in with Google...";
+
+  try {
+    await signInWithPopup(auth, provider);
+
+    const status = await getAdminStatus(true);
+    updateAdminUi(status);
+
+    if (!status.isAdmin) {
+      statusText.textContent = "Signed in, but this account is not admin.";
+      return;
+    }
+
+    statusText.textContent = "Admin sign-in successful.";
+  } catch (error) {
+    console.error(error);
+    statusText.textContent = error?.message || "Sign-in failed.";
+  } finally {
+    adminSignInBtn.disabled = false;
+  }
+});
+
+adminSignOutBtn?.addEventListener("click", async () => {
+  adminSignOutBtn.disabled = true;
+  statusText.textContent = "Signing out...";
+
+  try {
+    await signOut(auth);
+
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+
+    statusText.textContent = "Signed out.";
+  } catch (error) {
+    console.error(error);
+    statusText.textContent = error?.message || "Sign-out failed.";
+  } finally {
+    adminSignOutBtn.disabled = false;
+  }
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+    return;
+  }
+
+  try {
+    const status = await getAdminStatus(false);
+    updateAdminUi(status);
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 window.addEventListener("DOMContentLoaded", async () => {
   choosePrompt();
   await loadGridField();
+
+  updateAdminUi({
+    signedIn: false,
+    isAdmin: false,
+    email: null,
+    uid: null
+  });
 });
 
 imageInput.addEventListener("change", handleFileSelection);
