@@ -21,20 +21,22 @@
     <section class="card stack" aria-labelledby="adminTitle">
       <div class="section-title" id="adminTitle">Admin</div>
 
-      <div class="stack" style="gap: 0.85rem;">
-        <div id="adminAuthStatus" class="small">Not signed in.</div>
+<section class="card stack" aria-labelledby="adminTitle">
+  <div class="section-title" id="adminTitle">Admin</div>
 
-        <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-          <div>
-            <label class="label" for="adminEmail">Admin email</label>
-            <input
-              id="adminEmail"
-              class="input"
-              type="email"
-              autocomplete="username"
-              placeholder="admin@example.com"
-            />
-          </div>
+  <div class="stack" style="gap: 0.85rem;">
+    <div id="adminAuthStatus" class="small">Not signed in.</div>
+
+    <div class="actions">
+      <button id="adminSignInBtn" class="button soft" type="button">Login with Google</button>
+      <button id="adminSignOutBtn" class="button soft" type="button">Logout</button>
+    </div>
+
+    <div class="small">
+      Vain admin-kirjautunut käyttäjä voi tallentaa uusia QR-runoja Firebaseen.
+    </div>
+  </div>
+</section>
 
           <div>
             <label class="label" for="adminPassword">Admin password</label>
@@ -120,6 +122,6 @@
     </section>
   </main>
 
-  <script type="module" src="src/qr-poem-generator.js?v=2"></script>
+  <script type="module" src="src/qr-poem-generator.js?v=3"></script>
 </body>
 </html>
