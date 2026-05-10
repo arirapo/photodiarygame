@@ -14,10 +14,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
 import {
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+const provider = new GoogleAuthProvider();
 
 const GRID_SIZE = 12;
 const GRID_CELL_COUNT = GRID_SIZE * GRID_SIZE;
@@ -67,7 +70,10 @@ const REGION_ZONES = {
   outer_shadow_right: { cols: [9, 11], rows: [6, 10] }
 };
 
-const gridField = document.getElementById("grid-field");
+const gridField =
+  document.getElementById("grid-field") ||
+  document.getElementById("mosaic-layer");
+
 const ghostLayer = document.getElementById("ghost-base-layer");
 const promptText = document.getElementById("prompt-text");
 const statusText = document.getElementById("status-text");
@@ -79,8 +85,6 @@ const imageInput = document.getElementById("image-input");
 const wordInput = document.getElementById("word-input");
 
 const adminAuthStatus = document.getElementById("admin-auth-status");
-const adminEmailInput = document.getElementById("admin-email");
-const adminPasswordInput = document.getElementById("admin-password");
 const adminSignInBtn = document.getElementById("admin-sign-in-btn");
 const adminSignOutBtn = document.getElementById("admin-sign-out-btn");
 
@@ -88,7 +92,7 @@ let currentPrompt = prompts[0];
 
 function choosePrompt() {
   currentPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-  promptText.textContent = currentPrompt;
+  if (promptText) promptText.textContent = currentPrompt;
 }
 
 function clamp(value, min, max) {
@@ -116,6 +120,7 @@ function formatFileSize(bytes) {
 
 function handleFileSelection() {
   const file = imageInput.files && imageInput.files[0];
+
   if (!file) {
     statusText.textContent = "No image selected.";
     return;
@@ -185,9 +190,10 @@ function computeGhostOpacity(totalActiveCount, usedRegionsCount) {
 
 function updateGhost(totalActiveCount, usedRegionsCount = 0) {
   const opacity = computeGhostOpacity(totalActiveCount, usedRegionsCount);
-  ghostLayer.style.opacity = opacity.toFixed(3);
-  ghostOpacityReadout.textContent = opacity.toFixed(2);
-  traceCount.textContent = String(totalActiveCount);
+
+  if (ghostLayer) ghostLayer.style.opacity = opacity.toFixed(3);
+  if (ghostOpacityReadout) ghostOpacityReadout.textContent = opacity.toFixed(2);
+  if (traceCount) traceCount.textContent = String(totalActiveCount);
 }
 
 function getAgeFade(index, total) {
@@ -268,6 +274,8 @@ function buildGridItems(liveImages) {
 }
 
 function renderGrid(items) {
+  if (!gridField) return;
+
   gridField.innerHTML = "";
 
   const surface = document.createElement("div");
@@ -280,7 +288,10 @@ function renderGrid(items) {
   });
 
   gridField.appendChild(surface);
-  gridCellsReadout.textContent = `${items.filter(Boolean).length} / ${items.length}`;
+
+  if (gridCellsReadout) {
+    gridCellsReadout.textContent = `${items.filter(Boolean).length} / ${items.length}`;
+  }
 }
 
 async function loadGridField() {
@@ -305,11 +316,10 @@ async function loadGridField() {
     renderGrid(items);
     updateGhost(allActive.length, usedRegions.size);
 
-    if (allActive.length > 0) {
-      statusText.textContent = `${allActive.length} live trace${allActive.length === 1 ? "" : "s"} in the field.`;
-    } else {
-      statusText.textContent = "No live traces yet. Demo grid still visible.";
-    }
+    statusText.textContent =
+      allActive.length > 0
+        ? `${allActive.length} live trace${allActive.length === 1 ? "" : "s"} in the field.`
+        : "No live traces yet. Demo grid still visible.";
   } catch (error) {
     console.error(error);
 
@@ -322,6 +332,7 @@ async function loadGridField() {
 
 async function getAdminStatus(forceRefresh = false) {
   const user = auth.currentUser;
+
   if (!user) {
     return {
       signedIn: false,
@@ -332,6 +343,7 @@ async function getAdminStatus(forceRefresh = false) {
   }
 
   const tokenResult = await getIdTokenResult(user, forceRefresh);
+
   return {
     signedIn: true,
     isAdmin: tokenResult?.claims?.admin === true,
@@ -362,12 +374,15 @@ function updateAdminUi(status) {
 
 async function requireAdmin() {
   const status = await getAdminStatus(true);
+
   if (!status.signedIn) {
     throw new Error("Please sign in as admin first.");
   }
+
   if (!status.isAdmin) {
     throw new Error("This signed-in account does not have admin rights.");
   }
+
   return status;
 }
 
@@ -375,6 +390,7 @@ async function handleSubmit(event) {
   event.preventDefault();
 
   const file = imageInput.files && imageInput.files[0];
+
   if (!file) {
     statusText.textContent = "Choose an image first.";
     return;
@@ -429,24 +445,12 @@ async function handleSubmit(event) {
 }
 
 adminSignInBtn?.addEventListener("click", async () => {
-  const email = adminEmailInput?.value.trim() || "";
-  const password = adminPasswordInput?.value || "";
-
-  if (!email) {
-    statusText.textContent = "Enter admin email.";
-    return;
-  }
-
-  if (!password) {
-    statusText.textContent = "Enter admin password.";
-    return;
-  }
-
   adminSignInBtn.disabled = true;
-  statusText.textContent = "Signing in...";
+  statusText.textContent = "Signing in with Google...";
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithPopup(auth, provider);
+
     const status = await getAdminStatus(true);
     updateAdminUi(status);
 
@@ -455,7 +459,6 @@ adminSignInBtn?.addEventListener("click", async () => {
       return;
     }
 
-    if (adminPasswordInput) adminPasswordInput.value = "";
     statusText.textContent = "Admin sign-in successful.";
   } catch (error) {
     console.error(error);
@@ -471,8 +474,14 @@ adminSignOutBtn?.addEventListener("click", async () => {
 
   try {
     await signOut(auth);
-    if (adminPasswordInput) adminPasswordInput.value = "";
-    updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
+
     statusText.textContent = "Signed out.";
   } catch (error) {
     console.error(error);
@@ -485,12 +494,23 @@ adminSignOutBtn?.addEventListener("click", async () => {
 window.addEventListener("DOMContentLoaded", async () => {
   choosePrompt();
   await loadGridField();
-  updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+
+  updateAdminUi({
+    signedIn: false,
+    isAdmin: false,
+    email: null,
+    uid: null
+  });
 });
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+    updateAdminUi({
+      signedIn: false,
+      isAdmin: false,
+      email: null,
+      uid: null
+    });
     return;
   }
 
@@ -502,5 +522,5 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-imageInput.addEventListener("change", handleFileSelection);
-uploadForm.addEventListener("submit", handleSubmit);
+imageInput?.addEventListener("change", handleFileSelection);
+uploadForm?.addEventListener("submit", handleSubmit);
