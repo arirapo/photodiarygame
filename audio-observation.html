@@ -11,14 +11,7 @@
       --soft:#efe7dc; --ok:#49684f; --warn:#9a5c3c; --radius:22px; --shadow:0 14px 40px rgba(45,38,31,.08);
     }
     *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      padding:0;
-      min-height:100%;
-      background:linear-gradient(180deg,var(--bg),#efe8de);
-      color:var(--ink);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    }
+    html,body{margin:0;padding:0;min-height:100%;background:linear-gradient(180deg,var(--bg),#efe8de);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     body{min-height:100vh}
     button,input{font:inherit}
     a{text-decoration:none;color:inherit}
@@ -31,129 +24,34 @@
     h1{font-size:clamp(2rem,6vw,4.4rem);line-height:.94;letter-spacing:-.045em;margin-bottom:14px}
     .lead{font-size:clamp(1rem,2vw,1.08rem);line-height:1.68;color:var(--muted);max-width:64ch}
     .layout{display:grid;gap:18px}
-    @media (min-width:920px){
-      .layout{grid-template-columns:1fr .92fr;align-items:start}
-    }
-    .card{
-      background:rgba(255,255,255,.56);
-      backdrop-filter:blur(10px);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px;
-    }
+    @media (min-width:920px){.layout{grid-template-columns:1fr .92fr;align-items:start}}
+    .card{background:rgba(255,255,255,.56);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
     .stack{display:grid;gap:16px}
     .section-title{font-size:1.08rem;letter-spacing:-.02em}
     .mode-tabs{display:flex;gap:10px;flex-wrap:wrap}
-    .mode-tab,.button{
-      appearance:none;
-      border:1px solid var(--line);
-      border-radius:999px;
-      min-height:46px;
-      padding:12px 18px;
-      cursor:pointer;
-      background:rgba(255,255,255,.58);
-      color:var(--ink);
-      transition:transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-    .mode-tab:hover,.button:hover{
-      transform:translateY(-1px);
-      background:white;
-    }
-    .mode-tab.active{
-      background:var(--ink);
-      color:white;
-      border-color:transparent;
-    }
-    .button.primary{
-      background:var(--ink);
-      color:white;
-      border-color:transparent;
-    }
+    .mode-tab,.button{appearance:none;border:1px solid var(--line);border-radius:999px;min-height:46px;padding:12px 18px;cursor:pointer;background:rgba(255,255,255,.58);color:var(--ink);transition:transform .12s ease, background .12s ease}
+    .mode-tab:hover,.button:hover{transform:translateY(-1px);background:white}
+    .mode-tab.active{background:var(--ink);color:white;border-color:transparent}
+    .button.primary{background:var(--ink);color:white;border-color:transparent}
     .button.soft{background:var(--soft)}
-    .button.danger{
-      background:#7f2f2f;
-      color:white;
-      border-color:transparent;
-    }
+    .button.danger{background:#7f2f2f;color:white;border-color:transparent}
     .hidden{display:none!important}
-    .input{
-      width:100%;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.52);
-      color:var(--ink);
-      padding:12px 14px;
-    }
+    .input{width:100%;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.52);color:var(--ink);padding:12px 14px}
     .status{font-size:.95rem;line-height:1.55;color:var(--muted)}
     .status.ok{color:var(--ok)}
     .status.warn{color:var(--warn)}
     .small{font-size:.9rem;color:var(--muted);line-height:1.55}
-    .player-wrap{
-      border-radius:20px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.48);
-      padding:16px;
-      min-height:120px;
-    }
+    .player-wrap{border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.48);padding:16px;min-height:120px}
     audio{width:100%}
-    .poem-block{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:rgba(255,255,255,.46);
-      padding:14px;
-    }
-    .poem-title{
-      font-size:.84rem;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--muted);
-      margin-bottom:10px;
-    }
-    .poem{
-      font-family:Georgia,"Times New Roman",serif;
-      font-size:1.08rem;
-      line-height:1.72;
-      white-space:pre-line;
-    }
-    .meta{
-      display:grid;
-      gap:8px;
-      color:var(--muted);
-      font-size:.94rem;
-      line-height:1.5;
-    }
-    .meta code{
-      background:rgba(255,255,255,.55);
-      padding:2px 6px;
-      border-radius:8px;
-    }
-    .record-box{
-      border:1px dashed rgba(47,42,36,.18);
-      border-radius:18px;
-      padding:16px;
-      background:rgba(255,255,255,.34);
-    }
-    .timer{
-      font-size:1.2rem;
-      font-weight:600;
-      letter-spacing:.02em;
-    }
-    .dot{
-      display:inline-block;
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:#c33;
-      margin-right:8px;
-      vertical-align:middle;
-    }
-    .actions{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .poem-block{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.46);padding:14px}
+    .poem-title{font-size:.84rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .poem{font-family:Georgia,"Times New Roman",serif;font-size:1.08rem;line-height:1.72;white-space:pre-line}
+    .meta{display:grid;gap:8px;color:var(--muted);font-size:.94rem;line-height:1.5}
+    .meta code{background:rgba(255,255,255,.55);padding:2px 6px;border-radius:8px}
+    .record-box{border:1px dashed rgba(47,42,36,.18);border-radius:18px;padding:16px;background:rgba(255,255,255,.34)}
+    .timer{font-size:1.2rem;font-weight:600;letter-spacing:.02em}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#c33;margin-right:8px;vertical-align:middle}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
   </style>
 </head>
 <body>
@@ -169,42 +67,12 @@
 
     <section class="card stack" aria-labelledby="adminTitle">
       <div class="section-title" id="adminTitle">Admin</div>
-
-      <div class="stack" style="gap: 0.85rem;">
+      <div class="stack" style="gap:0.85rem;">
         <div id="adminAuthStatus" class="small">Not signed in.</div>
-<!--
         <div class="actions">
-          <input
-            id="adminEmail"
-            class="input"
-            type="email"
-            autocomplete="username"
-            placeholder="Admin email"
-            style="max-width:320px;"
-          />
-          <input
-            id="adminPassword"
-            class="input"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Admin password"
-            style="max-width:320px;"
-          />
-        </div>
-
-        <div class="actions">
-         
-          
-          <button id="adminSignInBtn" class="button soft" type="button">Sign in</button>
-          <button id="adminSignOutBtn" class="button soft" type="button">Sign out</button>
-          -->
-
           <button id="adminSignInBtn" class="button soft" type="button">Login with Google</button>
-<button id="adminSignOutBtn" class="button soft" type="button">Logout</button>
-
+          <button id="adminSignOutBtn" class="button soft" type="button">Logout</button>
         </div>
-
-        
         <div class="small">
           Tallennus Firebaseen vaatii admin-kirjautumisen. Runon generointi ja paikallinen esikatselu toimivat ilman kirjautumista.
         </div>
@@ -269,14 +137,16 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  getIdTokenResult
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithPopup,
+      GoogleAuthProvider,
+      signOut,
+      getIdTokenResult
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    console.log("audio-observation Google login version loaded");
 
     const firebaseConfig = {
       apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -287,12 +157,12 @@ import {
       appId: "1:745003978989:web:727489ba72b34d77af3ce4",
       measurementId: "G-1T7CBFRP55"
     };
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
     const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     const bank = {
       opening: [
@@ -379,8 +249,6 @@ const provider = new GoogleAuthProvider();
     const audioPlaceholder = document.querySelector("#audioPlaceholder");
     const poemOutput = document.querySelector("#poemOutput");
     const resultMeta = document.querySelector("#resultMeta");
-
-
     const adminSignInBtn = document.querySelector("#adminSignInBtn");
     const adminSignOutBtn = document.querySelector("#adminSignOutBtn");
     const adminAuthStatus = document.querySelector("#adminAuthStatus");
@@ -467,12 +335,7 @@ const provider = new GoogleAuthProvider();
     async function getAdminStatus(forceRefresh = false) {
       const user = auth.currentUser;
       if (!user) {
-        return {
-          signedIn: false,
-          isAdmin: false,
-          email: null,
-          uid: null
-        };
+        return { signedIn: false, isAdmin: false, email: null, uid: null };
       }
 
       const tokenResult = await getIdTokenResult(user, forceRefresh);
@@ -504,16 +367,51 @@ const provider = new GoogleAuthProvider();
 
     async function requireAdmin() {
       const status = await getAdminStatus(true);
-      if (!status.signedIn) {
-        throw new Error("Please sign in as admin first.");
-      }
-      if (!status.isAdmin) {
-        throw new Error("This signed-in account does not have admin rights.");
-      }
+      if (!status.signedIn) throw new Error("Please sign in as admin first.");
+      if (!status.isAdmin) throw new Error("This signed-in account does not have admin rights.");
       return status;
     }
 
     tabs.forEach(tab => tab.addEventListener("click", () => setMode(tab.dataset.mode)));
+
+    adminSignInBtn.addEventListener("click", async () => {
+      adminSignInBtn.disabled = true;
+      setStatus("Signing in with Google...");
+
+      try {
+        await signInWithPopup(auth, provider);
+        const status = await getAdminStatus(true);
+        updateAdminUi(status);
+
+        if (!status.isAdmin) {
+          setStatus("Signed in, but this account is not admin.", "warn");
+          return;
+        }
+
+        setStatus("Admin sign-in successful.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus(err?.message || "Sign-in failed.", "warn");
+      } finally {
+        adminSignInBtn.disabled = false;
+      }
+    });
+
+    adminSignOutBtn.addEventListener("click", async () => {
+      adminSignOutBtn.disabled = true;
+      setStatus("Signing out...");
+
+      try {
+        await signOut(auth);
+        updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
+        setStatus("Signed out.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus(err?.message || "Sign-out failed.", "warn");
+      } finally {
+        adminSignOutBtn.disabled = false;
+      }
+    });
 
     startRecordBtn.addEventListener("click", async () => {
       try {
@@ -562,8 +460,6 @@ const provider = new GoogleAuthProvider();
       const file = e.target.files?.[0];
       if (!file) return;
 
-      console.log("Selected file:", file.name, file.type);
-
       if (!file.type.startsWith("audio/")) {
         setStatus("File type unclear, trying anyway…", "warn");
       }
@@ -593,60 +489,9 @@ const provider = new GoogleAuthProvider();
       setStatus("Poem generated.", "ok");
     });
 
-   adminSignInBtn.addEventListener("click", async () => {
-  adminSignInBtn.disabled = true;
-  setStatus("Signing in with Google...");
-
-  try {
-    await signInWithPopup(auth, provider);
-
-    const status = await getAdminStatus(true);
-    updateAdminUi(status);
-
-    if (!status.isAdmin) {
-      setStatus("Signed in, but this account is not admin.", "warn");
-      return;
-    }
-
-    setStatus("Admin sign-in successful.", "ok");
-  } catch (err) {
-    console.error(err);
-    setStatus(err?.message || "Sign-in failed.", "warn");
-  } finally {
-    adminSignInBtn.disabled = false;
-  }
-});
-
-    adminSignOutBtn.addEventListener("click", async () => {
-      adminSignOutBtn.disabled = true;
-      setStatus("Signing out...");
-
-      try {
-        await signOut(auth);
-
-        updateAdminUi({
-          signedIn: false,
-          isAdmin: false,
-          email: null,
-          uid: null
-        });
-        setStatus("Signed out.", "ok");
-      } catch (err) {
-        console.error(err);
-        setStatus(err?.message || "Sign-out failed.", "warn");
-      } finally {
-        adminSignOutBtn.disabled = false;
-      }
-    });
-
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        updateAdminUi({
-          signedIn: false,
-          isAdmin: false,
-          email: null,
-          uid: null
-        });
+        updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
         return;
       }
 
@@ -674,7 +519,6 @@ const provider = new GoogleAuthProvider();
 
       try {
         await requireAdmin();
-
         const id = uid();
 
         const ext =
@@ -696,6 +540,7 @@ const provider = new GoogleAuthProvider();
         await uploadBytes(audioRef, state.audioBlob, {
           contentType: state.audioBlob.type || "audio/webm"
         });
+
         const audioUrl = await getDownloadURL(audioRef);
 
         const payload = {
@@ -718,6 +563,7 @@ const provider = new GoogleAuthProvider();
           <div><strong>Duration:</strong> ${esc(formatSeconds(payload.duration))}</div>
           <div><strong>Gallery:</strong> <a href="audio-gallery.html">Open Audio Gallery</a></div>
         `;
+
         setStatus("Saved to Firebase.", "ok");
       } catch (err) {
         console.error(err);
@@ -728,12 +574,7 @@ const provider = new GoogleAuthProvider();
     });
 
     setMode("record");
-    updateAdminUi({
-      signedIn: false,
-      isAdmin: false,
-      email: null,
-      uid: null
-    });
+    updateAdminUi({ signedIn:false, isAdmin:false, email:null, uid:null });
   </script>
 </body>
 </html>
