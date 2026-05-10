@@ -623,7 +623,7 @@ const provider = new GoogleAuthProvider();
 
       try {
         await signOut(auth);
-        adminPasswordInput.value = "";
+
         updateAdminUi({
           signedIn: false,
           isAdmin: false,
