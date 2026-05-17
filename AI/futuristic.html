@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristinen Vesiväri - Kamera Puussa</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            font-family: 'Courier New', monospace;
+        }
+        canvas {
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.3);
+            max-width: 100%;
+            height: auto;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Futuristinen Vesiväri ⚡</h1>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 800;
+        canvas.height = 1200;
+
+        // Futuristic color palette
+        const colors = {
+            sky: ['#4a9eff', '#7b4aff', '#ff4a9e', '#4affd5'],
+            branch: ['#1a1a2e', '#16213e', '#0f3460', '#533483'],
+            leaves: ['#00ff88', '#00ffff', '#88ff00', '#ffff00'],
+            camera: ['#ff006e', '#8338ec', '#3a86ff', '#fb5607'],
+            glow: ['#00ffff', '#ff00ff', '#ffff00', '#00ff00']
+        };
+
+        // Helper functions
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function randomColor(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // Watercolor effect
+        function watercolorBlob(x, y, radius, color, alpha = 0.15) {
+            const layers = 8;
+            for (let i = 0; i < layers; i++) {
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = color;
+                const offsetX = random(-radius * 0.3, radius * 0.3);
+                const offsetY = random(-radius * 0.3, radius * 0.3);
+                const r = radius * random(0.7, 1.2);
+                ctx.beginPath();
+                ctx.arc(x + offsetX, y + offsetY, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Background - futuristic sky
+        function drawSky() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a1a3e');
+            gradient.addColorStop(0.5, '#2d1b4e');
+            gradient.addColorStop(1, '#0f1a2e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Watercolor sky washes
+            for (let i = 0; i < 30; i++) {
+                watercolorBlob(
+                    random(0, canvas.width),
+                    random(0, canvas.height * 0.6),
+                    random(100, 200),
+                    randomColor(colors.sky),
+                    0.08
+                );
+            }
+
+            // Digital stars/particles
+            ctx.globalAlpha = 0.6;
+            for (let i = 0; i < 100; i++) {
+                ctx.fillStyle = randomColor(colors.glow);
+                ctx.fillRect(random(0, canvas.width), random(0, canvas.height), 2, 2);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Branches with tech elements
+        function drawBranches() {
+            // Main horizontal branches
+            const branches = [
+                { y: 300, width: 120 },
+                { y: 600, width: 100 },
+                { y: 900, width: 80 }
+            ];
+
+            branches.forEach(branch => {
+                // Organic watercolor base
+                for (let x = 100; x < canvas.width - 100; x += 40) {
+                    watercolorBlob(x, branch.y, branch.width / 2, randomColor(colors.branch), 0.25);
+                }
+
+                // Moss/lichen with neon glow
+                for (let i = 0; i < 50; i++) {
+                    const x = random(150, canvas.width - 150);
+                    const y = branch.y + random(-30, 30);
+                    watercolorBlob(x, y, random(15, 35), randomColor(colors.leaves), 0.2);
+                    
+                    // Glowing edges
+                    ctx.globalAlpha = 0.5;
+                    ctx.strokeStyle = randomColor(colors.glow);
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, random(10, 20), 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            });
+
+            // Vertical connecting branches
+            for (let i = 0; i < 5; i++) {
+                const x = random(200, canvas.width - 200);
+                for (let y = 300; y < 900; y += 30) {
+                    watercolorBlob(x + random(-20, 20), y, 30, randomColor(colors.branch), 0.15);
+                }
+            }
+        }
+
+        // Futuristic leaves
+        function drawLeaves() {
+            const leafPositions = [
+                { x: 300, y: 250 },
+                { x: 500, y: 280 },
+                { x: 400, y: 550 },
+                { x: 600, y: 580 },
+                { x: 450, y: 1050 },
+                { x: 350, y: 1080 }
+            ];
+
+            leafPositions.forEach(pos => {
+                // Watercolor leaf base
+                ctx.globalAlpha = 0.3;
+                for (let i = 0; i < 5; i++) {
+                    ctx.fillStyle = randomColor(colors.leaves);
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        pos.x + random(-10, 10),
+                        pos.y + random(-10, 10),
+                        random(40, 60),
+                        random(25, 35),
+                        random(0, Math.PI),
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+
+                // Digital veins
+                ctx.strokeStyle = randomColor(colors.glow);
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y - 30);
+                ctx.lineTo(pos.x, pos.y + 30);
+                ctx.moveTo(pos.x - 20, pos.y - 10);
+                ctx.lineTo(pos.x + 20, pos.y + 10);
+                ctx.moveTo(pos.x - 20, pos.y + 10);
+                ctx.lineTo(pos.x + 20, pos.y - 10);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+
+                // Glow effect
+                const glow = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 50);
+                glow.addColorStop(0, randomColor(colors.glow) + '40');
+                glow.addColorStop(1, 'transparent');
+                ctx.fillStyle = glow;
+                ctx.fillRect(pos.x - 50, pos.y - 50, 100, 100);
+            });
+        }
+
+        // Futuristic camera
+        function drawCamera() {
+            const cx = 400;
+            const cy = 600;
+
+            // Holographic aura
+            for (let i = 0; i < 8; i++) {
+                ctx.globalAlpha = 0.1;
+                ctx.strokeStyle = randomColor(colors.camera);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(cx - 50 - i * 8, cy - 80 - i * 8, 100 + i * 16, 160 + i * 16, 10);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Main camera body - watercolor
+            for (let i = 0; i < 10; i++) {
+                watercolorBlob(cx, cy, 60, randomColor(colors.camera), 0.2);
+            }
+
+            // Tech details
+            ctx.fillStyle = '#000';
+            ctx.globalAlpha = 0.7;
+            ctx.fillRect(cx - 40, cy - 70, 80, 140);
+            ctx.globalAlpha = 1;
+
+            // Lens with glow
+            const lensGradient = ctx.createRadialGradient(cx, cy - 20, 10, cx, cy - 20, 30);
+            lensGradient.addColorStop(0, '#00ffff');
+            lensGradient.addColorStop(0.5, '#0088ff');
+            lensGradient.addColorStop(1, '#000033');
+            ctx.fillStyle = lensGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 20, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // LED indicator - pulsing
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00ffff';
+            ctx.fillStyle = '#00ffff';
+            ctx.beginPath();
+            ctx.arc(cx, cy + 30, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Circuit patterns
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(cx - 30, cy + 50);
+            ctx.lineTo(cx + 30, cy + 50);
+            ctx.moveTo(cx, cy + 50);
+            ctx.lineTo(cx, cy + 70);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            // Data streams
+            for (let i = 0; i < 20; i++) {
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = randomColor(colors.glow);
+                const angle = (i / 20) * Math.PI * 2;
+                const dist = 100 + random(0, 50);
+                ctx.fillRect(
+                    cx + Math.cos(angle) * dist,
+                    cy + Math.sin(angle) * dist,
+                    2,
+                    random(5, 15)
+                );
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Add digital effects
+        function addDigitalEffects() {
+            // Scanlines
+            ctx.globalAlpha = 0.05;
+            for (let y = 0; y < canvas.height; y += 4) {
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(0, y, canvas.width, 2);
+            }
+            ctx.globalAlpha = 1;
+
+            // Glitch rectangles
+            for (let i = 0; i < 15; i++) {
+                ctx.globalAlpha = random(0.1, 0.3);
+                ctx.fillStyle = randomColor(colors.glow);
+                ctx.fillRect(
+                    random(0, canvas.width),
+                    random(0, canvas.height),
+                    random(50, 200),
+                    random(2, 10)
+                );
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw everything
+        drawSky();
+        drawBranches();
+        drawLeaves();
+        drawCamera();
+        addDigitalEffects();
+
+        // Add signature
+        ctx.fillStyle = '#00ffff';
+        ctx.font = '14px Courier New';
+        ctx.globalAlpha = 0.5;
+        ctx.fillText('AI WATERCOLOR 2026', 20, canvas.height - 20);
+        ctx.globalAlpha = 1;
+    </script>
+</body>
+</html>
