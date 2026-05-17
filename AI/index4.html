@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Possible Trace v4</title>
+<style>
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #050505;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#front {
+  opacity: 1;
+  transition: opacity 3.5s ease-in-out;
+}
+
+.info {
+  position: fixed;
+  left: 24px;
+  bottom: 22px;
+  max-width: 620px;
+  color: rgba(255,255,255,0.62);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  user-select: none;
+  text-shadow: 0 0 14px rgba(0,0,0,0.9);
+  z-index: 10;
+}
+
+.title {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.8;
+}
+
+.poem {
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: 0.74;
+}
+
+.ethics {
+  margin-top: 8px;
+  font-size: 11px;
+  opacity: 0.42;
+}
+</style>
+</head>
+<body>
+
+<canvas id="back"></canvas>
+<canvas id="front"></canvas>
+
+<div class="info">
+  <div class="title" id="label"></div>
+  <div class="poem" id="poem"></div>
+  <div class="ethics">
+    Nothing is stored. Nothing follows you. The page only dreams from temporary conditions and a local image archive.
+  </div>
+</div>
+
+<script>
+const back = document.getElementById("back");
+const front = document.getElementById("front");
+const label = document.getElementById("label");
+const poem = document.getElementById("poem");
+
+let data = { images: [], phrases: [] };
+let frontVisible = true;
+let currentCanvas = front;
+let nextCanvas = back;
+
+let seed = 1;
+let originalSeed = 1;
+
+function random() {
+  seed = (seed * 1664525 + 1013904223) % 4294967296;
+  return seed / 4294967296;
+}
+
+function pick(arr) {
+  return arr[Math.floor(random() * arr.length)];
+}
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  return Math.abs(h);
+}
+
+async function loadData() {
+  const res = await fetch("traces.json");
+  data = await res.json();
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function prepareCanvas(canvas) {
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  return ctx;
+}
+
+function getContextData() {
+  return {
+    time: new Date(),
+    width: window.innerWidth,
+    height: window.innerHeight,
+    pixelRatio: window.devicePixelRatio || 1,
+    language: navigator.language || "unknown",
+    platform: navigator.platform || "unknown",
+    cores: navigator.hardwareConcurrency || 2,
+    touch: navigator.maxTouchPoints || 0,
+    referrer: document.referrer || ""
+  };
+}
+
+async function generateTrace(canvas) {
+  originalSeed = Math.floor(Math.random() * 999999999);
+  seed = originalSeed;
+
+  const ctx = prepareCanvas(canvas);
+  const c = getContextData();
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  const hour = c.time.getHours();
+  const night = hour < 6 || hour > 21;
+  const touchDevice = c.touch > 0;
+  const wideScreen = w / h > 1.6;
+
+  const imagePath = pick(data.images);
+  let img = null;
+
+  try {
+    img = await loadImage(imagePath);
+  } catch {
+    img = null;
+  }
+
+  const baseHue =
+    (hash(c.language) + hash(c.platform) + hour * 17 + originalSeed) % 360;
+
+  const modes = [
+    "archive-mist",
+    "fragment-memory",
+    "blurred-witness",
+    "colour-echo",
+    "soft-rupture"
+  ];
+
+  const mode = pick(modes);
+
+  ctx.clearRect(0, 0, w, h);
+
+  drawBase(ctx, w, h, baseHue, night);
+
+  if (img) {
+    drawArchiveGhost(ctx, img, w, h, mode);
+    drawFragments(ctx, img, w, h, mode);
+  }
+
+  drawGeneratedLayer(ctx, w, h, baseHue, c.cores, touchDevice, wideScreen);
+  addGrain(ctx, canvas, night ? 18 : 11);
+
+  label.textContent = `POSSIBLE TRACE V4 / ${mode} / ${originalSeed}`;
+  poem.textContent = pick(data.phrases);
+}
+
+function drawBase(ctx, w, h, baseHue, night) {
+  const g = ctx.createRadialGradient(
+    w * random(), h * random(), 10,
+    w * 0.5, h * 0.5, Math.max(w, h)
+  );
+
+  g.addColorStop(0, `hsla(${baseHue}, 65%, ${night ? 24 : 36}%, 0.45)`);
+  g.addColorStop(0.5, `hsla(${(baseHue + 100) % 360}, 55%, ${night ? 12 : 18}%, 0.45)`);
+  g.addColorStop(1, "#050505");
+
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
+function drawArchiveGhost(ctx, img, w, h, mode) {
+  ctx.save();
+
+  ctx.globalAlpha = mode === "blurred-witness" ? 0.22 : 0.10;
+  ctx.filter = mode === "colour-echo"
+    ? "blur(35px) saturate(180%) contrast(120%)"
+    : "blur(45px) saturate(130%) contrast(105%)";
+
+  const scale = Math.max(w / img.width, h / img.height);
+  const iw = img.width * scale;
+  const ih = img.height * scale;
+  const x = (w - iw) / 2;
+  const y = (h - ih) / 2;
+
+  ctx.drawImage(img, x, y, iw, ih);
+
+  ctx.restore();
+}
+
+function drawFragments(ctx, img, w, h, mode) {
+  const count = mode === "fragment-memory" ? 18 : 7;
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+
+  for (let i = 0; i < count; i++) {
+    const sw = img.width * (0.08 + random() * 0.22);
+    const sh = img.height * (0.08 + random() * 0.22);
+    const sx = random() * (img.width - sw);
+    const sy = random() * (img.height - sh);
+
+    const dw = sw * (0.25 + random() * 0.8);
+    const dh = sh * (0.25 + random() * 0.8);
+    const dx = random() * w;
+    const dy = random() * h;
+
+    ctx.globalAlpha = 0.035 + random() * 0.10;
+    ctx.filter = `blur(${8 + random() * 28}px) saturate(${90 + random() * 100}%)`;
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  }
+
+  ctx.restore();
+}
+
+function drawGeneratedLayer(ctx, w, h, baseHue, cores, touchDevice, wideScreen) {
+  const density = Math.min(1.7, Math.max(0.5, cores / 6));
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+
+  for (let i = 0; i < 90 * density; i++) {
+    const x = random() * w;
+    const y = random() * h;
+    const r = 20 + random() * Math.min(w, h) * 0.18;
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+
+    ctx.fillStyle = `hsla(${(baseHue + random() * 150) % 360}, 
+      ${35 + random() * 45}%, 
+      ${35 + random() * 35}%, 
+      ${0.012 + random() * 0.04})`;
+
+    ctx.fill();
+  }
+
+  ctx.restore();
+
+  const lineCount = wideScreen ? 28 : 16;
+
+  for (let i = 0; i < lineCount; i++) {
+    ctx.beginPath();
+
+    let x = random() * w;
+    let y = random() * h;
+
+    ctx.moveTo(x, y);
+
+    const points = 4 + Math.floor(random() * 8);
+
+    for (let j = 0; j < points; j++) {
+      x += (random() - 0.5) * w * 0.42;
+      y += (random() - 0.5) * h * 0.42;
+      ctx.lineTo(x, y);
+    }
+
+    ctx.strokeStyle = `rgba(255,255,255,${touchDevice ? 0.04 : 0.07})`;
+    ctx.lineWidth = 0.5 + random() * 2.5;
+    ctx.stroke();
+  }
+}
+
+function addGrain(ctx, canvas, grainAmount) {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+
+  for (let i = 0; i < d.length; i += 4) {
+    const noise = (Math.random() - 0.5) * grainAmount;
+    d[i] += noise;
+    d[i + 1] += noise;
+    d[i + 2] += noise;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function nextDelay() {
+  return 3500 + Math.random() * 8500;
+}
+
+async function transitionToNewTrace() {
+  await generateTrace(nextCanvas);
+
+  front.style.opacity = frontVisible ? 0 : 1;
+  frontVisible = !frontVisible;
+
+  const temp = currentCanvas;
+  currentCanvas = nextCanvas;
+  nextCanvas = temp;
+
+  setTimeout(transitionToNewTrace, nextDelay());
+}
+
+async function start() {
+  await loadData();
+
+  await generateTrace(front);
+  await generateTrace(back);
+
+  setTimeout(transitionToNewTrace, nextDelay());
+}
+
+window.addEventListener("resize", async () => {
+  await generateTrace(currentCanvas);
+  await generateTrace(nextCanvas);
+});
+
+start();
+</script>
+
+</body>
+</html>
