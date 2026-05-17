@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristinen Vesiväri - Järvimaisema</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            font-family: 'Courier New', monospace;
+        }
+        canvas {
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.3);
+            max-width: 100%;
+            height: auto;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Cyber Lake ⚡</h1>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 1200;
+        canvas.height = 900;
+
+        // Color palette - keeping it recognizable
+        const colors = {
+            sky: ['#4a9eff', '#6eb5ff', '#8fc5ff', '#5aa8ff'],
+            water: ['#2b5b8f', '#3d7ab8', '#1a4d7a', '#4a89c7'],
+            forest: ['#1a4d2e', '#2d5f3e', '#0f3d1f', '#3a7a4f'],
+            cliff: ['#5a5a5a', '#6e6e6e', '#4a4a4a', '#7a7a7a'],
+            person: ['#2d2d2d', '#3a3a3a', '#1a1a1a', '#4a4a4a'],
+            helmet: ['#ff6b35', '#ff8554', '#ff4d1a', '#ffa07a'],
+            beard: ['#d4b896', '#c9a77c', '#e8d5b7', '#b89968'],
+            glow: ['#00ffff', '#00ff88', '#88ffff', '#ffff00']
+        };
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function randomColor(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // Softer watercolor effect
+        function watercolorLayer(x, y, w, h, color, alpha = 0.12, layers = 5) {
+            for (let i = 0; i < layers; i++) {
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = color;
+                const offsetX = random(-w * 0.1, w * 0.1);
+                const offsetY = random(-h * 0.1, h * 0.1);
+                const width = w * random(0.9, 1.1);
+                const height = h * random(0.9, 1.1);
+                ctx.fillRect(x + offsetX, y + offsetY, width, height);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function watercolorCircle(x, y, radius, color, alpha = 0.15, layers = 6) {
+            for (let i = 0; i < layers; i++) {
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = color;
+                const offsetX = random(-radius * 0.15, radius * 0.15);
+                const offsetY = random(-radius * 0.15, radius * 0.15);
+                const r = radius * random(0.85, 1.15);
+                ctx.beginPath();
+                ctx.arc(x + offsetX, y + offsetY, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Sky with subtle tech elements
+        function drawSky() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.5);
+            gradient.addColorStop(0, '#5aa8ff');
+            gradient.addColorStop(0.7, '#7ab8ff');
+            gradient.addColorStop(1, '#9ac9ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.5);
+
+            // Watercolor cloud washes
+            for (let i = 0; i < 20; i++) {
+                watercolorLayer(
+                    random(0, canvas.width),
+                    random(0, 200),
+                    random(150, 300),
+                    random(50, 100),
+                    randomColor(colors.sky),
+                    0.08
+                );
+            }
+
+            // Subtle digital grid
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.05;
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 300);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Forest background
+        function drawForest() {
+            const forestY = 250;
+            const forestHeight = 200;
+
+            // Base forest layer
+            for (let x = 400; x < canvas.width; x += 30) {
+                const treeHeight = random(120, 180);
+                const treeY = forestY + random(-20, 20);
+                
+                // Tree watercolor
+                for (let y = treeY; y < treeY + treeHeight; y += 15) {
+                    watercolorCircle(
+                        x + random(-10, 10),
+                        y,
+                        random(12, 20),
+                        randomColor(colors.forest),
+                        0.18
+                    );
+                }
+
+                // Subtle glow on some trees
+                if (Math.random() > 0.7) {
+                    ctx.globalAlpha = 0.15;
+                    const glow = ctx.createRadialGradient(x, treeY + treeHeight/2, 0, x, treeY + treeHeight/2, 40);
+                    glow.addColorStop(0, '#00ff88');
+                    glow.addColorStop(1, 'transparent');
+                    ctx.fillStyle = glow;
+                    ctx.fillRect(x - 40, treeY, 80, treeHeight);
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
+
+        // Rocky cliff
+        function drawCliff() {
+            const cliffPoints = [
+                [800, 300], [850, 320], [900, 310], [950, 330],
+                [1000, 340], [1050, 350], [1100, 360], [1150, 380],
+                [1200, 400], [1200, 500], [800, 500]
+            ];
+
+            // Watercolor cliff base
+            for (let i = 0; i < 25; i++) {
+                ctx.globalAlpha = 0.15;
+                ctx.fillStyle = randomColor(colors.cliff);
+                ctx.beginPath();
+                ctx.moveTo(cliffPoints[0][0] + random(-20, 20), cliffPoints[0][1]);
+                for (let p of cliffPoints) {
+                    ctx.lineTo(p[0] + random(-15, 15), p[1] + random(-10, 10));
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Forest on cliff
+            for (let x = 820; x < 1180; x += 25) {
+                const treeHeight = random(80, 120);
+                const baseY = 320 + (x - 820) * 0.15;
+                
+                for (let y = baseY; y < baseY + treeHeight; y += 12) {
+                    watercolorCircle(
+                        x + random(-8, 8),
+                        y,
+                        random(10, 16),
+                        randomColor(colors.forest),
+                        0.2
+                    );
+                }
+            }
+
+            // Tech scan lines on cliff
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.1;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(800, 320 + i * 30);
+                ctx.lineTo(1200, 380 + i * 30);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Water
+        function drawWater() {
+            const waterY = 450;
+            
+            // Base water
+            const gradient = ctx.createLinearGradient(0, waterY, 0, canvas.height);
+            gradient.addColorStop(0, '#3d7ab8');
+            gradient.addColorStop(0.5, '#2b5b8f');
+            gradient.addColorStop(1, '#1a4d7a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
+
+            // Watercolor waves
+            for (let y = waterY; y < canvas.height; y += 25) {
+                for (let x = 0; x < canvas.width; x += 80) {
+                    watercolorLayer(
+                        x,
+                        y,
+                        random(60, 120),
+                        random(15, 25),
+                        randomColor(colors.water),
+                        0.12
+                    );
+                }
+            }
+
+            // Reflective highlights with glow
+            ctx.globalAlpha = 0.15;
+            for (let i = 0; i < 30; i++) {
+                ctx.fillStyle = randomColor(colors.glow);
+                ctx.fillRect(
+                    random(0, canvas.width),
+                    random(waterY, canvas.height),
+                    random(20, 60),
+                    random(2, 4)
+                );
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Post/pole on left
+        function drawPole() {
+            const poleX = 220;
+            
+            // Watercolor pole
+            for (let y = 0; y < 500; y += 20) {
+                watercolorLayer(poleX - 15, y, 30, 25, '#cccccc', 0.2);
+            }
+
+            // Metal shine
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(poleX - 5, 0, 10, 500);
+            ctx.globalAlpha = 1;
+
+            // Tech details
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.4;
+            for (let y = 50; y < 450; y += 100) {
+                ctx.beginPath();
+                ctx.arc(poleX, y, 15, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Person with bike helmet
+        function drawPerson() {
+            const headX = 150;
+            const headY = 380;
+            const headR = 70;
+
+            // Shoulders/jacket
+            ctx.globalAlpha = 0.25;
+            for (let i = 0; i < 15; i++) {
+                ctx.fillStyle = randomColor(colors.person);
+                ctx.fillRect(
+                    headX - 80 + random(-10, 10),
+                    headY + 40 + random(-10, 10),
+                    160 + random(-20, 20),
+                    200 + random(-20, 20)
+                );
+            }
+            ctx.globalAlpha = 1;
+
+            // Head base
+            watercolorCircle(headX, headY, headR, '#e8c9a8', 0.25, 8);
+
+            // Beard - prominent feature
+            ctx.globalAlpha = 0.2;
+            for (let i = 0; i < 20; i++) {
+                ctx.fillStyle = randomColor(colors.beard);
+                ctx.beginPath();
+                const angle = random(Math.PI * 0.2, Math.PI * 0.8);
+                const dist = random(50, 90);
+                const x = headX + Math.cos(angle) * dist;
+                const y = headY + Math.sin(angle) * dist;
+                ctx.arc(x, y, random(8, 18), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Sunglasses - dark
+            ctx.fillStyle = '#1a1a1a';
+            ctx.globalAlpha = 0.8;
+            ctx.fillRect(headX - 45, headY - 15, 40, 18);
+            ctx.fillRect(headX + 5, headY - 15, 40, 18);
+            ctx.globalAlpha = 1;
+
+            // Helmet - orange with black
+            for (let i = 0; i < 12; i++) {
+                ctx.globalAlpha = 0.22;
+                ctx.fillStyle = randomColor(colors.helmet);
+                ctx.beginPath();
+                ctx.ellipse(
+                    headX + random(-5, 5),
+                    headY - 55 + random(-5, 5),
+                    55 + random(-10, 10),
+                    40 + random(-8, 8),
+                    0, 0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            // Helmet vents/details - black
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#000000';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.ellipse(headX + (i - 1) * 25, headY - 60, 15, 25, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Tech glow around helmet
+            ctx.globalAlpha = 0.2;
+            const helmetGlow = ctx.createRadialGradient(headX, headY - 50, 0, headX, headY - 50, 80);
+            helmetGlow.addColorStop(0, '#ff6b35');
+            helmetGlow.addColorStop(0.5, '#00ffff');
+            helmetGlow.addColorStop(1, 'transparent');
+            ctx.fillStyle = helmetGlow;
+            ctx.fillRect(headX - 80, headY - 100, 160, 100);
+            ctx.globalAlpha = 1;
+        }
+
+        // Subtle tech overlay
+        function addTechElements() {
+            // HUD elements
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.15;
+            
+            // Corner brackets
+            const corners = [
+                [20, 20], [canvas.width - 20, 20],
+                [20, canvas.height - 20], [canvas.width - 20, canvas.height - 20]
+            ];
+            
+            corners.forEach(([x, y]) => {
+                ctx.beginPath();
+                const size = 30;
+                if (x < canvas.width / 2 && y < canvas.height / 2) {
+                    ctx.moveTo(x, y + size);
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(x + size, y);
+                } else if (x > canvas.width / 2 && y < canvas.height / 2) {
+                    ctx.moveTo(x - size, y);
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(x, y + size);
+                } else if (x < canvas.width / 2 && y > canvas.height / 2) {
+                    ctx.moveTo(x, y - size);
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(x + size, y);
+                } else {
+                    ctx.moveTo(x - size, y);
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(x, y - size);
+                }
+                ctx.stroke();
+            });
+            
+            ctx.globalAlpha = 1;
+
+            // Minimal scanlines
+            ctx.globalAlpha = 0.03;
+            for (let y = 0; y < canvas.height; y += 6) {
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(0, y, canvas.width, 2);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw scene
+        drawSky();
+        drawWater();
+        drawForest();
+        drawCliff();
+        drawPole();
+        drawPerson();
+        addTechElements();
+
+        // Signature
+        ctx.fillStyle = '#00ffff';
+        ctx.font = '12px Courier New';
+        ctx.globalAlpha = 0.4;
+        ctx.fillText('CYBER WATERCOLOR 2026', 20, canvas.height - 20);
+        ctx.globalAlpha = 1;
+    </script>
+</body>
+</html>
