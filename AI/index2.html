@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Possible Trace v2</title>
+<style>
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: #050505;
+    overflow: hidden;
+    font-family: system-ui, sans-serif;
+  }
+
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .info {
+    position: fixed;
+    left: 24px;
+    bottom: 22px;
+    max-width: 520px;
+    color: rgba(255,255,255,0.62);
+    font-size: 12px;
+    line-height: 1.45;
+    letter-spacing: 0.04em;
+    user-select: none;
+    text-shadow: 0 0 12px rgba(0,0,0,0.8);
+  }
+
+  .title {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: 0.8;
+  }
+
+  .poem {
+    margin-top: 6px;
+    font-size: 13px;
+    opacity: 0.72;
+  }
+
+  .ethics {
+    margin-top: 8px;
+    font-size: 11px;
+    opacity: 0.42;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="art"></canvas>
+
+<div class="info">
+  <div class="title" id="label"></div>
+  <div class="poem" id="poem"></div>
+  <div class="ethics">
+    Nothing is stored. Nothing follows you. The page only makes a poetic guess.
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("art");
+const ctx = canvas.getContext("2d");
+const label = document.getElementById("label");
+const poem = document.getElementById("poem");
+
+const originalSeed = Math.floor(Math.random() * 999999999);
+let seed = originalSeed;
+
+function random() {
+  seed = (seed * 1664525 + 1013904223) % 4294967296;
+  return seed / 4294967296;
+}
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  return Math.abs(h);
+}
+
+const context = {
+  time: new Date(),
+  width: window.innerWidth,
+  height: window.innerHeight,
+  pixelRatio: window.devicePixelRatio || 1,
+  language: navigator.language || "unknown",
+  userAgent: navigator.userAgent || "unknown",
+  platform: navigator.platform || "unknown",
+  cores: navigator.hardwareConcurrency || 2,
+  memory: navigator.deviceMemory || 4,
+  touch: navigator.maxTouchPoints || 0,
+  referrer: document.referrer || "",
+  online: navigator.onLine
+};
+
+const hour = context.time.getHours();
+const night = hour < 6 || hour > 21;
+const morning = hour >= 6 && hour < 11;
+const smallScreen = context.width < 700;
+const wideScreen = context.width / context.height > 1.6;
+const touchDevice = context.touch > 0;
+const arrivedFromElsewhere = context.referrer.length > 0;
+
+const modes = [
+  "mist",
+  "watercolor",
+  "constellation",
+  "soft-glitch",
+  "organic-cells",
+  "passing-lines",
+  "dark-oracle"
+];
+
+let modeBias = [];
+
+if (night) modeBias.push("dark-oracle", "constellation", "mist");
+if (morning) modeBias.push("watercolor", "mist");
+if (touchDevice) modeBias.push("organic-cells", "watercolor");
+if (wideScreen) modeBias.push("passing-lines", "mist");
+if (arrivedFromElsewhere) modeBias.push("soft-glitch", "passing-lines");
+
+const allModes = modes.concat(modeBias);
+const mode = allModes[Math.floor(random() * allModes.length)];
+
+const baseHue =
+  (hash(context.language) +
+  hash(context.platform) +
+  Math.floor(hour * 13) +
+  originalSeed) % 360;
+
+const density = Math.min(1.8, Math.max(0.45, context.cores / 6));
+const softness = touchDevice ? 0.85 : 0.45;
+const grainAmount = night ? 18 : 10;
+
+label.textContent = `POSSIBLE TRACE V2 / ${mode} / ${originalSeed}`;
+
+poem.textContent = makePoeticGuess();
+
+function makePoeticGuess() {
+  const lines = [];
+
+  if (night) lines.push("The image is being born after light.");
+  else if (morning) lines.push("The browser opens like a pale window.");
+  else lines.push("The page listens to the weather of the screen.");
+
+  if (touchDevice) lines.push("This visitor arrives by hand.");
+  else lines.push("The cursor keeps a little distance.");
+
+  if (smallScreen) lines.push("The trace is pocket-sized.");
+  else if (wideScreen) lines.push("The trace has room to wander.");
+  else lines.push("The trace stays almost square with itself.");
+
+  if (arrivedFromElsewhere) lines.push("Something led you here.");
+  else lines.push("You appeared without a visible past.");
+
+  return lines[Math.floor(random() * lines.length)];
+}
+
+function resize() {
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  draw();
+}
+
+function draw() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  ctx.clearRect(0, 0, w, h);
+  drawBackground(w, h);
+
+  if (mode === "mist") drawMist(w, h);
+  if (mode === "watercolor") drawWatercolor(w, h);
+  if (mode === "constellation") drawConstellation(w, h);
+  if (mode === "soft-glitch") drawSoftGlitch(w, h);
+  if (mode === "organic-cells") drawOrganicCells(w, h);
+  if (mode === "passing-lines") drawPassingLines(w, h);
+  if (mode === "dark-oracle") drawDarkOracle(w, h);
+
+  addGrain();
+}
+
+function drawBackground(w, h) {
+  const gradient = ctx.createRadialGradient(
+    w * random(), h * random(), 10,
+    w * 0.5, h * 0.5, Math.max(w, h)
+  );
+
+  const lightness = night ? 12 : 18;
+
+  gradient.addColorStop(0, `hsla(${baseHue}, 65%, ${lightness + 18}%, 0.45)`);
+  gradient.addColorStop(0.45, `hsla(${(baseHue + 90) % 360}, 55%, ${lightness}%, 0.38)`);
+  gradient.addColorStop(1, "#050505");
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, w, h);
+}
+
+function drawMist(w, h) {
+  ctx.globalCompositeOperation = "screen";
+
+  for (let i = 0; i < 120 * density; i++) {
+    const x = random() * w;
+    const y = random() * h;
+    const r = 30 + random() * Math.min(w, h) * 0.24;
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${(baseHue + random() * 130) % 360}, 60%, 45%, ${0.012 + random() * 0.045})`;
+    ctx.fill();
+  }
+
+  ctx.globalCompositeOperation = "source-over";
+}
+
+function drawWatercolor(w, h) {
+  ctx.globalCompositeOperation = "screen";
+
+  for (let i = 0; i < 55 * density; i++) {
+    const x = random() * w;
+    const y = random() * h;
+    const r = 80 + random() * Math.min(w, h) * 0.3;
+
+    ctx.beginPath();
+
+    for (let a = 0; a < Math.PI * 2; a += 0.25) {
+      const rr = r * (0.72 + random() * 0.45);
+      const px = x + Math.cos(a) * rr;
+      const py = y + Math.sin(a) * rr;
+      if (a === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+
+    ctx.closePath();
+    ctx.fillStyle = `hsla(${(baseHue + random() * 90) % 360}, 55%, 55%, ${0.018 + random() * 0.035})`;
+    ctx.fill();
+  }
+
+  ctx.globalCompositeOperation = "source-over";
+}
+
+function drawConstellation(w, h) {
+  const points = [];
+
+  for (let i = 0; i < 80 * density; i++) {
+    points.push({
+      x: random() * w,
+      y: random() * h,
+      r: 0.8 + random() * 2.2
+    });
+  }
+
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = 1;
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      const dx = points[i].x - points[j].x;
+      const dy = points[i].y - points[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+
+      if (d < 120 + random() * 80) {
+        ctx.beginPath();
+        ctx.moveTo(points[i].x, points[i].y);
+        ctx.lineTo(points[j].x, points[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  points.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function drawSoftGlitch(w, h) {
+  for (let i = 0; i < 70 * density; i++) {
+    const x = random() * w;
+    const y = random() * h;
+    const ww = 20 + random() * w * 0.35;
+    const hh = 1 + random() * 18;
+
+    ctx.fillStyle = `hsla(${(baseHue + random() * 220) % 360}, 70%, 55%, ${0.025 + random() * 0.09})`;
+    ctx.fillRect(x, y, ww, hh);
+  }
+}
+
+function drawOrganicCells(w, h) {
+  ctx.globalCompositeOperation = "screen";
+
+  for (let i = 0; i < 95 * density; i++) {
+    const x = random() * w;
+    const y = random() * h;
+    const r = 12 + random() * Math.min(w, h) * 0.08;
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+
+    ctx.strokeStyle = `hsla(${(baseHue + random() * 120) % 360}, 65%, 60%, ${0.05 + softness * 0.06})`;
+    ctx.lineWidth = 0.5 + random() * 2.5;
+    ctx.stroke();
+
+    ctx.fillStyle = `hsla(${(baseHue + random() * 120) % 360}, 55%, 45%, 0.018)`;
+    ctx.fill();
+  }
+
+  ctx.globalCompositeOperation = "source-over";
+}
+
+function drawPassingLines(w, h) {
+  for (let i = 0; i < 26 * density; i++) {
+    ctx.beginPath();
+
+    let x = random() * w;
+    let y = random() * h;
+
+    ctx.moveTo(x, y);
+
+    const points = 5 + Math.floor(random() * 10);
+
+    for (let j = 0; j < points; j++) {
+      x += (random() - 0.5) * w * 0.42;
+      y += (random() - 0.5) * h * 0.42;
+      ctx.lineTo(x, y);
+    }
+
+    ctx.strokeStyle = `rgba(255,255,255,${0.025 + random() * 0.10})`;
+    ctx.lineWidth = 0.5 + random() * 3;
+    ctx.stroke();
+  }
+}
+
+function drawDarkOracle(w, h) {
+  ctx.globalCompositeOperation = "screen";
+
+  const cx = w * (0.35 + random() * 0.3);
+  const cy = h * (0.35 + random() * 0.3);
+
+  for (let i = 0; i < 9; i++) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 40 + i * 38 + random() * 20, 0, Math.PI * 2);
+    ctx.strokeStyle = `hsla(${(baseHue + i * 18) % 360}, 70%, 55%, ${0.035 + random() * 0.055})`;
+    ctx.lineWidth = 1 + random() * 2;
+    ctx.stroke();
+  }
+
+  ctx.globalCompositeOperation = "source-over";
+
+  for (let i = 0; i < 22; i++) {
+    ctx.fillStyle = `rgba(255,255,255,${0.025 + random() * 0.09})`;
+    ctx.fillRect(random() * w, random() * h, 1 + random() * 80, 1);
+  }
+}
+
+function addGrain() {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const noise = (Math.random() - 0.5) * grainAmount;
+    data[i] += noise;
+    data[i + 1] += noise;
+    data[i + 2] += noise;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+}
+
+window.addEventListener("resize", resize);
+resize();
+</script>
+
+</body>
+</html>
