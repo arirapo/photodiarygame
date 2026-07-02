@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>Live Memory Gallery v3</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;padding:24px;background:#111;color:#eee;font-family:system-ui,sans-serif}
+h1{font-weight:400}
+button,input{font-size:1rem;margin:8px 6px 8px 0;border-radius:20px;padding:6px 16px}
+#timeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:24px}
+.item{border:1px solid #333;padding:8px;background:#1a1a1a}
+.item img,.item video{width:100%;height:120px;object-fit:cover;background:#000}
+.badge{font-size:.85rem;color:#aaa;margin-top:6px}
+.controls button{font-size:.8rem;padding:3px 8px}
+#stage{margin-top:32px;width:100%;max-width:900px;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#stage img,#stage video{width:100%;height:100%;object-fit:contain}
+.breathe{animation:breathe 2s ease-in-out forwards}
+@keyframes breathe{from{transform:scale(1);opacity:.85}to{transform:scale(1.04);opacity:1}}
+#download a{color:#9cf;font-size:1.1rem}
+</style>
+</head>
+<body>
+
+<h1>Live Memory Gallery v3</h1>
+
+<p>
+Valitse Live Photoista viedyt alkuperäiset tiedostot: kuva + video.
+Mukaan voi valita myös tavallisia kuvia.
+</p>
+
+<input type="file" id="fileInput" multiple accept="image/*,video/*">
+
+<br>
+<button onclick="playStory()">Play Story</button>
+<button onclick="recordStory()">Record & Save Story</button>
+
+<div id="download"></div>
+<div id="timeline"></div>
+<div id="stage"></div>
+
+<script>
+const input = document.getElementById("fileInput");
+const timeline = document.getElementById("timeline");
+const stage = document.getElementById("stage");
+const download = document.getElementById("download");
+
+let memories = [];
+
+function baseName(filename){
+  return filename.replace(/\.[^/.]+$/, "").replace(/_original$/, "");
+}
+
+input.addEventListener("change", () => {
+  const files = Array.from(input.files);
+  const groups = {};
+
+  for (const file of files) {
+    const base = baseName(file.name);
+    if (!groups[base]) groups[base] = { base, image:null, video:null };
+
+    if (file.type.startsWith("image/")) groups[base].image = file;
+    if (file.type.startsWith("video/")) groups[base].video = file;
+  }
+
+  memories = Object.values(groups).sort((a,b)=>a.base.localeCompare(b.base));
+  renderTimeline();
+});
+
+function renderTimeline(){
+  timeline.innerHTML = "";
+
+  memories.forEach((memory, index) => {
+    const div = document.createElement("div");
+    div.className = "item";
+
+    const title = document.createElement("div");
+    title.textContent = `${index + 1}. ${memory.base}`;
+    div.appendChild(title);
+
+    if (memory.image) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(memory.image);
+      div.appendChild(img);
+    } else if (memory.video) {
+      const video = document.createElement("video");
+      video.src = URL.createObjectURL(memory.video);
+      video.muted = true;
+      video.playsInline = true;
+      div.appendChild(video);
+    }
+
+    const badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent = memory.video ? "Living memory" : "Still memory";
+    div.appendChild(badge);
+
+    const controls = document.createElement("div");
+    controls.className = "controls";
+
+    const up = document.createElement("button");
+    up.textContent = "↑";
+    up.onclick = () => move(index, -1);
+
+    const down = document.createElement("button");
+    down.textContent = "↓";
+    down.onclick = () => move(index, 1);
+
+    controls.appendChild(up);
+    controls.appendChild(down);
+    div.appendChild(controls);
+
+    timeline.appendChild(div);
+  });
+}
+
+function move(index, direction){
+  const target = index + direction;
+  if (target < 0 || target >= memories.length) return;
+  [memories[index], memories[target]] = [memories[target], memories[index]];
+  renderTimeline();
+}
+
+async function playStory(){
+  for (const memory of memories) {
+    await showMemory(memory);
+  }
+}
+
+async function showMemory(memory){
+  stage.innerHTML = "";
+
+  if (memory.video) {
+    const video = document.createElement("video");
+    video.src = URL.createObjectURL(memory.video);
+    video.autoplay = true;
+    video.muted = true;
+    video.playsInline = true;
+    stage.appendChild(video);
+
+    await new Promise(resolve => {
+      video.onended = resolve;
+      video.onerror = resolve;
+      video.play().catch(resolve);
+    });
+
+  } else if (memory.image) {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(memory.image);
+    img.className = "breathe";
+    stage.appendChild(img);
+    await wait(2000);
+  }
+}
+
+async function recordStory(){
+  download.innerHTML = "Tallennetaan muistitarinaa...";
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1280;
+  canvas.height = 720;
+  const ctx = canvas.getContext("2d");
+
+  const stream = canvas.captureStream(30);
+
+  let mime = "video/webm";
+  if (MediaRecorder.isTypeSupported("video/mp4")) mime = "video/mp4";
+  else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) mime = "video/webm;codecs=vp9";
+
+  const recorder = new MediaRecorder(stream, { mimeType: mime });
+  const chunks = [];
+
+  recorder.ondataavailable = e => {
+    if (e.data.size > 0) chunks.push(e.data);
+  };
+
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mime });
+    const url = URL.createObjectURL(blob);
+    const ext = mime.includes("mp4") ? "mp4" : "webm";
+
+    download.innerHTML =
+      `<p><a href="${url}" download="memory-story.${ext}">Lataa muistitarina</a></p>`;
+  };
+
+  recorder.start();
+
+  for (const memory of memories) {
+    if (memory.video) {
+      await drawVideoToCanvas(memory.video, ctx, canvas);
+    } else if (memory.image) {
+      await drawImageToCanvas(memory.image, ctx, canvas, 2000);
+    }
+  }
+
+  recorder.stop();
+}
+
+async function drawImageToCanvas(file, ctx, canvas, duration){
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  await img.decode();
+
+  const start = performance.now();
+
+  return new Promise(resolve => {
+    function frame(now){
+      const t = Math.min((now - start) / duration, 1);
+      const zoom = 1 + t * 0.04;
+
+      drawCover(ctx, img, canvas, zoom);
+
+      if (t < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+async function drawVideoToCanvas(file, ctx, canvas){
+  const video = document.createElement("video");
+  video.src = URL.createObjectURL(file);
+  video.muted = true;
+  video.playsInline = true;
+
+  await video.play().catch(()=>{});
+
+  return new Promise(resolve => {
+    video.onended = resolve;
+    video.onerror = resolve;
+
+    function frame(){
+      if (!video.paused && !video.ended) {
+        drawCover(ctx, video, canvas, 1);
+        requestAnimationFrame(frame);
+      }
+    }
+    frame();
+  });
+}
+
+function drawCover(ctx, media, canvas, zoom){
+  const cw = canvas.width;
+  const ch = canvas.height;
+  const mw = media.videoWidth || media.naturalWidth;
+  const mh = media.videoHeight || media.naturalHeight;
+
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0,cw,ch);
+
+  const scale = Math.min(cw / mw, ch / mh) * zoom;
+  const w = mw * scale;
+  const h = mh * scale;
+  const x = (cw - w) / 2;
+  const y = (ch - h) / 2;
+
+  ctx.drawImage(media, x, y, w, h);
+}
+
+function wait(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+</script>
+
+</body>
+</html>
