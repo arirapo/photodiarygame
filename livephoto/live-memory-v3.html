@@ -18,6 +18,7 @@ button,input{font-size:1rem;margin:8px 6px 8px 0;border-radius:20px;padding:6px 
 .breathe{animation:breathe 2s ease-in-out forwards}
 @keyframes breathe{from{transform:scale(1);opacity:.85}to{transform:scale(1.04);opacity:1}}
 #download a{color:#9cf;font-size:1.1rem}
+.note{color:#999;font-size:.9rem}
 </style>
 </head>
 <body>
@@ -154,7 +155,10 @@ async function showMemory(memory){
 }
 
 async function recordStory(){
-  download.innerHTML = "Tallennetaan muistitarinaa...";
+  download.innerHTML = `
+    <p>Valmistellaan videota…</p>
+    <p class="note">Ääni ei tallennu tässä versiossa, vain video.</p>
+  `;
 
   const canvas = document.createElement("canvas");
   canvas.width = 1280;
@@ -179,8 +183,17 @@ async function recordStory(){
     const url = URL.createObjectURL(blob);
     const ext = mime.includes("mp4") ? "mp4" : "webm";
 
-    download.innerHTML =
-      `<p><a href="${url}" download="memory-story.${ext}">Lataa muistitarina</a></p>`;
+    download.innerHTML = `
+      <p>Muistitarina valmis.</p>
+
+      <p>
+        <a href="${url}" download="memory-story.${ext}">
+          Lataa muistitarina
+        </a>
+      </p>
+
+      <p class="note">Ääni ei tallennu tässä versiossa, vain video.</p>
+    `;
   };
 
   recorder.start();
