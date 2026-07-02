@@ -1,0 +1,20 @@
+<html>
+
+<input type="file" multiple id="picker">
+
+<pre id="log"></pre>
+
+<script>
+picker.onchange = () => {
+  log.textContent = "";
+
+  for (const f of picker.files) {
+    log.textContent +=
+      `Name: ${f.name}\n` +
+      `Type: ${f.type}\n` +
+      `Size: ${f.size}\n\n`;
+  }
+};
+</script>
+
+  </html>
