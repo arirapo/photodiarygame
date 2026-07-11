@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>Moving Traces v1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#111;
+  --panel:#1a1a1a;
+  --line:#333;
+  --text:#eee;
+  --muted:#999;
+  --accent:#b9dfff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  padding:24px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+main{max-width:1000px;margin:0 auto}
+h1{font-weight:400;margin:0 0 8px}
+h2{font-weight:500;font-size:1.15rem;margin-top:32px}
+p{line-height:1.5}
+button,input,select{
+  font:inherit;
+}
+button{
+  margin:8px 6px 8px 0;
+  border:1px solid #555;
+  border-radius:20px;
+  padding:8px 16px;
+  background:#222;
+  color:var(--text);
+}
+button:disabled{opacity:.45}
+button.danger{border-color:#744}
+input[type="file"]{display:block;margin:12px 0}
+input[type="range"]{width:100%}
+label{display:block;margin:12px 0 6px}
+.panel{
+  border:1px solid var(--line);
+  background:var(--panel);
+  padding:16px;
+  margin-top:20px;
+}
+#sourceVideo{
+  width:100%;
+  max-height:56vh;
+  background:#000;
+  display:block;
+}
+.timeRow{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+}
+.durationButtons button.active{
+  background:#eee;
+  color:#111;
+  border-color:#eee;
+}
+.meta,.note,.badge{
+  color:var(--muted);
+  font-size:.9rem;
+}
+#timeline{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+.item{
+  border:1px solid var(--line);
+  padding:8px;
+  background:var(--panel);
+}
+.item canvas{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  display:block;
+  background:#000;
+}
+.itemTitle{
+  margin-top:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+}
+.controls button{
+  font-size:.8rem;
+  padding:4px 9px;
+}
+#stage{
+  margin-top:20px;
+  width:100%;
+  aspect-ratio:1/1;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+#stage video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.empty{
+  color:#777;
+  border:1px dashed #333;
+  padding:20px;
+}
+.inline{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 16px;
+  align-items:center;
+}
+.inline label{margin:0}
+.status{
+  min-height:1.5em;
+  color:var(--accent);
+}
+@media (max-width:600px){
+  body{padding:16px}
+  .timeRow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Moving Traces v1</h1>
+  <p>
+    Valitse tavallinen MP4- tai MOV-video, etsi siitä 1–5 sekunnin elävä jälki
+    ja lisää valinta aikajanalle. Alkuperäistä videotiedostoa ei muuteta.
+  </p>
+
+  <section class="panel">
+    <label for="fileInput"><strong>1. Valitse video</strong></label>
+    <input type="file" id="fileInput" accept="video/*">
+
+    <video id="sourceVideo" controls playsinline preload="metadata"></video>
+
+    <div id="editor" hidden>
+      <label for="startRange"><strong>2. Valitse alkukohta</strong></label>
+      <div class="timeRow">
+        <input type="range" id="startRange" min="0" max="0" step="0.05" value="0">
+        <output id="startOutput">00:00.00</output>
+      </div>
+
+      <button id="useCurrent">Aseta alku tähän kohtaan</button>
+
+      <label><strong>3. Valitse kesto</strong></label>
+      <div class="durationButtons" id="durationButtons">
+        <button type="button" data-duration="1">1 s</button>
+        <button type="button" data-duration="2">2 s</button>
+        <button type="button" data-duration="3" class="active">3 s</button>
+        <button type="button" data-duration="4">4 s</button>
+        <button type="button" data-duration="5">5 s</button>
+      </div>
+
+      <div class="inline">
+        <button id="previewClip">Esikatsele valinta</button>
+        <button id="addClip">Lisää aikajanalle</button>
+        <label><input type="checkbox" id="previewLoop" checked> Loop-esikatselu</label>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Aikajana</h2>
+    <div class="inline">
+      <button id="playStory" disabled>Play Story</button>
+      <button id="stopStory" disabled>Pysäytä</button>
+      <label><input type="checkbox" id="muteStory"> Mykistä ääni</label>
+    </div>
+    <p class="note">
+      Tämä kehitysversio toistaa valitut kohdat suoraan alkuperäisistä videoista.
+      Varsinaisten erillisten MP4-leikkeiden luonti lisätään myöhemmin.
+    </p>
+    <div id="timeline" class="empty">Ei vielä liikkuvia jälkiä.</div>
+  </section>
+
+  <section>
+    <h2>Story-esikatselu</h2>
+    <div id="stage">
+      <span class="meta">Aikajana näkyy tässä.</span>
+    </div>
+  </section>
+</main>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const sourceVideo = document.getElementById("sourceVideo");
+const editor = document.getElementById("editor");
+const startRange = document.getElementById("startRange");
+const startOutput = document.getElementById("startOutput");
+const useCurrent = document.getElementById("useCurrent");
+const durationButtons = document.getElementById("durationButtons");
+const previewClip = document.getElementById("previewClip");
+const addClip = document.getElementById("addClip");
+const previewLoop = document.getElementById("previewLoop");
+const status = document.getElementById("status");
+const timeline = document.getElementById("timeline");
+const stage = document.getElementById("stage");
+const playStoryButton = document.getElementById("playStory");
+const stopStoryButton = document.getElementById("stopStory");
+const muteStory = document.getElementById("muteStory");
+
+let currentFile = null;
+let currentUrl = "";
+let selectedDuration = 3;
+let previewing = false;
+let previewEnd = 0;
+let memories = [];
+let storyCancelled = false;
+
+function formatTime(seconds){
+  if (!Number.isFinite(seconds)) return "00:00.00";
+  const min = Math.floor(seconds / 60);
+  const sec = seconds - min * 60;
+  return `${String(min).padStart(2,"0")}:${sec.toFixed(2).padStart(5,"0")}`;
+}
+
+function clampStart(value){
+  const maxStart = Math.max(0, sourceVideo.duration - selectedDuration);
+  return Math.min(Math.max(0, Number(value) || 0), maxStart);
+}
+
+function updateRangeLimits(){
+  if (!Number.isFinite(sourceVideo.duration)) return;
+  const maxStart = Math.max(0, sourceVideo.duration - selectedDuration);
+  startRange.max = maxStart;
+  startRange.value = clampStart(startRange.value);
+  startOutput.textContent = formatTime(Number(startRange.value));
+}
+
+function stopPreview(){
+  previewing = false;
+  sourceVideo.pause();
+}
+
+fileInput.addEventListener("change", () => {
+  stopPreview();
+  if (currentUrl) URL.revokeObjectURL(currentUrl);
+
+  currentFile = fileInput.files[0] || null;
+  status.textContent = "";
+
+  if (!currentFile){
+    sourceVideo.removeAttribute("src");
+    sourceVideo.load();
+    editor.hidden = true;
+    return;
+  }
+
+  currentUrl = URL.createObjectURL(currentFile);
+  sourceVideo.src = currentUrl;
+  sourceVideo.load();
+});
+
+sourceVideo.addEventListener("loadedmetadata", () => {
+  editor.hidden = false;
+  startRange.value = 0;
+  updateRangeLimits();
+  status.textContent = `${currentFile.name} · ${formatTime(sourceVideo.duration)}`;
+});
+
+sourceVideo.addEventListener("timeupdate", () => {
+  if (!previewing) return;
+  if (sourceVideo.currentTime >= previewEnd - 0.03){
+    if (previewLoop.checked){
+      sourceVideo.currentTime = Number(startRange.value);
+      sourceVideo.play().catch(() => {});
+    } else {
+      stopPreview();
+      sourceVideo.currentTime = previewEnd;
+    }
+  }
+});
+
+sourceVideo.addEventListener("seeking", () => {
+  if (!previewing) startOutput.textContent = formatTime(Number(startRange.value));
+});
+
+startRange.addEventListener("input", () => {
+  stopPreview();
+  const start = clampStart(startRange.value);
+  startRange.value = start;
+  startOutput.textContent = formatTime(start);
+  sourceVideo.currentTime = start;
+});
+
+useCurrent.addEventListener("click", () => {
+  stopPreview();
+  const start = clampStart(sourceVideo.currentTime);
+  startRange.value = start;
+  startOutput.textContent = formatTime(start);
+  sourceVideo.currentTime = start;
+});
+
+durationButtons.addEventListener("click", event => {
+  const button = event.target.closest("button[data-duration]");
+  if (!button) return;
+
+  selectedDuration = Number(button.dataset.duration);
+  [...durationButtons.querySelectorAll("button")].forEach(b =>
+    b.classList.toggle("active", b === button)
+  );
+  updateRangeLimits();
+  stopPreview();
+});
+
+previewClip.addEventListener("click", async () => {
+  if (!currentFile) return;
+
+  const start = clampStart(startRange.value);
+  startRange.value = start;
+  previewEnd = Math.min(sourceVideo.duration, start + selectedDuration);
+  previewing = true;
+
+  sourceVideo.currentTime = start;
+  try{
+    await sourceVideo.play();
+    status.textContent =
+      `Esikatselu ${formatTime(start)}–${formatTime(previewEnd)} (${(previewEnd-start).toFixed(2)} s)`;
+  }catch(error){
+    previewing = false;
+    status.textContent = "Videon toisto ei käynnistynyt.";
+  }
+});
+
+addClip.addEventListener("click", async () => {
+  if (!currentFile || !Number.isFinite(sourceVideo.duration)) return;
+
+  stopPreview();
+
+  const start = clampStart(startRange.value);
+  const duration = Math.min(selectedDuration, sourceVideo.duration - start);
+  const thumb = await makeThumbnail(currentUrl, start);
+
+  memories.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    file: currentFile,
+    url: currentUrl,
+    name: currentFile.name.replace(/\.[^/.]+$/, ""),
+    start,
+    duration,
+    thumb
+  });
+
+  renderTimeline();
+  status.textContent = `Lisätty: ${formatTime(start)} + ${duration.toFixed(2)} s`;
+});
+
+async function makeThumbnail(url, time){
+  const video = document.createElement("video");
+  video.src = url;
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = "auto";
+
+  await new Promise(resolve => {
+    video.onloadedmetadata = resolve;
+    video.onerror = resolve;
+  });
+
+  video.currentTime = Math.min(time, Math.max(0, video.duration - 0.05));
+
+  await new Promise(resolve => {
+    video.onseeked = resolve;
+    video.onerror = resolve;
+  });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 400;
+  canvas.height = 400;
+  const ctx = canvas.getContext("2d");
+
+  drawContain(ctx, video, canvas);
+  return canvas.toDataURL("image/jpeg", 0.82);
+}
+
+function drawContain(ctx, media, canvas){
+  const cw = canvas.width;
+  const ch = canvas.height;
+  const mw = media.videoWidth || 1;
+  const mh = media.videoHeight || 1;
+
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0,cw,ch);
+
+  const scale = Math.min(cw / mw, ch / mh);
+  const w = mw * scale;
+  const h = mh * scale;
+  const x = (cw - w) / 2;
+  const y = (ch - h) / 2;
+
+  ctx.drawImage(media, x, y, w, h);
+}
+
+function renderTimeline(){
+  timeline.innerHTML = "";
+  timeline.classList.toggle("empty", memories.length === 0);
+
+  playStoryButton.disabled = memories.length === 0;
+
+  if (!memories.length){
+    timeline.textContent = "Ei vielä liikkuvia jälkiä.";
+    return;
+  }
+
+  memories.forEach((memory, index) => {
+    const div = document.createElement("article");
+    div.className = "item";
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img,0,0,400,400);
+    img.src = memory.thumb;
+    div.appendChild(canvas);
+
+    const title = document.createElement("div");
+    title.className = "itemTitle";
+    title.textContent = `${index + 1}. ${memory.name}`;
+    div.appendChild(title);
+
+    const badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent =
+      `${formatTime(memory.start)} · ${memory.duration.toFixed(2)} s`;
+    div.appendChild(badge);
+
+    const controls = document.createElement("div");
+    controls.className = "controls";
+
+    controls.appendChild(makeButton("▶", () => playSingle(memory)));
+    controls.appendChild(makeButton("←", () => move(index,-1)));
+    controls.appendChild(makeButton("→", () => move(index,1)));
+
+    const remove = makeButton("Poista", () => removeMemory(index));
+    remove.classList.add("danger");
+    controls.appendChild(remove);
+
+    div.appendChild(controls);
+    timeline.appendChild(div);
+  });
+}
+
+function makeButton(text, handler){
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = text;
+  button.addEventListener("click", handler);
+  return button;
+}
+
+function move(index, direction){
+  const target = index + direction;
+  if (target < 0 || target >= memories.length) return;
+  [memories[index], memories[target]] = [memories[target], memories[index]];
+  renderTimeline();
+}
+
+function removeMemory(index){
+  memories.splice(index,1);
+  renderTimeline();
+  if (!memories.length){
+    stage.innerHTML = '<span class="meta">Aikajana näkyy tässä.</span>';
+  }
+}
+
+async function playSingle(memory){
+  storyCancelled = true;
+  await showMemory(memory);
+}
+
+playStoryButton.addEventListener("click", async () => {
+  storyCancelled = false;
+  playStoryButton.disabled = true;
+  stopStoryButton.disabled = false;
+
+  for (const memory of memories){
+    if (storyCancelled) break;
+    await showMemory(memory);
+  }
+
+  playStoryButton.disabled = memories.length === 0;
+  stopStoryButton.disabled = true;
+});
+
+stopStoryButton.addEventListener("click", () => {
+  storyCancelled = true;
+  const video = stage.querySelector("video");
+  if (video) video.pause();
+  playStoryButton.disabled = memories.length === 0;
+  stopStoryButton.disabled = true;
+});
+
+async function showMemory(memory){
+  stage.innerHTML = "";
+
+  const video = document.createElement("video");
+  video.src = memory.url;
+  video.playsInline = true;
+  video.controls = false;
+  video.muted = muteStory.checked;
+  video.preload = "auto";
+  stage.appendChild(video);
+
+  await waitForMetadata(video);
+
+  video.currentTime = memory.start;
+  await waitForSeek(video);
+
+  try{
+    await video.play();
+  }catch(error){
+    stage.innerHTML = '<span class="meta">Videon toisto ei käynnistynyt.</span>';
+    return;
+  }
+
+  const end = memory.start + memory.duration;
+
+  await new Promise(resolve => {
+    let done = false;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      video.pause();
+      resolve();
+    };
+
+    const onTime = () => {
+      if (storyCancelled || video.currentTime >= end - 0.03) finish();
+    };
+
+    video.addEventListener("timeupdate", onTime);
+    video.addEventListener("ended", finish);
+    video.addEventListener("error", finish);
+
+    const safety = setInterval(() => {
+      if (done){
+        clearInterval(safety);
+        return;
+      }
+      if (storyCancelled || video.currentTime >= end - 0.03){
+        clearInterval(safety);
+        finish();
+      }
+    }, 30);
+  });
+}
+
+function waitForMetadata(video){
+  if (video.readyState >= 1) return Promise.resolve();
+  return new Promise(resolve => {
+    video.addEventListener("loadedmetadata", resolve, {once:true});
+    video.addEventListener("error", resolve, {once:true});
+  });
+}
+
+function waitForSeek(video){
+  if (!video.seeking) return Promise.resolve();
+  return new Promise(resolve => {
+    video.addEventListener("seeked", resolve, {once:true});
+    video.addEventListener("error", resolve, {once:true});
+  });
+}
+</script>
+</body>
+</html>
