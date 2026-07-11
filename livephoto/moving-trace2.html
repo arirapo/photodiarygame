@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>Moving Traces v2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#111;--panel:#1a1a1a;--line:#333;--text:#eee;--muted:#999;--accent:#b9dfff;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1000px;margin:0 auto}
+h1{font-weight:400;margin:0 0 8px}
+h2{font-weight:500;font-size:1.15rem;margin-top:32px}
+p{line-height:1.5}
+button,input{font:inherit}
+button{margin:8px 6px 8px 0;border:1px solid #555;border-radius:20px;padding:8px 16px;background:#222;color:var(--text)}
+button:disabled{opacity:.45}
+button.danger{border-color:#744}
+input[type="file"]{display:block;margin:12px 0}
+input[type="range"]{width:100%}
+label{display:block;margin:12px 0 6px}
+.panel{border:1px solid var(--line);background:var(--panel);padding:16px;margin-top:20px}
+#sourceVideo{width:100%;max-height:56vh;background:#000;display:block}
+.timeRow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.durationButtons button.active{background:#eee;color:#111;border-color:#eee}
+.meta,.note,.badge{color:var(--muted);font-size:.9rem}
+#timeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
+.item{border:1px solid var(--line);padding:8px;background:var(--panel);min-width:0}
+.item img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;background:#000}
+.itemTitle{margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.controls{display:flex;flex-wrap:wrap}
+.controls button{font-size:.8rem;padding:4px 9px}
+#stage{margin-top:20px;width:100%;aspect-ratio:1/1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#stage video{width:100%;height:100%;object-fit:contain}
+.empty{color:#777;border:1px dashed #333;padding:20px}
+.inline{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.inline label{margin:0}
+.status{min-height:1.5em;color:var(--accent)}
+#download a{color:#9cf;font-size:1.05rem}
+progress{width:100%;max-width:420px;height:18px}
+@media (max-width:600px){body{padding:16px}.timeRow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>Moving Traces v2</h1>
+<p>Valitse videosta 1–5 sekunnin elävä jälki, lisää se aikajanalle ja tallenna lopuksi koko aikajana yhdeksi neliövideoksi.</p>
+
+<section class="panel">
+  <label for="fileInput"><strong>1. Valitse video</strong></label>
+  <input type="file" id="fileInput" accept="video/*">
+  <video id="sourceVideo" controls playsinline preload="metadata"></video>
+
+  <div id="editor" hidden>
+    <label for="startRange"><strong>2. Valitse alkukohta</strong></label>
+    <div class="timeRow">
+      <input type="range" id="startRange" min="0" max="0" step="0.05" value="0">
+      <output id="startOutput">00:00.00</output>
+    </div>
+    <button id="useCurrent">Aseta alku tähän kohtaan</button>
+
+    <label><strong>3. Valitse kesto</strong></label>
+    <div class="durationButtons" id="durationButtons">
+      <button type="button" data-duration="1">1 s</button>
+      <button type="button" data-duration="2">2 s</button>
+      <button type="button" data-duration="3" class="active">3 s</button>
+      <button type="button" data-duration="4">4 s</button>
+      <button type="button" data-duration="5">5 s</button>
+    </div>
+
+    <div class="inline">
+      <button id="previewClip">Esikatsele valinta</button>
+      <button id="addClip">Lisää aikajanalle</button>
+      <label><input type="checkbox" id="previewLoop" checked> Loop-esikatselu</label>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</section>
+
+<section>
+  <h2>Aikajana</h2>
+  <div class="inline">
+    <button id="playStory" disabled>Play Story</button>
+    <button id="stopStory" disabled>Pysäytä</button>
+    <button id="exportStory" disabled>Tallenna aikajana videoksi</button>
+    <label><input type="checkbox" id="muteStory"> Mykistä ääni</label>
+  </div>
+  <div id="exportStatus" class="status"></div>
+  <progress id="exportProgress" value="0" max="1" hidden></progress>
+  <div id="download"></div>
+  <p class="note">Vienti tehdään selaimessa. Pitkien tai erittäin suurten lähdevideoiden käsittely voi olla iPadilla raskasta.</p>
+  <div id="timeline" class="empty">Ei vielä liikkuvia jälkiä.</div>
+</section>
+
+<section>
+  <h2>Story-esikatselu</h2>
+  <div id="stage"><span class="meta">Aikajana näkyy tässä.</span></div>
+</section>
+</main>
+
+<script>
+const fileInput=document.getElementById("fileInput");
+const sourceVideo=document.getElementById("sourceVideo");
+const editor=document.getElementById("editor");
+const startRange=document.getElementById("startRange");
+const startOutput=document.getElementById("startOutput");
+const useCurrent=document.getElementById("useCurrent");
+const durationButtons=document.getElementById("durationButtons");
+const previewClip=document.getElementById("previewClip");
+const addClip=document.getElementById("addClip");
+const previewLoop=document.getElementById("previewLoop");
+const status=document.getElementById("status");
+const timeline=document.getElementById("timeline");
+const stage=document.getElementById("stage");
+const playStoryButton=document.getElementById("playStory");
+const stopStoryButton=document.getElementById("stopStory");
+const exportStoryButton=document.getElementById("exportStory");
+const muteStory=document.getElementById("muteStory");
+const exportStatus=document.getElementById("exportStatus");
+const exportProgress=document.getElementById("exportProgress");
+const download=document.getElementById("download");
+
+let currentFile=null;
+let currentUrl="";
+let selectedDuration=3;
+let previewing=false;
+let previewEnd=0;
+let memories=[];
+let storyCancelled=false;
+let exportCancelled=false;
+
+function formatTime(seconds){
+  if(!Number.isFinite(seconds))return"00:00.00";
+  const min=Math.floor(seconds/60);
+  const sec=seconds-min*60;
+  return `${String(min).padStart(2,"0")}:${sec.toFixed(2).padStart(5,"0")}`;
+}
+function clampStart(value){
+  const maxStart=Math.max(0,sourceVideo.duration-selectedDuration);
+  return Math.min(Math.max(0,Number(value)||0),maxStart);
+}
+function updateRangeLimits(){
+  if(!Number.isFinite(sourceVideo.duration))return;
+  const maxStart=Math.max(0,sourceVideo.duration-selectedDuration);
+  startRange.max=maxStart;
+  startRange.value=clampStart(startRange.value);
+  startOutput.textContent=formatTime(Number(startRange.value));
+}
+function stopPreview(){previewing=false;sourceVideo.pause()}
+
+fileInput.addEventListener("change",()=>{
+  stopPreview();
+  currentFile=fileInput.files[0]||null;
+  status.textContent="";
+  if(!currentFile){
+    sourceVideo.removeAttribute("src");sourceVideo.load();editor.hidden=true;return;
+  }
+  // Älä vapauta vanhoja object URL -osoitteita, koska aikajana voi yhä käyttää niitä.
+  currentUrl=URL.createObjectURL(currentFile);
+  sourceVideo.src=currentUrl;
+  sourceVideo.load();
+});
+sourceVideo.addEventListener("loadedmetadata",()=>{
+  editor.hidden=false;startRange.value=0;updateRangeLimits();
+  status.textContent=`${currentFile.name} · ${formatTime(sourceVideo.duration)}`;
+});
+sourceVideo.addEventListener("timeupdate",()=>{
+  if(!previewing)return;
+  if(sourceVideo.currentTime>=previewEnd-0.03){
+    if(previewLoop.checked){
+      sourceVideo.currentTime=Number(startRange.value);
+      sourceVideo.play().catch(()=>{});
+    }else{
+      stopPreview();sourceVideo.currentTime=previewEnd;
+    }
+  }
+});
+startRange.addEventListener("input",()=>{
+  stopPreview();
+  const start=clampStart(startRange.value);
+  startRange.value=start;startOutput.textContent=formatTime(start);sourceVideo.currentTime=start;
+});
+useCurrent.addEventListener("click",()=>{
+  stopPreview();
+  const start=clampStart(sourceVideo.currentTime);
+  startRange.value=start;startOutput.textContent=formatTime(start);sourceVideo.currentTime=start;
+});
+durationButtons.addEventListener("click",event=>{
+  const button=event.target.closest("button[data-duration]");
+  if(!button)return;
+  selectedDuration=Number(button.dataset.duration);
+  [...durationButtons.querySelectorAll("button")].forEach(b=>b.classList.toggle("active",b===button));
+  updateRangeLimits();stopPreview();
+});
+previewClip.addEventListener("click",async()=>{
+  if(!currentFile)return;
+  const start=clampStart(startRange.value);
+  startRange.value=start;
+  previewEnd=Math.min(sourceVideo.duration,start+selectedDuration);
+  previewing=true;sourceVideo.currentTime=start;
+  try{
+    await sourceVideo.play();
+    status.textContent=`Esikatselu ${formatTime(start)}–${formatTime(previewEnd)} (${(previewEnd-start).toFixed(2)} s)`;
+  }catch(e){
+    previewing=false;status.textContent="Videon toisto ei käynnistynyt.";
+  }
+});
+addClip.addEventListener("click",async()=>{
+  if(!currentFile||!Number.isFinite(sourceVideo.duration))return;
+  stopPreview();
+  const start=clampStart(startRange.value);
+  const duration=Math.min(selectedDuration,sourceVideo.duration-start);
+
+  const memory={
+    id:(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`),
+    file:currentFile,
+    url:currentUrl,
+    name:currentFile.name.replace(/\.[^/.]+$/,""),
+    start,duration,
+    thumb:null
+  };
+
+  // Lisää kortti heti, jotta aikajanalta ei "häviä" pätkiä vaikka pikkukuvan teko epäonnistuisi.
+  memories.push(memory);
+  renderTimeline();
+  status.textContent=`Lisätty: ${formatTime(start)} + ${duration.toFixed(2)} s`;
+
+  try{
+    memory.thumb=await makeThumbnail(memory.url,start);
+    renderTimeline();
+  }catch(e){
+    console.warn("Pikkukuvaa ei voitu tehdä",e);
+  }
+});
+async function makeThumbnail(url,time){
+  const video=document.createElement("video");
+  video.src=url;video.muted=true;video.playsInline=true;video.preload="auto";
+  await withTimeout(waitEvent(video,"loadedmetadata"),5000);
+  video.currentTime=Math.min(time,Math.max(0,video.duration-0.05));
+  await withTimeout(waitEvent(video,"seeked"),5000);
+  const canvas=document.createElement("canvas");
+  canvas.width=400;canvas.height=400;
+  drawContain(canvas.getContext("2d"),video,canvas);
+  return canvas.toDataURL("image/jpeg",0.82);
+}
+function drawContain(ctx,media,canvas){
+  const cw=canvas.width,ch=canvas.height;
+  const mw=media.videoWidth||media.naturalWidth||1;
+  const mh=media.videoHeight||media.naturalHeight||1;
+  ctx.fillStyle="black";ctx.fillRect(0,0,cw,ch);
+  const scale=Math.min(cw/mw,ch/mh);
+  const w=mw*scale,h=mh*scale;
+  ctx.drawImage(media,(cw-w)/2,(ch-h)/2,w,h);
+}
+function renderTimeline(){
+  timeline.innerHTML="";
+  timeline.classList.toggle("empty",memories.length===0);
+  playStoryButton.disabled=memories.length===0;
+  exportStoryButton.disabled=memories.length===0;
+  if(!memories.length){timeline.textContent="Ei vielä liikkuvia jälkiä.";return}
+
+  memories.forEach((memory,index)=>{
+    const div=document.createElement("article");div.className="item";
+    const img=document.createElement("img");
+    img.alt="";
+    img.src=memory.thumb||placeholderDataUrl(index+1);
+    div.appendChild(img);
+
+    const title=document.createElement("div");title.className="itemTitle";
+    title.textContent=`${index+1}. ${memory.name}`;div.appendChild(title);
+
+    const badge=document.createElement("div");badge.className="badge";
+    badge.textContent=`${formatTime(memory.start)} · ${memory.duration.toFixed(2)} s`;div.appendChild(badge);
+
+    const controls=document.createElement("div");controls.className="controls";
+    controls.appendChild(makeButton("▶",()=>playSingle(memory)));
+    controls.appendChild(makeButton("←",()=>move(index,-1)));
+    controls.appendChild(makeButton("→",()=>move(index,1)));
+    const remove=makeButton("Poista",()=>removeMemory(index));remove.classList.add("danger");
+    controls.appendChild(remove);div.appendChild(controls);
+    timeline.appendChild(div);
+  });
+}
+function placeholderDataUrl(n){
+  const c=document.createElement("canvas");c.width=400;c.height=400;
+  const x=c.getContext("2d");x.fillStyle="#000";x.fillRect(0,0,400,400);
+  x.fillStyle="#777";x.font="48px system-ui";x.textAlign="center";x.textBaseline="middle";x.fillText(String(n),200,200);
+  return c.toDataURL();
+}
+function makeButton(text,handler){
+  const b=document.createElement("button");b.type="button";b.textContent=text;b.addEventListener("click",handler);return b;
+}
+function move(index,direction){
+  const target=index+direction;if(target<0||target>=memories.length)return;
+  [memories[index],memories[target]]=[memories[target],memories[index]];renderTimeline();
+}
+function removeMemory(index){
+  memories.splice(index,1);renderTimeline();
+  if(!memories.length)stage.innerHTML='<span class="meta">Aikajana näkyy tässä.</span>';
+}
+async function playSingle(memory){storyCancelled=false;await showMemory(memory)}
+playStoryButton.addEventListener("click",async()=>{
+  storyCancelled=false;playStoryButton.disabled=true;stopStoryButton.disabled=false;
+  for(const memory of memories){if(storyCancelled)break;await showMemory(memory)}
+  playStoryButton.disabled=memories.length===0;stopStoryButton.disabled=true;
+});
+stopStoryButton.addEventListener("click",()=>{
+  storyCancelled=true;const video=stage.querySelector("video");if(video)video.pause();
+  playStoryButton.disabled=memories.length===0;stopStoryButton.disabled=true;
+});
+async function showMemory(memory){
+  stage.innerHTML="";
+  const video=document.createElement("video");
+  video.src=memory.url;video.playsInline=true;video.controls=false;video.muted=muteStory.checked;video.preload="auto";
+  stage.appendChild(video);
+  await waitForMetadata(video);
+  video.currentTime=memory.start;await waitForSeek(video);
+  try{await video.play()}catch(e){stage.innerHTML='<span class="meta">Videon toisto ei käynnistynyt.</span>';return}
+  await playUntil(video,memory.start+memory.duration,()=>storyCancelled);
+}
+
+exportStoryButton.addEventListener("click",async()=>{
+  if(!memories.length)return;
+  exportCancelled=false;
+  download.innerHTML="";
+  exportStatus.textContent="Valmistellaan neliövideota…";
+  exportProgress.hidden=false;exportProgress.value=0;
+  exportStoryButton.disabled=true;
+
+  const canvas=document.createElement("canvas");
+  canvas.width=1080;canvas.height=1080;
+  const ctx=canvas.getContext("2d",{alpha:false});
+  ctx.fillStyle="black";ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  const canvasStream=canvas.captureStream(30);
+  let audioContext=null,audioDestination=null;
+  let combinedStream=new MediaStream(canvasStream.getVideoTracks());
+
+  if(!muteStory.checked){
+    try{
+      audioContext=new (window.AudioContext||window.webkitAudioContext)();
+      await audioContext.resume();
+      audioDestination=audioContext.createMediaStreamDestination();
+      audioDestination.stream.getAudioTracks().forEach(t=>combinedStream.addTrack(t));
+    }catch(e){
+      console.warn("Ääniraitaa ei voitu alustaa",e);
+    }
+  }
+
+  const mime=pickMimeType();
+  let recorder;
+  try{
+    recorder=new MediaRecorder(combinedStream,mime?{mimeType:mime}:undefined);
+  }catch(e){
+    exportStatus.textContent="Tämä selain ei tue aikajanan videotallennusta.";
+    exportProgress.hidden=true;exportStoryButton.disabled=false;
+    return;
+  }
+
+  const chunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+  const stopped=new Promise(resolve=>recorder.onstop=resolve);
+  recorder.start(250);
+
+  const total=memories.reduce((s,m)=>s+m.duration,0);
+  let completed=0;
+
+  try{
+    for(const memory of memories){
+      if(exportCancelled)break;
+      await renderClipToCanvas(memory,ctx,canvas,audioContext,audioDestination,progress=>{
+        exportProgress.value=(completed+progress*memory.duration)/total;
+      });
+      completed+=memory.duration;
+      exportProgress.value=completed/total;
+    }
+  }catch(e){
+    console.error(e);
+    exportStatus.textContent="Viennissä tapahtui virhe.";
+  }
+
+  recorder.stop();
+  await stopped;
+  if(audioContext)await audioContext.close().catch(()=>{});
+
+  const actualMime=recorder.mimeType||mime||"video/webm";
+  const blob=new Blob(chunks,{type:actualMime});
+  const url=URL.createObjectURL(blob);
+  const ext=actualMime.includes("mp4")?"mp4":"webm";
+
+  exportStatus.textContent="Aikajanavideo on valmis.";
+  download.innerHTML=`<p><a href="${url}" download="moving-traces.${ext}">Lataa moving-traces.${ext}</a></p>
+  <p class="note">${muteStory.checked?"Video tallennettiin ilman ääntä.":"Ääni tallennettiin, jos selain tuki ääniraitaa."}</p>`;
+  exportProgress.hidden=true;
+  exportStoryButton.disabled=false;
+});
+
+function pickMimeType(){
+  const types=[
+    "video/mp4;codecs=h264,aac",
+    "video/mp4",
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm"
+  ];
+  return types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+}
+
+async function renderClipToCanvas(memory,ctx,canvas,audioContext,audioDestination,onProgress){
+  const video=document.createElement("video");
+  video.src=memory.url;video.playsInline=true;video.preload="auto";video.crossOrigin="anonymous";
+  video.muted=!audioDestination;
+
+  let sourceNode=null;
+  if(audioContext&&audioDestination){
+    try{
+      sourceNode=audioContext.createMediaElementSource(video);
+      sourceNode.connect(audioDestination);
+      // Ei kytketä kaiuttimiin, jotta vienti ei soi kaksinkertaisena.
+    }catch(e){console.warn("Äänen liittäminen epäonnistui",e)}
+  }
+
+  await waitForMetadata(video);
+  video.currentTime=memory.start;
+  await waitForSeek(video);
+  await video.play();
+
+  const end=memory.start+memory.duration;
+
+  await new Promise(resolve=>{
+    let raf=0;
+    const frame=()=>{
+      if(exportCancelled||video.ended||video.currentTime>=end-0.02){
+        video.pause();cancelAnimationFrame(raf);
+        if(sourceNode)sourceNode.disconnect();
+        resolve();return;
+      }
+      drawContain(ctx,video,canvas);
+      onProgress(Math.min(1,(video.currentTime-memory.start)/memory.duration));
+      raf=requestAnimationFrame(frame);
+    };
+    frame();
+  });
+}
+
+function playUntil(video,end,cancelled){
+  return new Promise(resolve=>{
+    let done=false;
+    const finish=()=>{if(done)return;done=true;video.pause();resolve()};
+    const timer=setInterval(()=>{
+      if(done){clearInterval(timer);return}
+      if(cancelled()||video.ended||video.currentTime>=end-0.03){clearInterval(timer);finish()}
+    },30);
+    video.addEventListener("ended",finish,{once:true});
+    video.addEventListener("error",finish,{once:true});
+  });
+}
+function waitForMetadata(video){
+  if(video.readyState>=1)return Promise.resolve();
+  return waitEvent(video,"loadedmetadata");
+}
+function waitForSeek(video){
+  if(!video.seeking)return Promise.resolve();
+  return waitEvent(video,"seeked");
+}
+function waitEvent(target,name){
+  return new Promise((resolve,reject)=>{
+    target.addEventListener(name,resolve,{once:true});
+    target.addEventListener("error",reject,{once:true});
+  });
+}
+function withTimeout(promise,ms){
+  return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),ms))]);
+}
+</script>
+</body>
+</html>
