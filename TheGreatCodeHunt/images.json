@@ -5,11 +5,11 @@
   "finishTitle": "THE HUNT IS COMPLETE",
   "finishText": "All 54 fragments have been recovered. The cube is complete. Thank you for hunting.",
   "faces": [
-    {"name":"Renaissance","class":"front","image":"images/renaissance.svg"},
-    {"name":"Geometric","class":"right","image":"images/geometric.svg"},
-    {"name":"Self","class":"top","image":"images/selfie.svg"},
-    {"name":"Mural","class":"left","image":"images/mural.svg"},
-    {"name":"Cinema","class":"back","image":"images/cinema.svg"},
-    {"name":"Statue","class":"bottom","image":"images/statue.svg"}
+    {"name":"S1X","class":"front","image":"images/IMG_7448.jpeg"},
+    {"name":"S1X","class":"front","image":"images/IMG_7447.jpeg"},
+    {"name":"S1X","class":"front","image":"images/IMG_7446.jpeg"},
+    {"name":"S1X","class":"front","image":"images/IMG_7445.jpeg"},
+    {"name":"S1X","class":"front","image":"images/IMG_7444.jpeg"},
+    {"name":"S1X","class":"front","image":"images/IMG_7443.jpeg"},
   ]
 }
