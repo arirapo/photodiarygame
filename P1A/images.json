@@ -6,34 +6,34 @@
   "finishText": "Olet paljastanut kaikki 54 kuvapalaa. Kiitos pelaamisesta.",
   "faces": [
     {
-      "name": "Renessanssi",
+      "name": "Pia",
       "class": "front",
-      "image": "images/renaissance.svg"
+      "image": "images/IMG_7318.jpeg"
     },
     {
-      "name": "Geometrinen",
+      "name": "Pia",
       "class": "right",
-      "image": "images/geometric.svg"
+      "image": "images/IMG_7319.jpeg"
     },
     {
-      "name": "Selfie",
+      "name": "Pia",
       "class": "top",
-      "image": "images/selfie.svg"
+      "image": "images/IMG_7320.jpeg"
     },
     {
-      "name": "Muraali",
+      "name": "Pia",
       "class": "left",
-      "image": "images/mural.svg"
+      "image": "images/IMG_7321.jpeg"
     },
     {
-      "name": "Elokuvallinen",
+      "name": "Pia",
       "class": "back",
-      "image": "images/cinema.svg"
+      "image": "images/IMG_7322.jpeg"
     },
     {
-      "name": "Veistos",
+      "name": "Pia",
       "class": "bottom",
-      "image": "images/statue.svg"
+      "image": "images/IMG_7323.jpeg"
     }
   ]
 }
