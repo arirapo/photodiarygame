@@ -8,32 +8,32 @@
     {
       "name": "Renessanssi",
       "class": "front",
-      "image": "images/renaissance.svg"
+      "image": "images/IMG_1122.jpeg"
     },
     {
       "name": "Geometrinen",
       "class": "right",
-      "image": "images/geometric.svg"
+      "image": "images/IMG_1606.jpeg"
     },
     {
       "name": "Selfie",
       "class": "top",
-      "image": "images/selfie.svg"
+      "image": "images/IMG_3611.jpeg"
     },
     {
       "name": "Muraali",
       "class": "left",
-      "image": "images/mural.svg"
+      "image": "images/IMG_3899.jpeg"
     },
     {
       "name": "Elokuvallinen",
       "class": "back",
-      "image": "images/cinema.svg"
+      "image": "images/IMG_6402.jpeg"
     },
     {
       "name": "Veistos",
       "class": "bottom",
-      "image": "images/statue.svg"
+      "image": "images/IMG_7284.jpeg"
     }
   ]
 }
