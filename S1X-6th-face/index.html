@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SIX – prototyyppi 1.3.2</title>
+<title>SIX –  1.3.2</title>
 <style>
 :root{--bg:#0d1117;--panel:#161b22;--panel2:#21262d;--text:#f0f3f6;--muted:#9da7b3;--line:#30363d;--accent:#f2c66d;--ok:#67d59a;--danger:#ff7b72;--cube:240px}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 15%,#1b2430 0,#0d1117 42%,#090c11 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:20px;overflow-x:hidden}button{font:inherit}.app{max-width:980px;margin:0 auto}header{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}.brand h1{margin:0;font-size:clamp(2.1rem,7vw,4.5rem);letter-spacing:.18em;font-weight:700;line-height:.9}.brand p{margin:.75rem 0 0;color:var(--muted);max-width:560px}.stats{background:rgba(22,27,34,.78);border:1px solid var(--line);border-radius:18px;padding:12px 16px;min-width:120px;text-align:center;backdrop-filter:blur(10px)}.stats strong{font-size:1.4rem;display:block}.stats span{font-size:.8rem;color:var(--muted)}main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:22px;align-items:start}.stage-card,.control-card{background:rgba(22,27,34,.74);border:1px solid var(--line);border-radius:24px;box-shadow:0 25px 70px rgba(0,0,0,.28);backdrop-filter:blur(10px)}.stage-card{min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}.stage-card:before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(242,198,109,.12),transparent 68%);pointer-events:none}.scene{width:var(--cube);height:var(--cube);perspective:900px;touch-action:none;cursor:grab;position:relative;z-index:1}.scene:active{cursor:grabbing}.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-22deg) rotateY(35deg);transition:transform .08s linear}.face{position:absolute;width:var(--cube);height:var(--cube);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);background:#111;border:2px solid rgba(255,255,255,.06);backface-visibility:hidden}.front{transform:translateZ(calc(var(--cube)/2))}.back{transform:rotateY(180deg) translateZ(calc(var(--cube)/2))}.right{transform:rotateY(90deg) translateZ(calc(var(--cube)/2))}.left{transform:rotateY(-90deg) translateZ(calc(var(--cube)/2))}.top{transform:rotateX(90deg) translateZ(calc(var(--cube)/2))}.bottom{transform:rotateX(-90deg) translateZ(calc(var(--cube)/2))}.tile{position:relative;border:1px solid rgba(0,0,0,.52);overflow:hidden;background-color:#151922;background-repeat:no-repeat;background-size:300% 300%;filter:saturate(.95)}.tile.locked::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#252c36,#10141a);opacity:.98}.tile.locked::after{content:"✦";position:absolute;inset:0;display:grid;place-items:center;color:#46505e;font-size:1.2rem}.tile.revealed{animation:reveal .7s ease both}.tile.revealed::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 18px rgba(242,198,109,.18);pointer-events:none}@keyframes reveal{0%{transform:scale(.72) rotateY(90deg);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1);opacity:1}}.hint{margin-top:34px;color:var(--muted);font-size:.9rem;text-align:center;z-index:1}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;z-index:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 16px;border-radius:999px;cursor:pointer}.btn:hover{transform:translateY(-1px)}.btn.primary{background:var(--accent);color:#1a1204;border-color:transparent;font-weight:700}.btn.danger{color:#ffc2bd}.control-card{padding:20px}.control-card h2{margin:0 0 8px;font-size:1.15rem}.control-card p{color:var(--muted);line-height:1.5}.progress{height:10px;border-radius:999px;background:#0f1319;overflow:hidden;border:1px solid var(--line);margin:16px 0 8px}.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#fff0b8);transition:width .4s ease}.legend{display:grid;gap:10px;margin-top:18px}.legend-row{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}.legend-row span:last-child{color:var(--muted)}.note{margin-top:18px;padding:14px;border-radius:16px;background:#11161d;border:1px solid var(--line);font-size:.9rem;color:var(--muted)}.overlay{position:fixed;inset:0;background:rgba(3,6,10,.82);display:none;align-items:center;justify-content:center;padding:18px;z-index:50;backdrop-filter:blur(7px)}.overlay.open{display:flex}.modal{width:min(520px,100%);background:#131922;border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 35px 100px rgba(0,0,0,.55)}.modal h3{margin:0 0 8px}.modal p{color:var(--muted);margin:.2rem 0 1rem;line-height:1.45}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px auto;max-width:330px}.game-cell{aspect-ratio:1;border:1px solid var(--line);border-radius:14px;background:#202833;color:var(--text);font-size:2rem;display:grid;place-items:center;cursor:pointer;user-select:none}.memory-cell.active{background:var(--accent);box-shadow:0 0 22px rgba(242,198,109,.45)}.game-cell.small{font-size:1.35rem}.game-cell.selected{outline:2px solid var(--accent);background:#293444}.game-cell.matched{background:#244633;color:#d8ffe8}.option-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:360px;margin:18px auto}.option-btn{border:1px solid var(--line);background:#202833;color:var(--text);border-radius:14px;padding:16px 10px;min-height:72px;font-size:1.7rem;cursor:pointer}.sequence-line{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0}.sequence-token{width:54px;height:54px;border-radius:14px;background:#202833;border:1px solid var(--line);display:grid;place-items:center;font-size:1.6rem}.status{min-height:24px;text-align:center;font-weight:600}.tiny{font-size:.78rem;color:var(--muted)}.badge{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.82rem}
 .scanner-wrap{margin:14px 0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#080b10}
@@ -19,7 +19,7 @@
 .selfie-preview{width:76px;height:76px;flex:0 0 76px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(135deg,#252c36,#11161d);background-position:center;background-size:cover;display:grid;place-items:center;overflow:hidden}
 .selfie-preview span{color:var(--accent);font-size:1.15rem;font-weight:700}
 .selfie-copy{display:flex;flex-direction:column;gap:4px}.selfie-copy small{color:var(--muted);line-height:1.35}
-.start-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
+.start-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}.game-start-actions{margin-top:10px}
 .selfie-status{min-height:22px;margin-top:10px;color:var(--muted);font-size:.85rem}
 @media(max-width:760px){body{padding:14px}header{align-items:center}main{grid-template-columns:1fr}.stage-card{min-height:470px}:root{--cube:min(64vw,230px)}}
 .start-screen,.finish-screen{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 25%,#1b2430,#0d1117 55%,#090c11)}.start-screen.hidden,.finish-screen.hidden{display:none}.start-card,.finish-card{width:min(540px,100%);padding:30px;border-radius:28px;background:rgba(22,27,34,.9);border:1px solid var(--line);box-shadow:0 35px 100px rgba(0,0,0,.55);text-align:center}.start-card h1,.finish-card h1{margin:0;font-size:clamp(2.5rem,12vw,5rem);letter-spacing:.16em}.start-card p,.finish-card p{color:var(--muted);line-height:1.6;margin:18px auto 24px;max-width:420px}.face-label{position:absolute;left:6px;bottom:4px;z-index:5;font-size:.5rem;color:rgba(255,255,255,.75);text-shadow:0 1px 3px #000}</style>
@@ -28,17 +28,20 @@
   <div class="selfie-preview" id="selfiePreview"><span>6th</span></div>
   <div class="selfie-copy">
     <strong>Kuudes kasvosi</strong>
-    <small>Valitse oma kuva kuution kuudenneksi sivuksi. Kuva pysyy tällä laitteella.</small>
+    <small>Valitse oma kuva kuution kuudenneksi sivuksi. Kuva pysyy vain tällä laitteella.</small>
   </div>
 </div>
 <input type="file" id="selfieInput" accept="image/*" hidden>
 <div class="start-actions">
   <button class="btn" id="chooseSelfieBtn">Valitse kuva</button>
   <button class="btn danger hidden" id="removeSelfieBtn">Poista kuva</button>
-  <button class="btn primary" id="startGameBtn">Aloita peli</button>
+</div>
+<div class="start-actions game-start-actions">
+  <button class="btn primary hidden" id="continueGameBtn">Jatka peliä</button>
+  <button class="btn" id="newGameBtn">Uusi peli</button>
 </div>
 <div class="selfie-status" id="selfieStatus"></div></div></div><div class="finish-screen hidden" id="finishScreen"><div class="finish-card"><h1 id="finishTitle">Kuutio on valmis!</h1><p id="finishText">Olet paljastanut kaikki 54 kuvapalaa. Kiitos pelaamisesta.</p><button class="btn primary" id="closeFinishBtn">Katsele kuutiota</button></div></div>
-<div class="app"><header><div class="brand"><h1>S1X</h1><p>Complete the cube — and make its sixth face your own.</p></div><div class="stats"><strong id="count">0/54</strong><span>paljastettu</span></div></header><main><section class="stage-card"><div class="scene" id="scene" aria-label="Pyöritettävä kuutio"><div class="cube" id="cube"></div></div><div class="controls"><button class="btn primary" id="playBtn">Avaa seuraava pala</button><button class="btn" id="autoRotateBtn">Automaattinen pyöritys</button><button class="btn danger" id="resetBtn">Nollaa</button></div><div class="hint">Vedä kuutiota sormella tai hiirellä.</div></section><aside class="control-card"><div class="badge">SIXTH FACE · EXPERIMENTAL</div><h2 style="margin-top:16px">Pelin ydin</h2><p>Noin joka viides tehtävä on Koodijahti. Minipeli avaa yhden palan, EAN-koodi yhden ja QR-koodi kaksi.</p><div class="progress"><div id="progressBar"></div></div><div class="tiny" id="progressText">0 % valmis</div><div class="tiny" id="gameTimer" style="margin-top:6px">Peliaika 00:00</div><div class="legend">
+<div class="app"><header><div class="brand"><h1>S1X</h1><p>Complete the cube — and make its sixth face your own.</p></div><div class="stats"><strong id="count">0/54</strong><span>paljastettu</span></div></header><main><section class="stage-card"><div class="scene" id="scene" aria-label="Pyöritettävä kuutio"><div class="cube" id="cube"></div></div><div class="controls"><button class="btn primary" id="playBtn">Avaa seuraava pala</button><button class="btn" id="autoRotateBtn">Automaattinen pyöritys</button><button class="btn danger" id="resetBtn">Nollaa</button></div><div class="hint">Vedä kuutiota sormella tai hiirellä.</div></section><aside class="control-card"><div class="badge">S1X · SIXTH FACE</div><h2 style="margin-top:16px">Pelin ydin</h2><p>Noin joka viides tehtävä on Koodijahti. Minipeli avaa yhden palan, EAN-koodi yhden ja QR-koodi kaksi.</p><div class="progress"><div id="progressBar"></div></div><div class="tiny" id="progressText">0 % valmis</div><div class="tiny" id="gameTimer" style="margin-top:6px">Peliaika 00:00</div><div class="legend">
 <div class="legend-row"><span>Kuudes aisti</span><span>toista valosarja</span></div>
 <div class="legend-row"><span>Ristinolla</span><span>voita tai pelaa tasan</span></div>
 <div class="legend-row"><span>Poikkeava</span><span>löydä erilainen</span></div>
@@ -46,7 +49,7 @@
 <div class="legend-row"><span>Muistiparit</span><span>etsi kolme paria</span></div>
 <div class="legend-row"><span>Käännä oikein</span><span>suuntaa nuolet</span></div>
 <div class="legend-row"><span>Koodijahti</span><span>EAN 1 · QR 2 palaa</span></div>
-</div><div class="note">Kuvat ovat alkuperäisiä SVG-muotokuvia. Eteneminen ja jo käytetyt koodit tallentuvat tämän laitteen selaimeen.</div></aside></main></div>
+</div><div class="note">Eteneminen, käytetyt koodit ja oma kuudes kuva tallentuvat vain tämän laitteen selaimeen.</div></aside></main></div>
 <div class="overlay" id="overlay"><div class="modal"><h3 id="modalTitle">Tehtävä</h3><p id="modalText"></p><div id="gameArea"></div><div class="status" id="status"></div><div class="modal-actions"><button class="btn" id="closeModal">Sulje</button></div></div></div>
 <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
 <script>
@@ -66,7 +69,7 @@ async function loadConfig(){
   }catch(e){
     console.error(e);
     document.getElementById("startText").textContent="images.json ei latautunut. Avaa peli GitHub Pagesin kautta.";
-    document.getElementById("startGameBtn").disabled=true;
+    document.getElementById("newGameBtn").disabled=true;document.getElementById("continueGameBtn").disabled=true;
   }
 }function buildCube(faces){cube.innerHTML="";["front","right","top","left","back","bottom"].forEach((cls,fi)=>{const f=faces.find(x=>x.class===cls)||faces[fi];const el=document.createElement("div");el.className=`face ${cls}`;for(let i=0;i<9;i++){const t=document.createElement("div");t.className="tile locked";t.dataset.index=fi*9+i;const img=(cls==="bottom"&&sixthFaceImage)?sixthFaceImage:(f?.image||"");t.style.backgroundImage=`url("${img}")`;t.style.backgroundPosition=`${i%3*50}% ${Math.floor(i/3)*50}%`;el.appendChild(t)}if(f?.name){const l=document.createElement("div");l.className="face-label";l.textContent=(cls==="bottom"&&sixthFaceImage)?"SIXTH FACE":f.name;el.appendChild(l)}cube.appendChild(el)})}let revealed=JSON.parse(localStorage.getItem("six-revealed")||"[]");revealed=Array.isArray(revealed)?revealed.filter(n=>Number.isInteger(n)&&n>=0&&n<54):[];let last=-1;let previousRevealedCount=revealed.length;let gameStarted=false;let finishShown=false;function showFinish(){
   if(finishShown)return;
@@ -271,112 +274,22 @@ function startRotate(){
   const cells=state.map((v,i)=>{const b=document.createElement("button");b.className="game-cell";b.textContent=dirs[v];b.onclick=()=>{state[i]=(state[i]+1)%4;b.textContent=dirs[state[i]];if(state.every(x=>x===0))rewardByTime(startedAt,14,"Kaikki suunnat ovat kohdallaan.")};grid.appendChild(b);return b});
 }
 
-document.getElementById("resetBtn").onclick=()=>{if(confirm("Nollataanko kaikki 54 kuvapalaa ja käytettyjen koodien historia?")){revealed=[];last=-1;previousRevealedCount=0;finishShown=false;document.getElementById("finishScreen").classList.add("hidden");localStorage.removeItem("six-used-codes");localStorage.removeItem("six-game-start");gameStartTime=0;clearInterval(timerInterval);selfieDB.remove();sixthFaceImage=null;updateSelfieUI();buildCube(gameConfig.faces||[]);updateGameTimer();updateUI()}};
-
-const selfieDB={
-  open(){
-    return new Promise((resolve,reject)=>{
-      const req=indexedDB.open("s1x-sixth-face",1);
-      req.onupgradeneeded=()=>req.result.createObjectStore("images");
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    });
-  },
-  async get(){
-    const db=await this.open();
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction("images","readonly");
-      const req=tx.objectStore("images").get("sixthFace");
-      req.onsuccess=()=>resolve(req.result||null);
-      req.onerror=()=>reject(req.error);
-    });
-  },
-  async set(value){
-    const db=await this.open();
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction("images","readwrite");
-      tx.objectStore("images").put(value,"sixthFace");
-      tx.oncomplete=()=>resolve();
-      tx.onerror=()=>reject(tx.error);
-    });
-  },
-  async remove(){
-    const db=await this.open();
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction("images","readwrite");
-      tx.objectStore("images").delete("sixthFace");
-      tx.oncomplete=()=>resolve();
-      tx.onerror=()=>reject(tx.error);
-    });
-  }
-};
-
-function updateSelfieUI(){
-  const preview=document.getElementById("selfiePreview");
-  const remove=document.getElementById("removeSelfieBtn");
-  if(sixthFaceImage){
-    preview.style.backgroundImage=`url("${sixthFaceImage}")`;
-    preview.innerHTML="";
-    remove.classList.remove("hidden");
-    document.getElementById("selfieStatus").textContent="Oma kuva on asetettu kuudenneksi sivuksi.";
-  }else{
-    preview.style.backgroundImage="";
-    preview.innerHTML="<span>6th</span>";
-    remove.classList.add("hidden");
-    document.getElementById("selfieStatus").textContent="Voit myös aloittaa ilman omaa kuvaa.";
-  }
-}
-
-function cropImageToSquare(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onerror=()=>reject(reader.error);
-    reader.onload=()=>{
-      const img=new Image();
-      img.onerror=()=>reject(new Error("Kuvaa ei voitu avata."));
-      img.onload=()=>{
-        const side=Math.min(img.naturalWidth,img.naturalHeight);
-        const sx=(img.naturalWidth-side)/2;
-        const sy=(img.naturalHeight-side)/2;
-        const canvas=document.createElement("canvas");
-        canvas.width=1200; canvas.height=1200;
-        const ctx=canvas.getContext("2d");
-        ctx.drawImage(img,sx,sy,side,side,0,0,1200,1200);
-        resolve(canvas.toDataURL("image/jpeg",0.86));
-      };
-      img.src=reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-document.getElementById("chooseSelfieBtn").onclick=()=>document.getElementById("selfieInput").click();
-document.getElementById("selfieInput").onchange=async e=>{
-  const file=e.target.files?.[0];
-  if(!file)return;
-  const status=document.getElementById("selfieStatus");
-  status.textContent="Käsitellään kuvaa…";
-  try{
-    sixthFaceImage=await cropImageToSquare(file);
-    await selfieDB.set(sixthFaceImage);
-    updateSelfieUI();
-    buildCube(gameConfig.faces||[]);
+document.getElementById("resetBtn").onclick=()=>{
+  if(confirm("Aloitetaanko uusi peli? Eteneminen, käytetyt koodit ja peliaika nollataan. Oma kuva säilyy.")){
+    revealed=[];
+    last=-1;
+    finishShown=false;
+    localStorage.removeItem("six-revealed");
+    localStorage.removeItem("six-used-codes");
+    localStorage.removeItem("six-game-start");
+    gameStartTime=Date.now();
+    localStorage.setItem("six-game-start",String(gameStartTime));
+    clearInterval(timerInterval);
     updateUI();
-  }catch(err){
-    console.error(err);
-    status.textContent="Kuvan käsittely ei onnistunut.";
-  }finally{
-    e.target.value="";
+    updateGameTimer();
+    startGameClock();
+    updateStartChoices();
   }
 };
-document.getElementById("removeSelfieBtn").onclick=async()=>{
-  await selfieDB.remove();
-  sixthFaceImage=null;
-  updateSelfieUI();
-  buildCube(gameConfig.faces||[]);
-  updateUI();
-};
-
-loadConfig();updateGameTimer();
-document.getElementById("startGameBtn").onclick=()=>{gameStarted=true;startGameClock();document.getElementById("startScreen").classList.add("hidden");if(revealed.length>=54)showFinish()};document.getElementById("closeFinishBtn").onclick=()=>document.getElementById("finishScreen").classList.add("hidden");</script><!-- S1X: Sixth Face © 2026 Ari Rapo. Experimental branch. -->
+</script><!-- S1X: Sixth Face © 2026 Ari Rapo. All rights reserved. -->
 </body></html>
