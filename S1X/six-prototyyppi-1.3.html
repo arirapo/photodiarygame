@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIX – prototyyppi 1.3</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel2:#21262d;--text:#f0f3f6;--muted:#9da7b3;--line:#30363d;--accent:#f2c66d;--ok:#67d59a;--danger:#ff7b72;--cube:240px}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 15%,#1b2430 0,#0d1117 42%,#090c11 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:20px;overflow-x:hidden}button{font:inherit}.app{max-width:980px;margin:0 auto}header{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}.brand h1{margin:0;font-size:clamp(2.1rem,7vw,4.5rem);letter-spacing:.18em;font-weight:700;line-height:.9}.brand p{margin:.75rem 0 0;color:var(--muted);max-width:560px}.stats{background:rgba(22,27,34,.78);border:1px solid var(--line);border-radius:18px;padding:12px 16px;min-width:120px;text-align:center;backdrop-filter:blur(10px)}.stats strong{font-size:1.4rem;display:block}.stats span{font-size:.8rem;color:var(--muted)}main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:22px;align-items:start}.stage-card,.control-card{background:rgba(22,27,34,.74);border:1px solid var(--line);border-radius:24px;box-shadow:0 25px 70px rgba(0,0,0,.28);backdrop-filter:blur(10px)}.stage-card{min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}.stage-card:before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(242,198,109,.12),transparent 68%);pointer-events:none}.scene{width:var(--cube);height:var(--cube);perspective:900px;touch-action:none;cursor:grab;position:relative;z-index:1}.scene:active{cursor:grabbing}.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-22deg) rotateY(35deg);transition:transform .08s linear}.face{position:absolute;width:var(--cube);height:var(--cube);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);background:#111;border:2px solid rgba(255,255,255,.06);backface-visibility:hidden}.front{transform:translateZ(calc(var(--cube)/2))}.back{transform:rotateY(180deg) translateZ(calc(var(--cube)/2))}.right{transform:rotateY(90deg) translateZ(calc(var(--cube)/2))}.left{transform:rotateY(-90deg) translateZ(calc(var(--cube)/2))}.top{transform:rotateX(90deg) translateZ(calc(var(--cube)/2))}.bottom{transform:rotateX(-90deg) translateZ(calc(var(--cube)/2))}.tile{position:relative;border:1px solid rgba(0,0,0,.52);overflow:hidden;background-color:#151922;background-repeat:no-repeat;background-size:300% 300%;filter:saturate(.95)}.tile.locked::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#252c36,#10141a);opacity:.98}.tile.locked::after{content:"✦";position:absolute;inset:0;display:grid;place-items:center;color:#46505e;font-size:1.2rem}.tile.revealed{animation:reveal .7s ease both}.tile.revealed::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 18px rgba(242,198,109,.18);pointer-events:none}@keyframes reveal{0%{transform:scale(.72) rotateY(90deg);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1);opacity:1}}.hint{margin-top:34px;color:var(--muted);font-size:.9rem;text-align:center;z-index:1}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;z-index:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 16px;border-radius:999px;cursor:pointer}.btn:hover{transform:translateY(-1px)}.btn.primary{background:var(--accent);color:#1a1204;border-color:transparent;font-weight:700}.btn.danger{color:#ffc2bd}.control-card{padding:20px}.control-card h2{margin:0 0 8px;font-size:1.15rem}.control-card p{color:var(--muted);line-height:1.5}.progress{height:10px;border-radius:999px;background:#0f1319;overflow:hidden;border:1px solid var(--line);margin:16px 0 8px}.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#fff0b8);transition:width .4s ease}.legend{display:grid;gap:10px;margin-top:18px}.legend-row{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}.legend-row span:last-child{color:var(--muted)}.note{margin-top:18px;padding:14px;border-radius:16px;background:#11161d;border:1px solid var(--line);font-size:.9rem;color:var(--muted)}.overlay{position:fixed;inset:0;background:rgba(3,6,10,.82);display:none;align-items:center;justify-content:center;padding:18px;z-index:50;backdrop-filter:blur(7px)}.overlay.open{display:flex}.modal{width:min(520px,100%);background:#131922;border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 35px 100px rgba(0,0,0,.55)}.modal h3{margin:0 0 8px}.modal p{color:var(--muted);margin:.2rem 0 1rem;line-height:1.45}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px auto;max-width:330px}.game-cell{aspect-ratio:1;border:1px solid var(--line);border-radius:14px;background:#202833;color:var(--text);font-size:2rem;display:grid;place-items:center;cursor:pointer;user-select:none}.memory-cell.active{background:var(--accent);box-shadow:0 0 22px rgba(242,198,109,.45)}.game-cell.small{font-size:1.35rem}.game-cell.selected{outline:2px solid var(--accent);background:#293444}.game-cell.matched{background:#244633;color:#d8ffe8}.option-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:360px;margin:18px auto}.option-btn{border:1px solid var(--line);background:#202833;color:var(--text);border-radius:14px;padding:16px 10px;min-height:72px;font-size:1.7rem;cursor:pointer}.sequence-line{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0}.sequence-token{width:54px;height:54px;border-radius:14px;background:#202833;border:1px solid var(--line);display:grid;place-items:center;font-size:1.6rem}.status{min-height:24px;text-align:center;font-weight:600}.tiny{font-size:.78rem;color:var(--muted)}.badge{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.82rem}
+.scanner-wrap{margin:14px 0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#080b10}
+#scannerVideo{display:block;width:100%;max-height:290px;object-fit:cover;background:#05070a}
+.scan-line{height:2px;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:scanpulse 1.4s ease-in-out infinite}
+@keyframes scanpulse{0%,100%{opacity:.25}50%{opacity:1}}
+.scan-controls{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.manual-row{display:flex;gap:8px;margin-top:12px}
+.manual-row input{min-width:0;flex:1;background:#0d1218;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px}
+.code-note{font-size:.82rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4}
+@media(max-width:760px){body{padding:14px}header{align-items:center}main{grid-template-columns:1fr}.stage-card{min-height:470px}:root{--cube:min(64vw,230px)}}
+.start-screen,.finish-screen{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 25%,#1b2430,#0d1117 55%,#090c11)}.start-screen.hidden,.finish-screen.hidden{display:none}.start-card,.finish-card{width:min(540px,100%);padding:30px;border-radius:28px;background:rgba(22,27,34,.9);border:1px solid var(--line);box-shadow:0 35px 100px rgba(0,0,0,.55);text-align:center}.start-card h1,.finish-card h1{margin:0;font-size:clamp(2.5rem,12vw,5rem);letter-spacing:.16em}.start-card p,.finish-card p{color:var(--muted);line-height:1.6;margin:18px auto 24px;max-width:420px}.face-label{position:absolute;left:6px;bottom:4px;z-index:5;font-size:.5rem;color:rgba(255,255,255,.75);text-shadow:0 1px 3px #000}</style>
+</head>
+<body><div class="start-screen" id="startScreen"><div class="start-card"><h1 id="startTitle">SIX</h1><p id="startText">Ladataan peliä…</p><button class="btn primary" id="startGameBtn">Aloita peli</button></div></div><div class="finish-screen hidden" id="finishScreen"><div class="finish-card"><h1 id="finishTitle">Kuutio on valmis!</h1><p id="finishText">Olet paljastanut kaikki 54 kuvapalaa. Kiitos pelaamisesta.</p><button class="btn primary" id="closeFinishBtn">Katsele kuutiota</button></div></div>
+<div class="app"><header><div class="brand"><h1>SIX</h1><p>Pyöritä kuutiota, ratkaise lyhyt tehtävä ja paljasta yksi kuvapala kerrallaan.</p></div><div class="stats"><strong id="count">0/54</strong><span>paljastettu</span></div></header><main><section class="stage-card"><div class="scene" id="scene" aria-label="Pyöritettävä kuutio"><div class="cube" id="cube"></div></div><div class="controls"><button class="btn primary" id="playBtn">Avaa seuraava pala</button><button class="btn" id="autoRotateBtn">Automaattinen pyöritys</button><button class="btn danger" id="resetBtn">Nollaa</button></div><div class="hint">Vedä kuutiota sormella tai hiirellä.</div></section><aside class="control-card"><div class="badge">Prototyyppi 1.3 · JSON-kuvat</div><h2 style="margin-top:16px">Pelin ydin</h2><p>Noin joka viides tehtävä on Koodijahti. Minipeli avaa yhden palan, EAN-koodi yhden ja QR-koodi kaksi.</p><div class="progress"><div id="progressBar"></div></div><div class="tiny" id="progressText">0 % valmis</div><div class="legend">
+<div class="legend-row"><span>Kuudes aisti</span><span>toista valosarja</span></div>
+<div class="legend-row"><span>Ristinolla</span><span>voita tai pelaa tasan</span></div>
+<div class="legend-row"><span>Poikkeava</span><span>löydä erilainen</span></div>
+<div class="legend-row"><span>Jatka sarjaa</span><span>päättele seuraava</span></div>
+<div class="legend-row"><span>Muistiparit</span><span>etsi kolme paria</span></div>
+<div class="legend-row"><span>Käännä oikein</span><span>suuntaa nuolet</span></div>
+<div class="legend-row"><span>Koodijahti</span><span>EAN 1 · QR 2 palaa</span></div>
+</div><div class="note">Kuvat ovat alkuperäisiä SVG-muotokuvia. Eteneminen ja jo käytetyt koodit tallentuvat tämän laitteen selaimeen.</div></aside></main></div>
+<div class="overlay" id="overlay"><div class="modal"><h3 id="modalTitle">Tehtävä</h3><p id="modalText"></p><div id="gameArea"></div><div class="status" id="status"></div><div class="modal-actions"><button class="btn" id="closeModal">Sulje</button></div></div></div>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
+<script>
+const cube=document.getElementById("cube");let gameConfig=null;async function loadConfig(){try{const r=await fetch("images.json",{cache:"no-store"});gameConfig=await r.json();document.getElementById("startTitle").textContent=gameConfig.introTitle||"SIX";document.getElementById("startText").textContent=gameConfig.introText||"Aloita peli";document.getElementById("finishTitle").textContent=gameConfig.finishTitle||"Kuutio on valmis!";document.getElementById("finishText").textContent=gameConfig.finishText||"Kiitos pelaamisesta";buildCube(gameConfig.faces||[]);updateUI()}catch(e){document.getElementById("startText").textContent="images.json ei latautunut. Avaa peli GitHub Pagesin kautta.";document.getElementById("startGameBtn").disabled=true}}function buildCube(faces){cube.innerHTML="";["front","right","top","left","back","bottom"].forEach((cls,fi)=>{const f=faces.find(x=>x.class===cls)||faces[fi];const el=document.createElement("div");el.className=`face ${cls}`;for(let i=0;i<9;i++){const t=document.createElement("div");t.className="tile locked";t.dataset.index=fi*9+i;t.style.backgroundImage=`url("${f?.image||""}")`;t.style.backgroundPosition=`${i%3*50}% ${Math.floor(i/3)*50}%`;el.appendChild(t)}if(f?.name){const l=document.createElement("div");l.className="face-label";l.textContent=f.name;el.appendChild(l)}cube.appendChild(el)})}let revealed=JSON.parse(localStorage.getItem("six-revealed")||"[]");revealed=Array.isArray(revealed)?revealed.filter(n=>Number.isInteger(n)&&n>=0&&n<54):[];let last=-1;function updateUI(){document.querySelectorAll(".tile").forEach(t=>t.classList.toggle("locked",!revealed.includes(+t.dataset.index)));if(last>=0){const t=document.querySelector(`.tile[data-index="${last}"]`);if(t){t.classList.remove("revealed");void t.offsetWidth;t.classList.add("revealed")}last=-1}document.getElementById("count").textContent=`${revealed.length}/54`;const p=Math.round(revealed.length/54*100);document.getElementById("progressBar").style.width=p+"%";document.getElementById("progressText").textContent=p+" % valmis";localStorage.setItem("six-revealed",JSON.stringify(revealed));if(revealed.length>=54&&!sessionStorage.getItem("six-finish-shown")){sessionStorage.setItem("six-finish-shown","1");setTimeout(()=>document.getElementById("finishScreen").classList.remove("hidden"),500)}}function revealNext(){const locked=[...Array(54).keys()].filter(i=>!revealed.includes(i));if(!locked.length)return;last=locked[Math.floor(Math.random()*locked.length)];revealed.push(last);updateUI()}updateUI();
+let rotX=-22,rotY=35,drag=false,px=0,py=0,auto=false,raf;const scene=document.getElementById("scene");const apply=()=>cube.style.transform=`rotateX(${rotX}deg) rotateY(${rotY}deg)`;scene.onpointerdown=e=>{drag=true;px=e.clientX;py=e.clientY;scene.setPointerCapture(e.pointerId)};scene.onpointermove=e=>{if(!drag)return;rotY+=(e.clientX-px)*.45;rotX-=(e.clientY-py)*.45;rotX=Math.max(-85,Math.min(85,rotX));px=e.clientX;py=e.clientY;apply()};scene.onpointerup=()=>drag=false;scene.onpointercancel=()=>drag=false;function spin(){if(!auto)return;rotY+=.22;apply();raf=requestAnimationFrame(spin)}document.getElementById("autoRotateBtn").onclick=()=>{auto=!auto;document.getElementById("autoRotateBtn").textContent=auto?"Pysäytä pyöritys":"Automaattinen pyöritys";auto?spin():cancelAnimationFrame(raf)};
+const overlay=document.getElementById("overlay"),title=document.getElementById("modalTitle"),text=document.getElementById("modalText"),area=document.getElementById("gameArea"),statusEl=document.getElementById("status");
+let scannerControls=null;
+function stopScanner(){if(scannerControls){try{scannerControls.stop()}catch(e){}scannerControls=null}}
+document.getElementById("closeModal").onclick=()=>{stopScanner();overlay.classList.remove("open")};
+const openModal=()=>{stopScanner();overlay.classList.add("open");statusEl.textContent="";area.innerHTML=""};
+function revealMany(amount){
+  let opened=0;
+  for(let n=0;n<amount;n++){
+    const locked=[...Array(54).keys()].filter(i=>!revealed.includes(i));
+    if(!locked.length)break;
+    last=locked[Math.floor(Math.random()*locked.length)];
+    revealed.push(last);opened++;
+  }
+  updateUI();
+  return opened;
+}
+function success(m){statusEl.textContent=m;statusEl.style.color="var(--ok)";setTimeout(()=>{revealNext();overlay.classList.remove("open")},900)}
+function codeSuccess(m,amount){statusEl.textContent=m;statusEl.style.color="var(--ok)";setTimeout(()=>{stopScanner();revealMany(amount);overlay.classList.remove("open")},1100)}
+function fail(m){statusEl.textContent=m;statusEl.style.color="var(--danger)"}
+const games=[startMemory,startTicTacToe,startOddOneOut,startSequence,startPairs,startRotate];
+let lastTask=-1;
+
+function chooseTask(){
+  let task;
+  do{
+    task=Math.random()<.20?6:Math.floor(Math.random()*6);
+  }while(task===lastTask);
+  lastTask=task;
+  if(task===6)startCodeHunt();else games[task]();
+}
+document.getElementById("playBtn").onclick=chooseTask;
+
+function startCodeHunt(){
+  openModal();title.textContent="Koodijahti";
+  text.textContent="Etsi ympäristöstä uusi koodi. EAN tai muu viivakoodi avaa yhden palan, QR-koodi kaksi.";
+  area.innerHTML=`
+    <div class="scanner-wrap">
+      <video id="scannerVideo" muted playsinline></video>
+      <div class="scan-line"></div>
+    </div>
+    <div class="scan-controls">
+      <button class="btn primary" id="startScanBtn">Käynnistä kamera</button>
+      <button class="btn" id="postponeBtn">Siirrä myöhemmäksi</button>
+    </div>
+    <div class="manual-row">
+      <input id="manualCode" inputmode="text" autocomplete="off" placeholder="Tai kirjoita koodi testataksesi">
+      <button class="btn" id="manualBtn">Käytä</button>
+    </div>
+    <div class="code-note">Sama koodisisältö hyväksytään tällä laitteella vain kerran. Kameran käyttö vaatii yleensä HTTPS-yhteyden.</div>`;
+  document.getElementById("postponeBtn").onclick=()=>{
+    stopScanner();overlay.classList.remove("open");
+    let idx;do{idx=Math.floor(Math.random()*games.length)}while(idx===lastTask);
+    lastTask=idx;setTimeout(()=>games[idx](),120);
+  };
+  document.getElementById("manualBtn").onclick=()=>{
+    const value=document.getElementById("manualCode").value.trim();
+    if(!value){fail("Kirjoita ensin jokin koodi.");return}
+    processScannedCode(value,/^\d{8,14}$/.test(value)?"EAN":"QR");
+  };
+  document.getElementById("startScanBtn").onclick=startCameraScanner;
+}
+
+async function startCameraScanner(){
+  const btn=document.getElementById("startScanBtn");
+  btn.disabled=true;btn.textContent="Kamera käynnistyy…";
+  statusEl.textContent="Suuntaa kamera koodiin.";statusEl.style.color="var(--text)";
+  if(!window.ZXingBrowser){
+    fail("Skannerikirjasto ei latautunut. Voit testata kirjoittamalla koodin käsin.");
+    btn.disabled=false;btn.textContent="Yritä kameraa uudelleen";return;
+  }
+  try{
+    const reader=new ZXingBrowser.BrowserMultiFormatReader();
+    const video=document.getElementById("scannerVideo");
+    scannerControls=await reader.decodeFromVideoDevice(undefined,video,(result,error,controls)=>{
+      if(!result)return;
+      const value=result.getText();
+      const format=Number(result.getBarcodeFormat());
+      const type=format===11?"QR":([6,7,14,15].includes(format)?"EAN":(/^\d{8,14}$/.test(value)?"EAN":"QR"));
+      controls.stop();scannerControls=null;
+      processScannedCode(value,type);
+    });
+    btn.textContent="Kamera käytössä";
+  }catch(err){
+    fail("Kameraa ei voitu avata. Salli kameran käyttö tai käytä käsinsyöttöä.");
+    btn.disabled=false;btn.textContent="Yritä kameraa uudelleen";
+  }
+}
+
+function processScannedCode(raw,type){
+  const normalized=String(raw).trim();
+  let used=JSON.parse(localStorage.getItem("six-used-codes")||"[]");
+  used=Array.isArray(used)?used:[];
+  if(used.includes(normalized)){
+    fail("Already discovered — tämä koodi on jo käytetty.");
+    return;
+  }
+  used.push(normalized);
+  localStorage.setItem("six-used-codes",JSON.stringify(used));
+  const amount=type==="QR"?2:1;
+  codeSuccess(`${type==="QR"?"QR-koodi":"Viivakoodi"} löytyi — ${amount===2?"kaksi palaa paljastuu":"uusi pala paljastuu"}.`,amount);
+}
+
+function startMemory(){openModal();title.textContent="Kuudes aisti";text.textContent="Katso valosarja ja toista se samassa järjestyksessä.";const grid=document.createElement("div");grid.className="game-grid";area.appendChild(grid);const cells=[];for(let i=0;i<9;i++){const b=document.createElement("button");b.className="game-cell memory-cell";grid.appendChild(b);cells.push(b)}const seq=Array.from({length:4},()=>Math.floor(Math.random()*9));let input=[],ready=false;cells.forEach((c,i)=>c.onclick=()=>{if(!ready)return;input.push(i);c.classList.add("active");setTimeout(()=>c.classList.remove("active"),180);const pos=input.length-1;if(input[pos]!==seq[pos]){ready=false;fail("Sarja katkesi. Uusi yritys alkaa.");setTimeout(startMemory,1100);return}if(input.length===seq.length){ready=false;success("Oikein — uusi pala paljastuu.")}});let delay=500;seq.forEach((idx,k)=>{setTimeout(()=>cells[idx].classList.add("active"),delay+k*620);setTimeout(()=>cells[idx].classList.remove("active"),delay+k*620+320)});setTimeout(()=>{ready=true;statusEl.textContent="Sinun vuorosi.";statusEl.style.color="var(--text)"},delay+seq.length*620)}
+function startTicTacToe(){openModal();title.textContent="Ristinolla";text.textContent="Pelaa ristillä. Voitto tai tasapeli avaa kuvapalan.";const grid=document.createElement("div");grid.className="game-grid";area.appendChild(grid);let board=Array(9).fill(""),ended=false;const cells=board.map((_,i)=>{const b=document.createElement("button");b.className="game-cell";b.onclick=()=>move(i);grid.appendChild(b);return b});const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],winner=m=>wins.some(w=>w.every(i=>board[i]===m)),draw=()=>board.every(Boolean),render=()=>cells.forEach((c,i)=>c.textContent=board[i]);function move(i){if(ended||board[i])return;board[i]="X";render();if(winner("X")){ended=true;success("Voitit — uusi pala paljastuu.");return}if(draw()){ended=true;success("Tasapeli — uusi pala paljastuu.");return}setTimeout(aiMove,330)}function aiMove(){const free=board.map((v,i)=>v?"":i).filter(v=>v!=="");const choose=m=>{for(const w of wins){const vals=w.map(i=>board[i]);if(vals.filter(v=>v===m).length===2&&vals.includes(""))return w[vals.indexOf("")]}return null};let i=choose("O");if(i===null)i=choose("X");if(i===null&&board[4]==="")i=4;if(i===null)i=free[Math.floor(Math.random()*free.length)];board[i]="O";render();if(winner("O")){ended=true;fail("Kuutio voitti. Uusi yritys alkaa.");setTimeout(startTicTacToe,1100);return}if(draw()){ended=true;success("Tasapeli — uusi pala paljastuu.")}}}
+
+function startOddOneOut(){
+  openModal();title.textContent="Poikkeava";text.textContent="Yksi merkeistä eroaa muista. Löydä se.";
+  const grid=document.createElement("div");grid.className="game-grid";area.appendChild(grid);
+  const symbols=["◆","●","▲","✦","⬟","■"];const base=symbols[Math.floor(Math.random()*symbols.length)];
+  let odd=base;while(odd===base)odd=symbols[Math.floor(Math.random()*symbols.length)];
+  const oddIndex=Math.floor(Math.random()*9);
+  for(let i=0;i<9;i++){
+    const b=document.createElement("button");b.className="game-cell";b.textContent=i===oddIndex?odd:base;
+    b.onclick=()=>i===oddIndex?success("Löysit poikkeavan — uusi pala paljastuu."):fail("Ei aivan. Katso vielä tarkemmin.");
+    grid.appendChild(b);
+  }
+}
+
+function startSequence(){
+  openModal();title.textContent="Jatka sarjaa";text.textContent="Päättele, mikä merkki jatkaa sarjaa.";
+  const patterns=[
+    {seq:["●","○","●","○"],ans:"●",opts:["●","○","■"]},
+    {seq:["▲","▶","▼","◀"],ans:"▲",opts:["◀","▲","▼"]},
+    {seq:["■","■■","■■■"],ans:"■■■■",opts:["■■","■■■■","■■■■■"]},
+    {seq:["1","2","4","8"],ans:"16",opts:["10","12","16"]},
+    {seq:["✦","✦✦","✦✦✦"],ans:"✦✦✦✦",opts:["✦✦","✦✦✦✦","✦✦✦✦✦"]}
+  ];
+  const p=patterns[Math.floor(Math.random()*patterns.length)];
+  const line=document.createElement("div");line.className="sequence-line";area.appendChild(line);
+  p.seq.forEach(v=>{const t=document.createElement("div");t.className="sequence-token";t.textContent=v;line.appendChild(t)});
+  const q=document.createElement("div");q.className="sequence-token";q.textContent="?";line.appendChild(q);
+  const row=document.createElement("div");row.className="option-row";area.appendChild(row);
+  [...p.opts].sort(()=>Math.random()-.5).forEach(v=>{const b=document.createElement("button");b.className="option-btn";b.textContent=v;b.onclick=()=>v===p.ans?success("Sarja jatkuu oikein — uusi pala paljastuu."):fail("Ei vielä. Tarkastele sarjan rytmiä.");row.appendChild(b)});
+}
+
+function startPairs(){
+  openModal();title.textContent="Muistiparit";text.textContent="Etsi kolme symboliparia.";
+  const vals=["☾","☾","✦","✦","◉","◉"].sort(()=>Math.random()-.5);
+  const grid=document.createElement("div");grid.className="game-grid";grid.style.gridTemplateColumns="repeat(3,1fr)";area.appendChild(grid);
+  let open=[],matched=0,locked=false;
+  vals.forEach((v,i)=>{const b=document.createElement("button");b.className="game-cell";b.textContent="?";b.onclick=()=>{
+    if(locked||b.classList.contains("matched")||open.some(x=>x.i===i))return;
+    b.textContent=v;b.classList.add("selected");open.push({i,v,b});
+    if(open.length===2){locked=true;setTimeout(()=>{
+      if(open[0].v===open[1].v){open.forEach(x=>{x.b.classList.remove("selected");x.b.classList.add("matched")});matched++;if(matched===3){success("Kaikki parit löytyivät — uusi pala paljastuu.");return}}
+      else open.forEach(x=>{x.b.textContent="?";x.b.classList.remove("selected")});
+      open=[];locked=false;
+    },550)};
+    };
+    grid.appendChild(b);
+  });
+}
+
+function startRotate(){
+  openModal();title.textContent="Käännä oikein";text.textContent="Napauta nuolia, kunnes kaikki osoittavat ylöspäin.";
+  const dirs=["↑","→","↓","←"];const grid=document.createElement("div");grid.className="game-grid";area.appendChild(grid);
+  const state=Array.from({length:9},()=>Math.floor(Math.random()*4));if(state.every(v=>v===0))state[4]=2;
+  const cells=state.map((v,i)=>{const b=document.createElement("button");b.className="game-cell";b.textContent=dirs[v];b.onclick=()=>{state[i]=(state[i]+1)%4;b.textContent=dirs[state[i]];if(state.every(x=>x===0))success("Kaikki suunnat kohdallaan — uusi pala paljastuu.")};grid.appendChild(b);return b});
+}
+
+document.getElementById("resetBtn").onclick=()=>{if(confirm("Nollataanko kaikki 54 kuvapalaa ja käytettyjen koodien historia?")){revealed=[];last=-1;localStorage.removeItem("six-used-codes");updateUI()}};
+document.getElementById("startGameBtn").onclick=()=>document.getElementById("startScreen").classList.add("hidden");document.getElementById("closeFinishBtn").onclick=()=>document.getElementById("finishScreen").classList.add("hidden");</script></body></html>
