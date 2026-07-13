@@ -1,15 +1,39 @@
 {
   "gameTitle": "S1X",
   "introTitle": "S1X",
-
+  "introText": "THE GREAT CODE HUNT. Find codes in the wild. Every barcode opens one fragment. Every QR code opens two. Every code can be captured only once.",
   "finishTitle": "THE HUNT IS COMPLETE",
   "finishText": "All 54 fragments have been recovered. The cube is complete. Thank you for hunting.",
   "faces": [
-    {"name":"S1X","class":"front","image":"images/IMG_7448.jpeg"},
-    {"name":"S1X","class":"top","image":"images/IMG_7447.jpeg"},
-    {"name":"S1X","class":"bottom","image":"images/IMG_7446.jpeg"},
-    {"name":"S1X","class":"left","image":"images/IMG_7445.jpeg"},
-    {"name":"S1X","class":"back","image":"images/IMG_7444.jpeg"},
-    {"name":"S1X","class":"right","image":"images/IMG_7443.jpeg"}
+    {
+      "name": "S1X",
+      "class": "front",
+      "image": "images/IMG_7448.jpeg"
+    },
+    {
+      "name": "S1X",
+      "class": "right",
+      "image": "images/IMG_7447.jpeg"
+    },
+    {
+      "name": "S1X",
+      "class": "top",
+      "image": "images/IMG_7446.jpeg"
+    },
+    {
+      "name": "S1X",
+      "class": "left",
+      "image": "images/IMG_7445.jpeg"
+    },
+    {
+      "name": "S1X",
+      "class": "back",
+      "image": "images/IMG_7444.jpeg"
+    },
+    {
+      "name": "S1X",
+      "class": "bottom",
+      "image": "images/IMG_7443.jpeg"
+    }
   ]
 }
