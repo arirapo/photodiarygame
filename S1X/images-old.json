@@ -1,0 +1,39 @@
+{
+  "gameTitle": "SIX",
+  "introTitle": "SIX",
+  "introText": "Kuusi sivua. Yhdeksän palaa. Yksi kuutio. Ratkaise tehtäviä ja löydä koodeja paljastaaksesi kaikki kuusi kuvaa.",
+  "finishTitle": "Kuutio on valmis!",
+  "finishText": "Olet paljastanut kaikki 54 kuvapalaa. Kiitos pelaamisesta.",
+  "faces": [
+    {
+      "name": "Renessanssi",
+      "class": "front",
+      "image": "images/renaissance.svg"
+    },
+    {
+      "name": "Geometrinen",
+      "class": "right",
+      "image": "images/geometric.svg"
+    },
+    {
+      "name": "Selfie",
+      "class": "top",
+      "image": "images/selfie.svg"
+    },
+    {
+      "name": "Muraali",
+      "class": "left",
+      "image": "images/mural.svg"
+    },
+    {
+      "name": "Elokuvallinen",
+      "class": "back",
+      "image": "images/cinema.svg"
+    },
+    {
+      "name": "Veistos",
+      "class": "bottom",
+      "image": "images/statue.svg"
+    }
+  ]
+}
