@@ -20,3 +20,7 @@ S1X-pelin henkilökohtainen versio, jossa pelaaja voi tehdä kuution kuudennesta
 Vie koko kansio GitHub Pagesiin. Säilytä `index.html`, `images.json` ja `images/` samassa kansiorakenteessa.
 
 © 2026 Ari Rapo. All rights reserved.
+
+
+## 1.0.1
+Korjattu aloituslogiikka: JSON-lataus, selfie-tallennus sekä Jatka/Uusi peli -painikkeet käynnistyvät oikein.

@@ -274,6 +274,133 @@ function startRotate(){
   const cells=state.map((v,i)=>{const b=document.createElement("button");b.className="game-cell";b.textContent=dirs[v];b.onclick=()=>{state[i]=(state[i]+1)%4;b.textContent=dirs[state[i]];if(state.every(x=>x===0))rewardByTime(startedAt,14,"Kaikki suunnat ovat kohdallaan.")};grid.appendChild(b);return b});
 }
 
+
+const selfieDB={
+  open(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open("s1x-sixth-face",1);
+      req.onupgradeneeded=()=>{
+        if(!req.result.objectStoreNames.contains("images")) req.result.createObjectStore("images");
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  },
+  async get(){
+    const db=await this.open();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction("images","readonly");
+      const req=tx.objectStore("images").get("sixthFace");
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>reject(req.error);
+    });
+  },
+  async set(value){
+    const db=await this.open();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction("images","readwrite");
+      tx.objectStore("images").put(value,"sixthFace");
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>reject(tx.error);
+    });
+  },
+  async remove(){
+    const db=await this.open();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction("images","readwrite");
+      tx.objectStore("images").delete("sixthFace");
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>reject(tx.error);
+    });
+  }
+};
+
+function updateSelfieUI(){
+  const preview=document.getElementById("selfiePreview");
+  const remove=document.getElementById("removeSelfieBtn");
+  const status=document.getElementById("selfieStatus");
+  if(sixthFaceImage){
+    preview.style.backgroundImage=`url("${sixthFaceImage}")`;
+    preview.innerHTML="";
+    remove.classList.remove("hidden");
+    status.textContent="Oma kuva on asetettu kuudenneksi sivuksi.";
+  }else{
+    preview.style.backgroundImage="";
+    preview.innerHTML="<span>6th</span>";
+    remove.classList.add("hidden");
+    status.textContent="Voit myös aloittaa ilman omaa kuvaa.";
+  }
+}
+
+function cropImageToSquare(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(reader.error);
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Kuvaa ei voitu avata."));
+      img.onload=()=>{
+        const side=Math.min(img.naturalWidth,img.naturalHeight);
+        const sx=(img.naturalWidth-side)/2, sy=(img.naturalHeight-side)/2;
+        const canvas=document.createElement("canvas");
+        canvas.width=1200;canvas.height=1200;
+        canvas.getContext("2d").drawImage(img,sx,sy,side,side,0,0,1200,1200);
+        resolve(canvas.toDataURL("image/jpeg",.86));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function hasSavedGame(){
+  const saved=JSON.parse(localStorage.getItem("six-revealed")||"[]");
+  return Array.isArray(saved)&&saved.length>0&&saved.length<54;
+}
+function updateStartChoices(){
+  document.getElementById("continueGameBtn").classList.toggle("hidden",!hasSavedGame());
+}
+function enterGame(){
+  gameStarted=true;
+  document.getElementById("startScreen").classList.add("hidden");
+  startGameClock();
+  if(revealed.length>=54)showFinish();
+}
+function startNewGame(){
+  revealed=[];last=-1;finishShown=false;previousRevealedCount=0;
+  localStorage.removeItem("six-revealed");
+  localStorage.removeItem("six-used-codes");
+  gameStartTime=Date.now();
+  localStorage.setItem("six-game-start",String(gameStartTime));
+  clearInterval(timerInterval);
+  updateUI();updateGameTimer();enterGame();
+}
+
+document.getElementById("chooseSelfieBtn").onclick=()=>document.getElementById("selfieInput").click();
+document.getElementById("selfieInput").onchange=async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  const status=document.getElementById("selfieStatus");status.textContent="Käsitellään kuvaa…";
+  try{
+    sixthFaceImage=await cropImageToSquare(file);
+    await selfieDB.set(sixthFaceImage);
+    updateSelfieUI();buildCube(gameConfig.faces||[]);updateUI();
+  }catch(err){console.error(err);status.textContent="Kuvan käsittely ei onnistunut."}
+  e.target.value="";
+};
+document.getElementById("removeSelfieBtn").onclick=async()=>{
+  await selfieDB.remove();sixthFaceImage=null;updateSelfieUI();buildCube(gameConfig.faces||[]);updateUI();
+};
+document.getElementById("continueGameBtn").onclick=enterGame;
+document.getElementById("newGameBtn").onclick=startNewGame;
+document.getElementById("closeFinishBtn").onclick=()=>document.getElementById("finishScreen").classList.add("hidden");
+
+(async function boot(){
+  updateGameTimer();
+  updateStartChoices();
+  await loadConfig();
+  updateStartChoices();
+})();
+
 document.getElementById("resetBtn").onclick=()=>{
   if(confirm("Aloitetaanko uusi peli? Eteneminen, käytetyt koodit ja peliaika nollataan. Oma kuva säilyy.")){
     revealed=[];
