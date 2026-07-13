@@ -6,32 +6,32 @@
   "finishText": "Olet paljastanut kaikki 54 kuvapalaa. Kiitos pelaamisesta.",
   "faces": [
     {
-      "name": "Renessanssi",
+      "name": "Traces Between",
       "class": "front",
       "image": "images/IMG_1122.jpeg"
     },
     {
-      "name": "Geometrinen",
+  "name": "Traces Between",
       "class": "right",
       "image": "images/IMG_1606.jpeg"
     },
     {
-      "name": "Selfie",
+  "name": "Traces Between",
       "class": "top",
       "image": "images/IMG_3611.jpeg"
     },
     {
-      "name": "Muraali",
+  "name": "Traces Between",
       "class": "left",
       "image": "images/IMG_3899.jpeg"
     },
     {
-      "name": "Elokuvallinen",
+  "name": "Traces Between",
       "class": "back",
       "image": "images/IMG_6402.jpeg"
     },
     {
-      "name": "Veistos",
+  "name": "Traces Between",
       "class": "bottom",
       "image": "images/IMG_7284.jpeg"
     }
