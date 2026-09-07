@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tekijyyden jäljet 1977–2027</title>
+<style>
+:root{--bg:#f2efe9;--ink:#181818;--muted:#6f6b64;--line:#b9b4ab;--card:#fbfaf7;--photo:#e7bac2;--photo-deep:#bf7e8d;--photo-soft:rgba(231,186,194,.34);--work:#e8c7a8;--work-deep:#b88758;--work-soft:rgba(232,199,168,.34);--tech:#b5ddd4;--tech-deep:#5da796;--tech-soft:rgba(181,221,212,.34);--study:#d1c7f0;--study-deep:#8f82c4;--study-soft:rgba(209,199,240,.34)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{overflow:hidden}
+.app{height:100vh;display:grid;grid-template-rows:auto 1fr auto}
+header{padding:22px 28px 12px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:clamp(28px,4vw,58px);letter-spacing:-.04em}
+.subtitle{margin-top:6px;color:var(--muted);font-size:14px}
+.viewport{position:relative;overflow:auto hidden;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.timeline{position:relative;width:5200px;min-height:760px;padding:74px 180px 110px 190px}
+.axis{position:absolute;left:190px;right:180px;top:332px;height:1px;background:var(--ink)}
+.axis:after{content:"";position:absolute;right:-8px;top:-4px;border-left:8px solid var(--ink);border-top:4px solid transparent;border-bottom:4px solid transparent}
+.tick{position:absolute;top:323px;transform:translateX(-50%);text-align:center;color:var(--muted);font-size:12px}
+.tick:before{content:"";display:block;width:1px;height:18px;background:var(--ink);margin:0 auto 5px}
+.lane-label{position:absolute;left:28px;width:145px;z-index:2;font-size:12px;line-height:1.2;color:var(--muted);padding:7px 10px;border-radius:12px;background:rgba(251,250,247,.88)}
+.lane-line{position:absolute;left:190px;right:180px;height:92px;border-radius:18px;opacity:1;border:1px solid rgba(24,24,24,.035);transform:translateY(-50%);z-index:0}.lane-label.photo{color:var(--photo-deep)}.lane-label.work{color:var(--work-deep)}.lane-label.tech{color:var(--tech-deep)}.lane-label.study{color:var(--study-deep)}.lane-line.photo{background:rgba(231,186,194,.18)}.lane-line.work{background:rgba(232,199,168,.18)}.lane-line.tech{background:rgba(181,221,212,.18)}.lane-line.study{background:rgba(209,199,240,.18)}.lane-line::after{content:"";position:absolute;left:18px;right:18px;top:50%;height:1px;transform:translateY(-50%);background:rgba(24,24,24,.10)}
+.event{position:absolute;transform:translate(-50%,-50%);border:0;background:transparent;padding:0;cursor:pointer;z-index:3}
+
+
+
+.hotspot{
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:58px;height:58px;
+  border:1.5px solid rgba(24,24,24,.18);
+  background:var(--card);
+  transform:rotate(-2deg);
+  box-shadow:4px 5px 0 rgba(24,24,24,.08);
+  transition:.18s ease;
+  overflow:hidden;
+  border-radius:8px;
+}
+.event:nth-of-type(3n) .hotspot{transform:rotate(2deg)}
+.event.major .hotspot{width:76px;height:76px;border-width:2px}
+.hotspot svg{
+  width:72%;
+  height:72%;
+  display:block;
+  fill:none;
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.hotspot .fill{stroke:none}
+.hotspot.photo{background:var(--photo);border-color:rgba(191,126,141,.45)}
+.hotspot.work{background:var(--work);border-color:rgba(184,135,88,.45)}
+.hotspot.tech{background:var(--tech);border-color:rgba(93,167,150,.45)}
+.hotspot.study{background:var(--study);border-color:rgba(143,130,196,.45)}
+.hotspot.photo svg{stroke:var(--photo-deep)} .hotspot.photo .fill{fill:var(--photo-deep)}
+.hotspot.work svg{stroke:var(--work-deep)} .hotspot.work .fill{fill:var(--work-deep)}
+.hotspot.tech svg{stroke:var(--tech-deep)} .hotspot.tech .fill{fill:var(--tech-deep)}
+.hotspot.study svg{stroke:var(--study-deep)} .hotspot.study .fill{fill:var(--study-deep)}
+
+.event:hover .hotspot,.event:focus-visible .hotspot,.event.active .hotspot{
+  transform:rotate(0deg) scale(1.10);
+  box-shadow:0 0 0 8px rgba(24,24,24,.05);
+}
+.event:hover .hotspot.photo,.event:focus-visible .hotspot.photo,.event.active .hotspot.photo{background:var(--photo-deep);border-color:var(--photo-deep)}
+.event:hover .hotspot.work,.event:focus-visible .hotspot.work,.event.active .hotspot.work{background:var(--work-deep);border-color:var(--work-deep)}
+.event:hover .hotspot.tech,.event:focus-visible .hotspot.tech,.event.active .hotspot.tech{background:var(--tech-deep);border-color:var(--tech-deep)}
+.event:hover .hotspot.study,.event:focus-visible .hotspot.study,.event.active .hotspot.study{background:var(--study-deep);border-color:var(--study-deep)}
+
+.event:hover .hotspot svg,.event:focus-visible .hotspot svg,.event.active .hotspot svg{stroke:var(--card)}
+.event:hover .hotspot .fill,.event:focus-visible .hotspot .fill,.event.active .hotspot .fill{fill:var(--card)}
+
+.event-label{
+
+
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:190px;margin-top:10px;text-align:center;font-size:12px;line-height:1.18;
+}
+.event.above .event-label{bottom:44px;margin-top:0}
+.event.major.above .event-label{bottom:54px}
+.event.major .event-label{font-weight:700}
+.event-year{
+  display:inline-block;
+  margin-bottom:3px;
+  padding:2px 5px;
+  border:1px solid var(--ink);
+  background:var(--bg);
+  font-size:10px;
+  letter-spacing:.08em;
+}
+.detail{position:fixed;right:22px;bottom:22px;width:min(420px,calc(100vw - 44px));max-height:42vh;overflow:auto;background:var(--card);border:1px solid rgba(24,24,24,.18);padding:18px 20px 20px;box-shadow:0 14px 40px rgba(0,0,0,.09);z-index:20;display:none;border-radius:16px}
+.detail.open{display:block}
+.detail .year{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.detail h2{margin:5px 32px 10px 0;font-size:24px;line-height:1.05;letter-spacing:-.03em}
+.detail p{margin:0;font-size:14px;line-height:1.5}
+.close{position:absolute;right:12px;top:10px;width:32px;height:32px;border:0;background:transparent;font-size:25px;cursor:pointer}
+.legend{position:fixed;left:22px;bottom:22px;background:rgba(242,239,233,.93);border:1px solid var(--line);padding:10px 12px;font-size:11px;color:var(--muted);z-index:8;border-radius:12px}
+.hint{padding:8px 28px 12px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+@media(max-width:760px){header{padding:16px 18px 10px}.timeline{padding-left:155px}.axis,.lane-line{left:155px}.lane-label{left:14px;width:130px}.detail{right:12px;bottom:48px;width:calc(100vw - 24px);max-height:48vh}.legend{display:none}.hint{padding:8px 18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>Tekijyyden jäljet</h1>
+<div class="subtitle">1977–2027 · rinnakkaisia ja lomittuvia jälkiä valokuvasta yrittäjyyteen, pedagogiikkaan, verkkoon ja installaatioon</div>
+</header>
+<main class="viewport">
+<section class="timeline" id="timeline">
+<div class="axis"></div>
+<div class="lane-label photo" style="top:118px">Valokuva ja taiteellinen työskentely</div>
+<div class="lane-line photo" style="top:138px"></div>
+<div class="lane-label work" style="top:234px">Yrittäjyys, visuaalinen suunnittelu ja media</div>
+<div class="lane-line work" style="top:254px"></div>
+<div class="lane-label tech" style="top:450px">Digitaalinen kuva, verkko ja teknologia</div>
+<div class="lane-line tech" style="top:470px"></div>
+<div class="lane-label study" style="top:608px">Opiskelu, tutkimus ja pedagoginen työ</div>
+<div class="lane-line study" style="top:628px"></div>
+</section>
+</main>
+<div class="hint">Vieritä vaakasuunnassa. Hotspotit kuvaavat neljää rinnakkaista tekemisen virtaa; avaa tapahtuma klikkaamalla tai napauttamalla.</div>
+</div>
+
+<aside class="detail" id="detail">
+<button class="close" id="close" aria-label="Sulje">×</button>
+<div class="year" id="detailYear"></div>
+<h2 id="detailTitle"></h2>
+<p id="detailText"></p>
+</aside>
+<div class="legend">Suurempi solmu = keskeinen käännekohta</div>
+
+<script>
+const START=1977, END=2027, X0=190, X1=5020;
+const laneY={photo:138,work:254,tech:470,study:628};
+const timeline=document.getElementById("timeline");
+const detail=document.getElementById("detail");
+const events=[
+{year:1977,lane:"photo",title:"Ensimmäinen järjestelmäkamera",text:"Aktiivinen valokuvaaminen alkaa. Valokuvasta muodostuu vähitellen keskeinen tapa havainnoida ympäristöä ja rakentaa omaa kuvallista ilmaisua.",major:true,above:true},
+{year:1981,lane:"photo",title:"Ensimmäiset näyttelyt ja apuraha",text:"Varhaiset näyttelyt ja apuraha vahvistavat omaehtoista valokuvallista työskentelyä ja taiteellista suuntaa.",above:false},
+{year:1981,lane:"study",title:"Ylioppilas",text:"Ylioppilastutkinto valmistui vuonna 1981.",above:true,yOffset:-54},
+{year:1981.4,lane:"study",displayYear:"1981–1983",title:"Työväen Akatemia – kulttuuritoiminnan linja",text:"Opiskelin kaksivuotisella kulttuuritoiminnan linjalla Työväen Akatemiassa vuosina 1981–1983. Opinnot rakensivat pohjaa kulttuurin, viestinnän ja yhteisöllisen toiminnan myöhemmälle yhdistämiselle.",above:false,yOffset:36},
+{year:1984,lane:"work",title:"Oma valokuvausalan yritys",text:"Perustin oman valokuvausalan toiminimen ja aloin tehdä valokuvauksia sekä mustavalkotöitä tilauksesta. Valokuvaamisesta tuli omaehtoisen tekemisen rinnalla myös ammatillista palvelutyötä, ja yritystoiminta jatkui myöhemmin muiden työtehtävien rinnalla.",major:true,above:true},
+{year:1988,lane:"work",title:"Mainostoimisto MustWalk Ay",text:"Työskentelin vuosina 1988–1992 art directorina ja valokuvaajana. Valokuvaus, graafinen suunnittelu ja visuaalinen viestintä lomittuivat, ja oma valokuvausalan toiminimeni jatkoi toimintaansa rinnalla.",above:false},
+{year:1991,lane:"work",title:"Yleisradio – liikkuva kuva",text:"Työ Yleisradiossa videoleikkauksen ja television parissa laajensi still-kuvallista ajattelua aikaan, rytmiin ja liikkuvaan kuvaan.",above:true},
+{year:1991.3,lane:"study",displayYear:"1991–1992",title:"Ääni- ja kuvatarkkailija",text:"Suoritin ääni- ja kuvatarkkailijan koulutuksen vuosina 1991–1992. Koulutus vahvisti audiovisuaalisen tuotannon teknistä ja ilmaisullista osaamista Yle-työn rinnalla.",above:true,yOffset:-40},
+{year:1994,lane:"tech",title:"Digitaalinen käänne",text:"Photoshopin käyttö alkoi Lahden muotoiluinstituutin multimediakurssilla. Samana vuonna internet tuli osaksi työskentelyäni ja osallistuin Turun taiteen ja viestinnän oppilaitoksen Arts Management -tuottajakurssille.",major:true,above:false},
+{year:1998,lane:"work",title:"Media Meedio Oy – hotelli-TV-käyttöliittymät",text:"Työskentelin AD-tehtävässä hotelli-TV-käyttöliittymien parissa. Sovelluksia tehtiin Turun Televisiotehtaan alihankintana hotelleihin eri puolille maailmaa.",above:false},
+
+{year:1999,lane:"work",title:"Arabia – yrityshautomo ja luova yhteisö",text:"Pääsin Taideteollisen korkeakoulun yrityshautomo Arabukseen Helsingin Arabianrantaan. Varsinainen yrityshautomojakso kesti noin vuoden, mutta jäin Arabianrannan luovaan yhteisöön useiksi vuosiksi. Vuosina 1999–2003 syntyi merkittäviä www-toteutuksia, yhteistyösuhteita ja verkostoja, jotka vahvistivat digitaalisen yrittäjyyden, luovan työn ja verkon välistä yhteyttä.",major:true,above:true,yOffset:-30},
+{year:1999,lane:"study",title:"Kouluttaminen osaksi yritystoimintaa",text:"Aloin tehdä koulutuksia oman yritystoimintani kautta. Kouluttaminen tuli mukaan muun visuaalisen, digitaalisen ja yrittäjämäisen työskentelyn rinnalle.",above:true,yOffset:-38},
+{year:2002,lane:"study",title:"Yrittäjän erikoisammattitutkinto",text:"Suoritin yrittäjän erikoisammattitutkinnon vuonna 2002. Opinnot vahvistivat käytännön yrittäjyysosaamista digitaalisten ja luovien tuotantojen rinnalla.",above:false,yOffset:30},
+{year:2004,lane:"tech",title:"Verkko, digitaalinen kuva ja omat tuotannot",text:"2000-luvulla verkkosivut, digitaalinen kuva ja verkkopohjaiset visuaaliset tuotannot muodostuivat yhä luontevammaksi osaksi tekemistä. Verkko ei ollut vain julkaisukanava vaan myös työskentely-ympäristö.",above:true},
+{year:2004,lane:"study",title:"Päätoimisesti ammatilliseen opetukseen",text:"Siirryin päätoimisesti ammatillisen koulutuksen tehtäviin. Pedagoginen työ muodostui pitkäkestoiseksi toimintalinjaksi samalla, kun yrittäjyys, opiskelu ja oma luova työ jatkuivat rinnalla.",major:true,above:false,yOffset:24},
+{year:2007,lane:"study",title:"Pedagoginen pätevyys",text:"Suoritin opettajan pedagogisen pätevyyden. Käytännön opetustyö sai muodollisen pedagogisen perustan.",above:true,yOffset:-34},
+{year:2009,lane:"study",title:"Johtamisen erikoisammattitutkinto",text:"Suoritin johtamisen erikoisammattitutkinnon vuonna 2009. Johtaminen ja kehittämistyö tulivat yhä selvemmin osaksi ammatillista toimijuutta pedagogisen työn rinnalla.",above:false,yOffset:34},
+
+{year:2010,lane:"photo",title:"Valokuvapäiväkirja alkaa",text:"1.1.2010 aloitin jatkuvan valokuvapäiväkirjan. Päivittäisestä kuvaamisesta muodostui pitkäkestoinen henkilökohtainen praktiikka ja myöhemmin myös tutkimuksen ja taiteellisen työskentelyn keskeinen lähtökohta.",major:true,above:true},
+{year:2013,lane:"study",title:"Pro gradu – valokuvapäiväkirja",text:"Valokuvapäiväkirja siirtyi henkilökohtaisesta praktiikasta myös tutkimuksen kohteeksi. Tarkastelin sitä reflektiivisenä ja yhteisöllisenä menetelmänä.",above:true,yOffset:-46},
+{year:2013,lane:"study",title:"Pelialan kouluttaja ja GAMEDU",text:"Aloitin KSAOssa pelialan kouluttajana ja GAMEDU-hankkeen projektipäällikkönä. Työssä yhdistyivät pedagogiikka, pelillisyys, digitaalinen media ja kehittämistyö.",above:false,yOffset:46},
+{year:2014,lane:"photo",title:"Fragments from my Memories",text:"Muisti ja henkilökohtainen kuva-arkisto tulivat entistä näkyvämmin osaksi taiteellista työskentelyä.",above:true},
+{year:2014,lane:"study",title:"Lahden kaupunginkirjasto – palvelupäällikkö",text:"Työskentelin lyhyen ajan Lahden kaupunginkirjastossa palvelupäällikkönä, vastuullani muun muassa mediaosasto. Tehtävä toi mukaan julkisten kulttuuri- ja mediapalvelujen kehittämisen näkökulman.",above:false,yOffset:22},
+
+{year:2016,lane:"tech",title:"Ensimmäinen Ricoh 360 -kamera",text:"360-kuvaamisesta tuli jatkuvampi osa valokuvallista praktiikkaa. Olin tehnyt panoraamakokeiluja jo aiemmin järjestelmäkameralla ja Photoshopilla, mutta Ricoh muutti työskentelyn jatkuvaksi ja spontaanimmaksi.",major:true,above:false},
+{year:2017,lane:"study",title:"Ohjauksen tehtäviin",text:"Työni painopiste alkoi siirtyä opetuksesta yksilöllisempään ohjaukseen: oppimisvalmentajan, uravalmentajan ja myöhemmin opinto-ohjaajan tehtäviin.",above:true,yOffset:-34},
+{year:2019,lane:"study",title:"Opinto-ohjaajan pätevyys",text:"Suoritin opinto-ohjaajan pätevyyden. Ohjaus vakiintui yhdeksi ammatillisen työni keskeisistä toimintamuodoista.",above:false,yOffset:26},
+
+{year:2020,lane:"photo",title:"Joutsan työhuone",text:"Oma työtila vahvisti pitkäjänteistä taiteellista työskentelyä, materiaalikokeiluja ja fyysisten teosratkaisujen rakentamista.",above:true},
+{year:2021,lane:"study",title:"Valokuvapäiväkirjan menetelmän määrittely",text:"YAMK-opinnäytetyössä tarkastelin valokuvapäiväkirjaa menetelmällisesti ja suhteessa palvelumuotoilun prosessiin.",above:true,yOffset:-42},
+{year:2021.35,lane:"study",displayYear:"2021",title:"Tuotekehitystyön erikoisammattitutkinto",text:"Suoritin tuotekehitystyön erikoisammattitutkinnon vuonna 2021. Opinnot tukivat kehittämisorientaatiota, kokeilevaa työskentelyä ja uusien ratkaisujen rakentamista.",above:false,yOffset:42},
+{year:2022,lane:"study",title:"Tekoäly luovan työn tukena",text:"Aloitin visuaaliset kokeilut tekoälyllä ja työskentelin projektiasiantuntijana kahdessa ESR-hankkeessa, joissa tekoälyllä oli merkittävä rooli. Kokemukset vahvistivat uskoa tekoälyn mahdollisuuksiin luovan työn tukena, mutta samalla korostui oman autenttisen sisällön ja omaperäisten ideoiden merkitys. Kaikkea luovaa työtä ei voi eikä pidä ulkoistaa tekoälylle.",above:false,yOffset:34},
+{year:2025,lane:"study",title:"Valokuvataiteen YAMK",text:"Valokuva, muisti, 360-kuva, verkko, teknologia ja tutkimuksellinen ajattelu alkavat tihentyä uudenlaiseksi taiteelliseksi kokonaisuudeksi.",above:false,yOffset:24},
+{year:2026,lane:"photo",title:"TRACES BETWEEN",text:"Kirjadummysta kehittyy fyysistä installaatiota, verkkotaidetta, 360-kuvaa, koodia ja Raspberry Pi -tekniikkaa yhdistävä teoskokonaisuus. Pitkät rinnakkaiset tekemisen linjat kohtaavat samassa työssä.",major:true,above:true}
+];
+
+const icons={
+ camera:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M8 16h8l3-5h10l3 5h8v22H8z"/><circle cx="24" cy="27" r="8"/><circle class="fill" cx="24" cy="27" r="2.2"/>
+ </svg>`,
+ exhibition:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="8" y="8" width="32" height="28"/><path d="M14 30l8-9 6 6 6-8 6 11"/><circle cx="17" cy="17" r="2.5"/>
+ </svg>`,
+ darkroom:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="8" y="10" width="32" height="28"/><path d="M13 16h22M13 22h16M13 28h20"/><path d="M34 30l4 4"/>
+ </svg>`,
+ layout:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="7" y="7" width="34" height="34"/><rect x="11" y="11" width="12" height="10"/><path d="M27 12h10M27 17h8M11 26h26M11 31h20M11 36h15"/>
+ </svg>`,
+ tv:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="7" y="12" width="34" height="24" rx="2"/><path d="M18 40h12M24 36v4M18 8l6 4 6-4"/>
+ </svg>`,
+ pixel:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="8" y="8" width="32" height="32"/><path d="M8 24h32M24 8v32"/><rect class="fill" x="26" y="10" width="12" height="12"/><rect class="fill" x="10" y="26" width="12" height="12"/>
+ </svg>`,
+ interface:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="6" y="8" width="36" height="30" rx="2"/><path d="M6 15h36"/><circle class="fill" cx="11" cy="11.5" r="1.2"/><circle class="fill" cx="15" cy="11.5" r="1.2"/><rect x="11" y="20" width="10" height="12"/><path d="M26 21h10M26 26h8M26 31h9"/>
+ </svg>`,
+ web:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <circle cx="24" cy="24" r="17"/><path d="M7 24h34M24 7c6 6 8 12 8 17s-2 11-8 17M24 7c-6 6-8 12-8 17s2 11 8 17"/>
+ </svg>`,
+ journal:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M10 8h26a3 3 0 0 1 3 3v28H13a3 3 0 0 1-3-3z"/><path d="M15 8v31M20 15h13M20 21h13M20 27h10"/>
+ </svg>`,
+ thesis:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M10 10h12a6 6 0 0 1 6 6v24H16a6 6 0 0 0-6 0z"/><path d="M38 10H26a6 6 0 0 0-6 6v24h12a6 6 0 0 1 6 0z"/>
+ </svg>`,
+ memory:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="9" y="10" width="30" height="28"/><path d="M13 32l7-8 5 5 5-7 5 10"/><path d="M33 7l3 3M38 12l3 3"/>
+ </svg>`,
+ camera360:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="16" y="6" width="16" height="36" rx="8"/><circle cx="24" cy="16" r="5"/><circle class="fill" cx="24" cy="16" r="1.5"/><path d="M8 24c3-7 8-11 16-11M40 24c-3 7-8 11-16 11"/>
+ </svg>`,
+ studio:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M7 38h34M11 38V17h26v21M17 17V10h14v7"/><circle cx="24" cy="27" r="5"/><path d="M24 22v10M19 27h10"/>
+ </svg>`,
+ method:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <circle cx="12" cy="16" r="4"/><circle cx="36" cy="16" r="4"/><circle cx="24" cy="34" r="4"/><path d="M16 16h16M14 20l8 11M34 20l-8 11"/>
+ </svg>`,
+ school:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M6 17l18-9 18 9-18 9z"/><path d="M12 21v10c6 5 18 5 24 0V21"/><path d="M42 17v13"/>
+ </svg>`,
+
+ teacher:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="7" y="8" width="34" height="24"/><path d="M12 14h24M12 20h18M12 26h13"/><circle cx="24" cy="38" r="3"/><path d="M17 43c1-4 4-6 7-6s6 2 7 6"/>
+ </svg>`,
+ qualification:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M10 10h28v24H10z"/><path d="M16 17h16M16 22h12"/><circle cx="31" cy="29" r="4"/><path d="M29 33l-2 7 4-2 4 2-2-7"/>
+ </svg>`,
+ game:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M12 18h24l5 16c1 4-4 7-7 4l-5-5H19l-5 5c-3 3-8 0-7-4z"/><path d="M16 26h8M20 22v8"/><circle class="fill" cx="32" cy="24" r="2"/><circle class="fill" cx="36" cy="28" r="2"/>
+ </svg>`,
+ library:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M7 13h34M10 13V38M18 13V38M30 13V38M38 13V38M6 38h36"/><path d="M9 8h30l3 5H6z"/>
+ </svg>`,
+ guidance:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <circle cx="16" cy="18" r="5"/><circle cx="32" cy="18" r="5"/><path d="M8 38c1-7 4-11 8-11s7 4 8 11M24 38c1-7 4-11 8-11s7 4 8 11"/><path d="M20 18h8"/>
+ </svg>`,
+ incubator:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <path d="M8 38h32M12 38V16h24v22M17 16V10h14v6"/><path d="M18 23h5M26 23h5M18 29h5M26 29h5"/>
+ </svg>`,
+ ai:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="11" y="11" width="26" height="26" rx="5"/><circle cx="19" cy="21" r="2"/><circle cx="29" cy="21" r="2"/><path d="M18 29c4 3 8 3 12 0"/><path d="M24 5v6M24 37v6M5 24h6M37 24h6"/>
+ </svg>`,
+ traces:`<svg viewBox="0 0 48 48" aria-hidden="true">
+   <rect x="7" y="8" width="14" height="32"/><rect x="27" y="8" width="14" height="32"/>
+   <path d="M12 14h4M12 19h4M12 24h4M12 29h4M32 14h4M32 19h4M32 24h4M32 29h4"/>
+   <path d="M21 24h6"/><circle class="fill" cx="24" cy="24" r="2.2"/>
+ </svg>`
+};
+
+const eventIcons=[
+ "camera","exhibition","school","school","darkroom","layout","tv","tv","pixel","interface","incubator","teacher","school","web","teacher","school","school","journal","thesis","game","memory","library","camera360","guidance","school","studio","method","school","ai","school","traces"
+];
+
+function xForYear(y){return X0+((y-START)/(END-START))*(X1-X0)}
+for(let y=1980;y<=2025;y+=5){
+ const t=document.createElement("div");
+ t.className="tick";t.style.left=xForYear(y)+"px";t.textContent=y;timeline.appendChild(t);
+}
+events.forEach((e,i)=>{
+ const b=document.createElement("button");
+ b.className="event "+e.lane+" "+(e.major?"major ":"")+(e.above?"above":"");
+ b.style.left=xForYear(e.year)+"px";b.style.top=(laneY[e.lane]+(e.yOffset||0))+"px";
+ const shownYear=e.displayYear||e.year; b.innerHTML='<span class="hotspot '+e.lane+'">'+icons[eventIcons[i]]+'</span><span class="event-label"><span class="event-year">'+shownYear+'</span><br>'+e.title+'</span>';
+ b.addEventListener("click",()=>openDetail(e,b));
+ b.addEventListener("mouseenter",()=>{if(matchMedia("(hover:hover)").matches)openDetail(e,b)});
+ timeline.appendChild(b);
+});
+function openDetail(e,b){
+ document.querySelectorAll(".event.active").forEach(x=>x.classList.remove("active"));
+ b.classList.add("active");
+ document.getElementById("detailYear").textContent=e.displayYear||e.year;
+ document.getElementById("detailTitle").textContent=e.title;
+ document.getElementById("detailText").textContent=e.text;
+ detail.classList.add("open");
+}
+function closeDetail(){
+ detail.classList.remove("open");
+ document.querySelectorAll(".event.active").forEach(x=>x.classList.remove("active"));
+}
+document.getElementById("close").addEventListener("click",closeDetail);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail()});
+</script>
+</body>
+</html>
