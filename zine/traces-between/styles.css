@@ -2,3 +2,67 @@
 @media screen and (max-width:1150px){.page{width:calc(100% - 2rem);min-height:70vw;padding:5vw 5vw 5vw 7vw}}@media screen and (max-width:650px){nav{justify-content:flex-start;gap:.8rem}.page{min-height:auto;padding:1.4rem 1.2rem 1.2rem 1.7rem}.columns,.qr-index{grid-template-columns:1fr;gap:1rem}h1{font-size:2.6rem}.lead{font-size:1.25rem}.placeholder,.hero{min-height:55mm}.diagram{flex-wrap:wrap;justify-content:flex-start}.diagram span{padding:3mm}.vellum{margin:-8mm 0 5mm 5mm}footer{margin-top:1.5rem}.sample{margin:5mm 0}header,footer{font-size:9px}}
 @page{size:A4 landscape;margin:0}@media print{html{scroll-behavior:auto}body{background:white;font-size:11pt;print-color-adjust:exact;-webkit-print-color-adjust:exact}nav,.skip{display:none}.page{width:297mm;height:210mm;min-height:0;margin:0;padding:12mm 14mm 12mm 23mm;background:white;break-after:page;page-break-after:always;break-inside:avoid}.page:last-child{break-after:auto;page-break-after:auto}h1{font-size:36pt}header,footer{font-size:8pt}.lead{font-size:18pt}.editorial{font-size:9pt}a{color:inherit}.vellum{background:#eeece1}.fragment{box-shadow:2mm 2mm 0 #dedbd0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Sisältöluonnos: rauhalliset harmaat aineistopaikat. */
+.placeholder{background:#e6e6e1;border:0;color:#6b6b64;min-height:58mm}
+.photo-page{justify-content:center}.panorama-placeholder{width:100%;aspect-ratio:2/1;background:#e6e6e1}
+@media print{.columns{grid-template-columns:1.15fr 1fr;gap:9mm}.columns p{font-size:10.5pt;line-height:1.45}.placeholder{min-height:58mm}.photo-page{justify-content:center}.panorama-placeholder{aspect-ratio:2/1}}
+
+/* Valokuvat säilytetään kokonaisina alkuperäisessä kuvasuhteessaan. */
+.zine-image{display:block;width:100%;height:auto;object-fit:contain;margin:4mm 0}
+.columns .zine-image{margin:0;align-self:center}
+.cover-page h1{font-size:40px;letter-spacing:-.04em;white-space:nowrap}
+.cover-page .content{display:flex;align-items:center}
+.cover-image,.panorama-image{margin:0}
+@media screen and (max-width:650px){.cover-page h1{font-size:clamp(21px,6.5vw,40px)}.photo-page{min-height:60vw}.cover-page .content{display:block}}
+@media print{.cover-page h1{font-size:30pt}.cover-page .content{flex:0}.cover-image,.panorama-image{width:100%;height:auto}.zine-image{break-inside:avoid}}
+
+.fresnel-images{display:grid;grid-template-columns:1fr 1fr;gap:4mm;align-items:start}
+.fresnel-images>.zine-image{margin:0}.fresnel-detail{margin:0}.fresnel-detail .zine-image{margin:0}
+.fresnel-detail figcaption{font:10px/1.5 system-ui,sans-serif;color:var(--muted);margin-top:2mm}
+@media screen and (max-width:650px){.fresnel-images{grid-template-columns:1fr 1fr}}
+
+#portti .portti-image{width:auto;max-width:100%;height:88mm;margin:4mm auto;object-fit:contain}
+@media screen and (max-width:650px){#portti .portti-image{width:100%;height:auto}}
+
+.diy-images{display:grid;gap:4mm}.diy-pair{display:grid;grid-template-columns:1fr 1fr;gap:4mm;align-items:start}.diy-images .zine-image{margin:0;width:100%;height:auto;object-fit:contain}
+
+.memory-images{grid-template-columns:1fr 1fr;align-items:center;gap:6mm}.memory-images .memory-image{width:100%;height:88mm;object-fit:contain;margin:0}
+@media screen and (max-width:650px){.memory-images{grid-template-columns:1fr}.memory-images .memory-image{height:auto}}
+
+#muisti .father-image{width:100%;height:118mm;object-fit:contain;margin:0;align-self:start}
+@media screen and (max-width:650px){#muisti .father-image{height:auto}}
+
+.material-images{display:grid;grid-template-columns:1fr 1fr;gap:4mm;align-items:center}.material-images .zine-image{width:100%;height:58mm;object-fit:contain;margin:0}
+@media screen and (max-width:650px){.material-images .zine-image{height:auto}}
+
+#kynnys .threshold-image{width:100%;height:auto;object-fit:contain;margin:4mm 0}
+@media screen and (max-width:650px){#kynnys .threshold-image{width:100%;height:auto;object-fit:contain;margin:4mm 0}}
+
+#kokonaisuus .overview-image{display:block;width:auto;max-width:100%;height:85mm;object-fit:contain;margin:4mm auto}
+@media screen and (max-width:650px){#kokonaisuus .overview-image{width:100%;height:auto}}
+
+.identity-images{display:grid;grid-template-columns:1fr 1fr;gap:4mm;align-items:center}.identity-images .zine-image{width:100%;height:auto;max-height:115mm;object-fit:contain;margin:0}
+
+.identity-images .pedagogy-image{grid-column:1/-1;margin:0}.identity-images .pedagogy-image img{max-height:none;width:100%;height:auto}.pedagogy-image figcaption{font:10px/1.5 system-ui,sans-serif;color:var(--muted);margin-top:2mm}
+
+.studio-history{margin:0;text-align:center}.studio-history .zine-image{width:100%;height:112mm;object-fit:contain;margin:0}.studio-history figcaption{font:11px/1.5 system-ui,sans-serif;color:var(--muted);margin-top:2mm}
+@media screen and (max-width:650px){.studio-history .zine-image{height:auto}}
+
+.method-excerpt{max-width:78ch;font-size:18px;line-height:1.55;margin:0 0 4mm}.method-source{font:11px/1.5 system-ui,sans-serif;color:var(--muted);max-width:90ch;margin-bottom:6mm}.method-images{grid-template-columns:1fr 1fr;align-items:center}.method-images .zine-image{width:100%;height:68mm;object-fit:contain;margin:0}
+@media screen and (max-width:650px){.method-images{grid-template-columns:1fr}.method-images .zine-image{height:auto}}
+
+.authorship-timeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4mm;margin:9mm 0 8mm}.authorship-timeline article{border-top:1px solid var(--line);padding-top:3mm}.authorship-timeline .timeline-date{font:14px/1.4 system-ui,sans-serif;margin-bottom:4mm}.authorship-timeline img{display:block;width:100%;height:46mm;object-fit:contain;object-position:left center;margin:0 0 4mm}.authorship-timeline h3{font-size:14px;margin:0 0 3mm}.authorship-timeline article>p:not(.timeline-date){font:12px/1.6 Georgia,serif}.timeline-link{font:12px/1.5 system-ui,sans-serif}
+@media screen and (max-width:800px){.authorship-timeline{grid-template-columns:repeat(3,minmax(0,1fr))}}@media screen and (max-width:500px){.authorship-timeline{grid-template-columns:1fr 1fr}}
+
+.childhood-history{margin:5mm 0}.childhood-history .zine-image{width:100%;height:90mm;object-fit:contain;margin:0}.childhood-history figcaption{font:12px/1.5 system-ui,sans-serif;color:var(--muted);text-align:center;margin-top:3mm}
+@media screen and (max-width:650px){.childhood-history .zine-image{height:auto}}
+
+.cv-list{display:grid;grid-template-columns:13mm 1fr;column-gap:3mm;row-gap:4mm;margin:0 0 6mm}.cv-list dt{font:13px/1.5 system-ui,sans-serif}.cv-list dd{margin:0;font-size:14px;line-height:1.5}.cv-education{list-style:none;margin:0 0 6mm;padding:0}.cv-education li{margin-bottom:4mm;font-size:14px;line-height:1.5}#cv h3,#taiteilija h3{margin:0 0 3mm}#cv h3:not(:first-child){margin-top:5mm}#taiteilija .lead{margin-bottom:7mm}#cv .columns{gap:13mm}
+
+.qr-code{display:block;width:34mm;height:34mm;object-fit:contain;image-rendering:pixelated}.cv-qr-links{display:flex;gap:7mm;margin-bottom:4mm}.cv-qr-links a{display:flex;flex-direction:column;gap:2mm;font:11px/1.4 system-ui,sans-serif;max-width:42mm}.cv-qr-links .qr-code{width:27mm;height:27mm}
+
+/* Erillinen kansi: koko panoraama ja väljä otsikko. */
+.art-cover{justify-content:center;gap:10mm;padding:16mm 14mm 16mm 23mm}.art-cover h1{font:300 30px/1.2 system-ui,sans-serif;letter-spacing:.23em;margin:0;text-align:left}.art-cover>.zine-image{width:100%;height:auto;margin:0;object-fit:contain}
+@media screen and (max-width:650px){.art-cover{padding:2rem 1.2rem 2rem 1.7rem;gap:1.5rem;min-height:70vw}.art-cover h1{font-size:clamp(16px,4vw,30px);letter-spacing:.18em}}
+@media print{.art-cover{gap:10mm;padding:16mm 14mm 16mm 23mm}.art-cover h1{font-size:23pt}}

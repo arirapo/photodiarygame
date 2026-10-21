@@ -4,7 +4,7 @@ Avaa `index.html` selaimessa. Sama HTML ja CSS palvelevat verkkoa ja myöhempä�
 
 ## Rakenne
 
-- `index.html`: 16 sivua, prologi (1–3), osa 1 (4–8), osa 2 (9–13), epilogi (14–16).
+- `index.html`: 23 sivua, prologi (1–3), osa 1 (4–8), osa 2 (9–13), epilogi (14–16).
 - `styles.css`: verkkonäkymä, mobiili ja A4-vaakatulostus.
 - `assets/images/`: originaalikuvat, screenshotit, kaaviot ja niiden verkkoversiot.
 - `assets/qr/`: lopullisiin osoitteisiin johtavat, testatut QR-kuvat.
@@ -26,8 +26,12 @@ GitHub Pagesin nykyisen juurijulkaisun alla osoite on `/zine/traces-between/`. L
 
 ## PDF ja kierresidonta
 
-Valitse selaimessa Tulosta / tallenna PDF, paperi A4, vaaka, mittakaava 100 %, ei selaimen ylä-/alatunnisteita ja ei lisämarginaaleja. Tarkista esikatselusta 16 sivua. CSS:n sivukoko on 297 × 210 mm; vasemmalla 23 mm sidontavaraa. Pohja olettaa yksipuolisen vasemmalta sidottavan vedoksen. Kaksipuoliseen painoon suunnittele peilautuvat sidontamarginaalit painon kanssa.
+Valitse selaimessa Tulosta / tallenna PDF, paperi A4, vaaka, mittakaava 100 %, ei selaimen ylä-/alatunnisteita ja ei lisämarginaaleja. Tarkista esikatselusta 23 sivua. CSS:n sivukoko on 297 × 210 mm; vasemmalla 23 mm sidontavaraa. Pohja olettaa yksipuolisen vasemmalta sidottavan vedoksen. Kaksipuoliseen painoon suunnittele peilautuvat sidontamarginaalit painon kanssa.
 
 Sivu on kiinteän kokoinen printissä: tarkista jokaisen sisältömuutoksen jälkeen sivumäärä ja mahdollinen ylivuoto. Pohja ei leikkaa ylipitkää sisältöä piiloon. Tämä ei vielä ole painovalmis aineisto. Kuvat, resoluutio, fontit, värit, leikkuuvarat ja sidonta tarkistetaan lopullisesta PDF:stä ja fyysisestä vedoksesta.
 
 Kuultopaperi ja 3D-fragmentti ovat CSS:llä tehtyjä materiaaliviitteitä. Varsinaiset kuultopaperilehdet ja fyysiset liitteet lisätään printin tuotantosuunnitelmaan erikseen. Testaa lopulliset QR-koodit sekä näytöltä että paperivedoksesta.
+
+## Sisältöluonnos 21.10.2026
+
+Tekstit siirretty Muistiinpanojen dokumentaatioluonnoksesta. Keskustelukommentit poistettu; isä-osuuden kolme kuvaehdotusta muutettu kuvanpaikoiksi. Pitkät tekstit jaettu lisäsivuille. Kolme tekstitöntä panoraamasivua lisätty. Valokuvapäiväkirjan lyhyt pohjateksti on ennallaan. GitHub-versiota ei ole päivitetty kirjoitusoikeuden puuttuessa. Taiton visuaalinen ja tulostetarkistus on vielä tekemättä.

@@ -1,0 +1,11 @@
+Kuvien tarkkuustarkistus 21.10.2026
+
+A4 vaaka 297 × 210 mm; normaalin sivun kuva-alueen leveys 260 mm (297 − 23 − 14). Täysleveät 3072 × 1536 panoraamat: noin 300 ppi (3072 / 260 × 25,4). Näyttelypanoraama 6720 × 3360: noin 657 ppi. Opetustilanteen 11008 × 5504 panoraama on sijoitettu tätä pienemmäksi.
+
+Muut kuvat näkyvät pääosin palstoissa, pareina tai ruudukoissa, eivät täysleveinä. Esimerkiksi isäkuva (1624 × 2135) 118 mm korkeana: noin 460 ppi. PDF:stä poimittu kasvokuva (1066 × 1346), noin 54 mm leveänä: noin 500 ppi. Fresnel-kuvitus (1774 × 887), noin 54 mm leveänä: yli 800 ppi. Tankkikuvitus (1023 × 1537), enintään 58 mm korkeana: yli 670 ppi. Saariretkikuva 1824 × 1368, 88 mm korkeana: noin 395 ppi.
+
+Poikkeus: mäkiautokuva 949 × 588, 90 mm korkeana: noin 166 ppi. Se voi näyttää tarkoituksellisen pehmeältä arkistokuvalta. Tarkemman alkuperäisskannauksen käyttäminen parantaisi oikeaa yksityiskohtien määrää; pelkkää pikselisuurennusta ei tehty.
+
+Oppaan kansi renderöity uudelleen PDF:stä 400 dpi:llä. Kannessa olevan valokuvan oma lähtöresoluutio voi silti rajoittaa yksityiskohtia, mutta kirjan tekstit renderöityvät tarkasti. QR-koodit generoitu pikselitarkasti; esityskoot 27 ja 34 mm ja neljän moduulin valkoinen reunus.
+
+Alkuperäisiä kuvakopioita ei ole pienennetty verkkoversiota varten. JPEG-muunnosten lähteet säilyvät käyttäjän Kuvat-kansiossa. Tarkistus koskee HTML/CSS-lähteen kuvakokoja. Lopullisen selaimesta viedyn PDF:n mahdollinen kuvien uudelleenpakkaus ja fyysinen vedos pitää vielä tarkistaa erikseen. Tulostus A4 vaaka, 100 %, ilman sovitusta tai ylimääräisiä selaimen marginaaleja.
