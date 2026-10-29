@@ -1,0 +1,1006 @@
+
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Browser Mirror 2.0 — Photodiary Experiments</title>
+
+<style>
+:root {
+  --bg:#101113;
+  --panel:#1c1d21;
+  --text:#ededee;
+  --muted:#999ba5;
+  --line:#35363d;
+  --red:#eb434b;
+}
+* { box-sizing:border-box }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.55 system-ui,-apple-system,sans-serif;
+}
+main {
+  max-width:1180px;
+  margin:auto;
+  padding:48px 22px 90px;
+}
+header {
+  border-bottom:1px solid var(--line);
+  padding-bottom:27px;
+}
+.eyebrow {
+  color:var(--red);
+  font-size:11px;
+  letter-spacing:.2em;
+}
+h1 {
+  font-size:clamp(45px,8vw,88px);
+  letter-spacing:-.075em;
+  line-height:1;
+  font-weight:620;
+  margin:16px 0;
+}
+h1 span { color:var(--red) }
+h1 small {
+  font-size:.24em;
+  letter-spacing:0;
+  color:var(--muted);
+  vertical-align:top;
+}
+p {
+  color:var(--muted);
+  max-width:780px;
+}
+.controls {
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin:25px 0;
+}
+button {
+  background:transparent;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:10px 13px;
+  font:inherit;
+  cursor:pointer;
+}
+button:hover { border-color:var(--red) }
+button.primary {
+  background:var(--red);
+  border-color:var(--red);
+  color:white;
+}
+button:disabled { opacity:.5 }
+#status {
+  color:var(--muted);
+  font-size:12px;
+}
+.metrics {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin:25px 0;
+}
+.metric,.panel {
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:10px;
+  padding:21px;
+}
+.metric strong {
+  display:block;
+  font-size:26px;
+}
+.metric small { color:var(--muted) }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.panel { min-width:0 }
+.panel h2 {
+  font-size:16px;
+  margin:0 0 15px;
+}
+.number {
+  float:right;
+  color:var(--red);
+  font:11px monospace;
+}
+.item {
+  display:grid;
+  grid-template-columns:42% minmax(0,1fr);
+  gap:12px;
+  border-top:1px solid #33343a;
+  padding:9px 0;
+  font-size:12px;
+}
+.key { color:var(--muted) }
+.value {
+  font:12px/1.55 ui-monospace,Menlo,monospace;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+footer {
+  border-top:1px solid var(--line);
+  margin-top:36px;
+  padding-top:20px;
+  color:var(--muted);
+  font-size:12px;
+}
+#pixel { width:1px;height:1px }
+@media(max-width:760px) {
+  .grid { grid-template-columns:1fr }
+  .metrics { grid-template-columns:repeat(2,1fr) }
+  .item { grid-template-columns:1fr;gap:2px }
+  main { padding:30px 15px 75px }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">
+    PHOTODIARY / EXPERIMENTS / DIGITAL PORTRAIT
+  </div>
+
+  <h1>Browser<br>Mirror<span>.</span> <small>2.0</small></h1>
+
+  <p>
+    Kuinka paljon selain paljastaa ilman evästeitä?
+    Tämä digitaalinen omakuva kokoaa paikallisesti
+    selaimen ja laitteen tekniset ominaisuudet,
+    sormenjäljet, saapumisreitin ja yksityisyyden rajat.
+  </p>
+
+  <div class="controls">
+    <button class="primary" id="scan">↻ Mittaa uudelleen</button>
+    <button id="download">↓ Vie JSON</button>
+    <button id="copy">Kopioi JSON</button>
+    <button id="location">⌖ Sijainti (lupa)</button>
+    <button id="sensors">◉ Liiketunnistimet (lupa)</button>
+    <button id="devices">▣ Medialaitteet (lupa)</button>
+  </div>
+
+  <div id="status" aria-live="polite">Mittaus käynnistyy…</div>
+</header>
+
+<section class="metrics">
+  <div class="metric">
+    <strong id="total">—</strong>
+    <small>havaintoa</small>
+  </div>
+  <div class="metric">
+    <strong id="groups">—</strong>
+    <small>havaintolohkoa</small>
+  </div>
+  <div class="metric">
+    <strong id="secure">—</strong>
+    <small>suojattu ympäristö</small>
+  </div>
+</section>
+
+<section id="results" class="grid"></section>
+
+<footer>
+  <b>PIKSELIN MUISTO.</b>
+  Tämä yhden pikselin kuva
+  <img id="pixel" alt="" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+  on upotettu sivuun. Se ei tee verkkopyyntöä.
+  Perinteinen seurantapikseli sen sijaan tekee HTTP-pyynnön,
+  josta vastaanottava palvelin voi havaita yhteystietoja.
+  <p>
+    Ei evästeiden käyttöä, analytiikkaa, ulkoisia
+    kirjastoja tai mittaustietojen lähettämistä.
+    Sijaintia ja laitteita tutkitaan vain luvalla.
+    JSON-vienti voi sisältää henkilökohtaisia tietoja.
+  </p>
+  BROWSER MIRROR 2.0 / PHOTODIARY EXPERIMENTS
+</footer>
+
+</main>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const data = {};
+let running = false;
+
+function add(group,key,value) {
+  if(!data[group]) data[group]={};
+  data[group][key] =
+    value===undefined || value===null
+    ? "Ei saatavilla" : value;
+}
+
+function safe(fn) {
+  try {
+    const value=fn();
+    return value==null?"Ei saatavilla":value;
+  } catch(e) {
+    return "Estetty: "+e.name;
+  }
+}
+
+function media(q) {
+  return safe(()=>matchMedia(q).matches);
+}
+
+async function hash(value) {
+  try {
+    const bytes=new TextEncoder().encode(value);
+    const digest=await crypto.subtle.digest("SHA-256",bytes);
+    return Array.from(new Uint8Array(digest))
+      .map(x=>x.toString(16).padStart(2,"0")).join("");
+  } catch(e) {
+    return "Ei saatavilla";
+  }
+}
+
+function timeout(promise,ms=2500) {
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>
+      setTimeout(()=>reject(new Error("Aikakatkaisu")),ms))
+  ]);
+}
+
+function render() {
+  const root=$("results");
+  root.replaceChildren();
+  let count=0;
+
+  Object.entries(data).forEach(([title,items],index)=>{
+    const card=document.createElement("article");
+    card.className="panel";
+
+    const heading=document.createElement("h2");
+    heading.textContent=title;
+
+    const number=document.createElement("span");
+    number.className="number";
+    number.textContent=String(index+1).padStart(2,"0");
+    heading.append(number);
+    card.append(heading);
+
+    Object.entries(items).forEach(([key,value])=>{
+      count++;
+      const row=document.createElement("div");
+      row.className="item";
+
+      const label=document.createElement("div");
+      label.className="key";
+      label.textContent=key;
+
+      const output=document.createElement("div");
+      output.className="value";
+      output.textContent=typeof value==="object"
+        ?JSON.stringify(value,null,2):String(value);
+
+      row.append(label,output);
+      card.append(row);
+    });
+
+    root.append(card);
+  });
+
+  $("total").textContent=count;
+  $("groups").textContent=Object.keys(data).length;
+  $("secure").textContent=isSecureContext?"Kyllä":"Ei";
+}
+
+async function measure() {
+  if(running)return;
+  running=true;
+  $("scan").disabled=true;
+  $("status").textContent="Kerätään paikallisia havaintoja…";
+
+  for(const key of Object.keys(data))delete data[key];
+
+  const n=navigator;
+  const w=window;
+  const s=screen;
+  let g;
+
+  // 01 — SAAPUMINEN JA NAVIGOINTI
+  g="Saapuminen ja navigointi";
+
+  const params=Object.fromEntries(
+    new URLSearchParams(location.search)
+  );
+
+  add(g,"document.referrer",
+    document.referrer||"Tyhjä tai piilotettu");
+  add(g,"Nykyinen URL",location.href);
+  add(g,"Origin",location.origin);
+  add(g,"Polku",location.pathname);
+  add(g,"Parametrit",params);
+  add(g,"Fragmentti",location.hash||"Ei ole");
+  add(g,"UTM / kampanjatunnisteet",
+    Object.fromEntries(
+      Object.entries(params).filter(([key])=>
+        /^(utm_|gclid$|fbclid$|msclkid$)/i.test(key))
+    ));
+  add(g,"History length",history.length);
+  add(g,"Scroll restoration",safe(()=>history.scrollRestoration));
+  add(g,"Navigaation tyyppi",safe(()=>
+    performance.getEntriesByType("navigation")[0]?.type));
+  add(g,"Visibility",document.visibilityState);
+  add(g,"ReadyState",document.readyState);
+  add(g,"Referrer Policy",document.referrerPolicy||"Ei ilmoitettu");
+
+  // 02 — SELAIN
+  g="Selain ja identiteettivihjeet";
+
+  for(const key of [
+    "userAgent","platform","vendor","vendorSub",
+    "product","productSub","appName","appVersion",
+    "language","languages","cookieEnabled",
+    "webdriver","pdfViewerEnabled","doNotTrack",
+    "globalPrivacyControl","onLine"
+  ]) add(g,key,safe(()=>n[key]));
+
+  add(g,"User-Agent Client Hints",safe(()=>
+    n.userAgentData?{
+      brands:n.userAgentData.brands,
+      mobile:n.userAgentData.mobile,
+      platform:n.userAgentData.platform
+    }:"Ei tuettu"));
+
+  if(n.userAgentData?.getHighEntropyValues) {
+    try {
+      add(g,"Laajennetut Client Hints",
+        await timeout(n.userAgentData.getHighEntropyValues([
+          "architecture","bitness","model",
+          "platformVersion","fullVersionList"
+        ])));
+    }catch(e){add(g,"Laajennetut Client Hints",e.message)}
+  }
+
+  // 03 — AIKA JA KIELI
+  g="Kieli, aika ja paikallisuus";
+
+  const intl=Intl.DateTimeFormat().resolvedOptions();
+
+  for(const [key,value] of Object.entries({
+    timezone:intl.timeZone,
+    timezoneOffset:new Date().getTimezoneOffset(),
+    locale:intl.locale,
+    calendar:intl.calendar,
+    numberingSystem:intl.numberingSystem,
+    hourCycle:intl.hourCycle,
+    localTime:new Date().toString(),
+    UTC:new Date().toISOString(),
+    dateFormat:new Intl.DateTimeFormat().format(new Date()),
+    numberFormat:new Intl.NumberFormat().format(1234567.89),
+    pluralRule:new Intl.PluralRules().select(2),
+    listFormat:safe(()=>
+      new Intl.ListFormat().format(["A","B","C"]))
+  }))add(g,key,value);
+
+  // 04 — NÄYTTÖ JA IKKUNA
+  g="Näyttö ja ikkuna";
+
+  for(const key of [
+    "width","height","availWidth","availHeight",
+    "colorDepth","pixelDepth"
+  ]) add(g,"screen."+key,safe(()=>s[key]));
+
+  for(const key of [
+    "innerWidth","innerHeight","outerWidth",
+    "outerHeight","devicePixelRatio",
+    "screenX","screenY","scrollX","scrollY"
+  ])add(g,key,safe(()=>w[key]));
+
+  add(g,"Visual Viewport",safe(()=>
+    w.visualViewport?{
+      width:visualViewport.width,
+      height:visualViewport.height,
+      scale:visualViewport.scale,
+      offsetTop:visualViewport.offsetTop
+    }:"Ei saatavilla"));
+
+  add(g,"Orientation",safe(()=>({
+    type:s.orientation.type,
+    angle:s.orientation.angle
+  })));
+
+  add(g,"Fullscreen Enabled",document.fullscreenEnabled);
+
+  // 05 — LAITTEISTO
+  g="Laitteisto ja syöttölaitteet";
+
+  for(const key of [
+    "hardwareConcurrency","deviceMemory","maxTouchPoints"
+  ])add(g,key,safe(()=>n[key]));
+
+  add(g,"Touch Events","ontouchstart" in w);
+
+  for(const q of [
+    "pointer:coarse","pointer:fine",
+    "any-pointer:fine","any-pointer:coarse",
+    "hover:hover","any-hover:hover"
+  ])add(g,q,media("("+q+")"));
+
+  add(g,"Gamepad API",!!n.getGamepads);
+  add(g,"Gamepadien määrä",safe(()=>
+    Array.from(n.getGamepads?.()||[]).filter(Boolean).length));
+  add(g,"Virtual Keyboard API",!!n.virtualKeyboard);
+
+  // 06 — ULKOASU
+  g="Ulkoasu ja saavutettavuus";
+
+  for(const q of [
+    "prefers-color-scheme:dark",
+    "prefers-reduced-motion:reduce",
+    "prefers-contrast:more",
+    "prefers-contrast:less",
+    "forced-colors:active",
+    "inverted-colors:inverted",
+    "prefers-reduced-transparency:reduce",
+    "color-gamut:p3",
+    "color-gamut:rec2020",
+    "dynamic-range:high",
+    "display-mode:standalone",
+    "min-resolution:2dppx"
+  ])add(g,q,media("("+q+")"));
+
+  // 07 — CSS-OMINAISUUDET
+  g="CSS-ominaisuudet";
+
+  const cssTests={
+    grid:["display","grid"],
+    subgrid:["grid-template-columns","subgrid"],
+    containerQueries:["container-type","inline-size"],
+    backdropFilter:["backdrop-filter","blur(2px)"],
+    aspectRatio:["aspect-ratio","16 / 9"],
+    textWrapBalance:["text-wrap","balance"],
+    colorMix:["color","color-mix(in srgb, red, blue)"],
+    oklch:["color","oklch(70% 0.2 20)"],
+    viewTransitions:!!document.startViewTransition,
+    scrollTimeline:"ScrollTimeline" in window
+  };
+
+  for(const [key,value] of Object.entries(cssTests)) {
+    add(g,key,Array.isArray(value)
+      ?safe(()=>CSS.supports(...value)):value);
+  }
+
+  // 08 — WEBGL
+  g="WebGL ja näytönohjain";
+
+  let gl=null;
+  try {
+    gl=document.createElement("canvas").getContext("webgl");
+  }catch(e){}
+
+  add(g,"WebGL käytettävissä",!!gl);
+
+  if(gl) {
+    const glFields={
+      version:gl.VERSION,
+      GLSL:gl.SHADING_LANGUAGE_VERSION,
+      vendor:gl.VENDOR,
+      renderer:gl.RENDERER,
+      maxTextureSize:gl.MAX_TEXTURE_SIZE,
+      maxCubeMapTextureSize:gl.MAX_CUBE_MAP_TEXTURE_SIZE,
+      maxRenderbufferSize:gl.MAX_RENDERBUFFER_SIZE,
+      maxVertexAttribs:gl.MAX_VERTEX_ATTRIBS,
+      maxTextureImageUnits:gl.MAX_TEXTURE_IMAGE_UNITS,
+      maxViewportDims:gl.MAX_VIEWPORT_DIMS
+    };
+
+    for(const [key,constant] of Object.entries(glFields)) {
+      add(g,key,safe(()=>{
+        const value=gl.getParameter(constant);
+        return ArrayBuffer.isView(value)
+          ?Array.from(value):value;
+      }));
+    }
+
+    const ext=gl.getExtension("WEBGL_debug_renderer_info");
+
+    add(g,"GPU-valmistaja",ext?
+      safe(()=>gl.getParameter(ext.UNMASKED_VENDOR_WEBGL)):
+      "Piilotettu");
+
+    add(g,"GPU-renderöijä",ext?
+      safe(()=>gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)):
+      "Piilotettu");
+
+    add(g,"Laajennukset",safe(()=>gl.getSupportedExtensions()));
+  }
+
+  // 09 — WEBGL2 / WEBGPU
+  g="WebGL2 ja WebGPU";
+
+  add(g,"WebGL2",safe(()=>
+    !!document.createElement("canvas").getContext("webgl2")));
+  add(g,"WebGPU API",!!n.gpu);
+
+  if(n.gpu) {
+    try {
+      const adapter=await timeout(n.gpu.requestAdapter(),2500);
+      add(g,"Adapteri saatavilla",!!adapter);
+      if(adapter) {
+        add(g,"Adapter info",safe(()=>adapter.info));
+        add(g,"Ominaisuuksia",adapter.features.size);
+        add(g,"Max Texture 2D",
+          adapter.limits.maxTextureDimension2D);
+      }
+    }catch(e){add(g,"WebGPU-kysely",e.message)}
+  }
+
+  // 10 — CANVAS
+  g="Canvas-sormenjälki";
+
+  try {
+    const canvas=document.createElement("canvas");
+    canvas.width=380;
+    canvas.height=100;
+
+    const ctx=canvas.getContext("2d");
+    ctx.fillStyle="#18212b";
+    ctx.fillRect(0,0,380,100);
+
+    ctx.fillStyle="#ed434b";
+    ctx.font="24px Georgia";
+    ctx.fillText("Browser Mirror 2.0",8,39);
+
+    ctx.fillStyle="white";
+    ctx.font="18px Arial";
+    ctx.fillText("Aa Ää Öö Ω 漢字 𝄞",8,80);
+
+    add(g,"Canvas SHA-256",await hash(canvas.toDataURL()));
+    add(g,"Pixel Readback",safe(()=>
+      Array.from(ctx.getImageData(0,0,1,1).data)));
+  }catch(e){add(g,"Canvas Error",e.name)}
+
+  // 11 — WEB AUDIO
+  g="Audio-sormenjälki";
+
+  const Offline=w.OfflineAudioContext||
+    w.webkitOfflineAudioContext;
+
+  add(g,"OfflineAudioContext",!!Offline);
+
+  if(Offline) {
+    try {
+      const ctx=new Offline(1,8192,44100);
+      const osc=ctx.createOscillator();
+      const compressor=ctx.createDynamicsCompressor();
+
+      osc.type="triangle";
+      osc.frequency.value=10000;
+      compressor.threshold.value=-50;
+      compressor.knee.value=40;
+      compressor.ratio.value=12;
+
+      osc.connect(compressor);
+      compressor.connect(ctx.destination);
+      osc.start();
+
+      const buffer=await timeout(ctx.startRendering(),2500);
+      const samples=buffer.getChannelData(0).slice(2000,3000);
+      let sum=0;
+      for(const value of samples)sum+=Math.abs(value);
+
+      add(g,"Audio SHA-256",await hash(sum.toPrecision(16)));
+    }catch(e){add(g,"Audio Error",e.message)}
+  }
+
+  // 12 — FONTIT
+  g="Fontit ja tekstin mittaus";
+
+  add(g,"Font Loading API",!!document.fonts);
+
+  const candidates=[
+    "Arial","Helvetica","Georgia","Times New Roman",
+    "Courier New","Verdana","Tahoma","Trebuchet MS",
+    "Palatino","Garamond","Futura","Avenir",
+    "Roboto","Calibri","Cambria","Menlo","Monaco",
+    "Noto Sans","Comic Sans MS"
+  ];
+
+  const fontCanvas=document.createElement("canvas");
+  const fontCtx=fontCanvas.getContext("2d");
+
+  function fontWidth(name) {
+    fontCtx.font="24px "+name;
+    return fontCtx.measureText("Browser Mirror ÆØÅ 漢字").width;
+  }
+
+  const baseline=fontWidth("monospace");
+
+  add(g,"Mahdollisesti saatavilla olevat fontit",
+    candidates.filter(name=>
+      Math.abs(fontWidth('"'+name+'",monospace')-baseline)>.05));
+
+  add(g,"Huomautus",
+    "Fonttien mittaus on arvio; fallback ja selainrajoitukset vaikuttavat.");
+
+  // 13 — VERKKO
+  g="Verkko ja siirtotekniikka";
+
+  const connection=n.connection||
+    n.mozConnection||n.webkitConnection;
+
+  for(const key of [
+    "type","effectiveType","downlink","rtt","saveData"
+  ])add(g,key,safe(()=>connection?.[key]));
+
+  add(g,"Online",n.onLine);
+  add(g,"Protokolla",location.protocol);
+  add(g,"Host",location.host);
+  add(g,"HTTPS",location.protocol==="https:");
+  add(g,"IP-osoite",
+    "Vaatii palvelimen tai erillisen verkkopyynnön");
+  add(g,"HTTP-pyyntöotsakkeet",
+    "Eivät ole kokonaisuudessaan JavaScriptin saatavilla");
+
+  // 14 — NAVIGATION TIMING
+  g="Navigoinnin suorituskyky";
+
+  const nav=performance.getEntriesByType("navigation")[0];
+
+  if(nav) {
+    for(const key of [
+      "type","redirectCount","duration",
+      "domInteractive","domContentLoadedEventEnd",
+      "loadEventEnd","responseStart","responseEnd",
+      "transferSize","encodedBodySize","decodedBodySize",
+      "nextHopProtocol","responseStatus","workerStart",
+      "secureConnectionStart"
+    ])add(g,key,safe(()=>nav[key]));
+
+    add(g,"Server Timing",safe(()=>
+      nav.serverTiming?.map(x=>({
+        name:x.name,duration:x.duration
+      }))));
+  }
+
+  add(g,"Performance Time Origin",performance.timeOrigin);
+  add(g,"Resource Timing entries",
+    performance.getEntriesByType("resource").length);
+
+  // 15 — TALLENNUS
+  g="Tallennus ja eristys";
+
+  add(g,"Secure Context",isSecureContext);
+  add(g,"Cross Origin Isolated",crossOriginIsolated);
+
+  for(const key of [
+    "localStorage","sessionStorage","indexedDB","caches"
+  ])add(g,key,safe(()=>!!w[key]));
+
+  add(g,"Service Worker",!!n.serviceWorker);
+  add(g,"SharedArrayBuffer",typeof SharedArrayBuffer!=="undefined");
+
+  try {
+    const estimate=await n.storage?.estimate();
+    add(g,"Storage Quota",estimate?.quota);
+    add(g,"Storage Usage",estimate?.usage);
+    add(g,"Persistent Storage",await n.storage?.persisted());
+  }catch(e){add(g,"Storage Error",e.name)}
+
+  // 16 — MEDIAKOODEKIT
+  g="Media ja koodekit";
+
+  const video=document.createElement("video");
+  const audio=document.createElement("audio");
+
+  const codecs={
+    H264:'video/mp4; codecs="avc1.42E01E"',
+    HEVC:'video/mp4; codecs="hvc1"',
+    AV1:'video/mp4; codecs="av01.0.05M.08"',
+    VP9:'video/webm; codecs="vp9"',
+    AAC:'audio/mp4; codecs="mp4a.40.2"',
+    Opus:'audio/ogg; codecs="opus"'
+  };
+
+  for(const [name,mime] of Object.entries(codecs)) {
+    const element=mime.startsWith("audio")?audio:video;
+    add(g,name,element.canPlayType(mime)||"Ei");
+  }
+
+  add(g,"MediaRecorder",!!w.MediaRecorder);
+  add(g,"MediaCapabilities",!!n.mediaCapabilities);
+  add(g,"MIDI API",!!n.requestMIDIAccess);
+
+  // 17 — SELAINRAJAPINNAT
+  g="Selaimen API-pinta";
+
+  for(const [name,available] of Object.entries({
+    WebRTC:!!w.RTCPeerConnection,
+    WebSocket:!!w.WebSocket,
+    WebTransport:!!w.WebTransport,
+    WebAssembly:!!w.WebAssembly,
+    SpeechSynthesis:!!w.speechSynthesis,
+    SpeechRecognition:!!(w.SpeechRecognition||
+      w.webkitSpeechRecognition),
+    Bluetooth:!!n.bluetooth,
+    USB:!!n.usb,
+    Serial:!!n.serial,
+    HID:!!n.hid,
+    NFC:!!w.NDEFReader,
+    Share:!!n.share,
+    Clipboard:!!n.clipboard,
+    WakeLock:!!n.wakeLock,
+    Vibration:!!n.vibrate,
+    PaymentRequest:!!w.PaymentRequest,
+    FileSystemAccess:!!w.showOpenFilePicker,
+    WebAuthn:!!w.PublicKeyCredential,
+    Notifications:!!w.Notification,
+    Geolocation:!!n.geolocation,
+    DeviceOrientation:!!w.DeviceOrientationEvent,
+    DeviceMotion:!!w.DeviceMotionEvent,
+    Gamepad:!!n.getGamepads
+  }))add(g,name,available);
+
+  // 18 — MEDIALAITTEET ILMAN LUPAA
+  g="Medialaitteet ilman lupaa";
+
+  add(g,"enumerateDevices API",
+    !!n.mediaDevices?.enumerateDevices);
+
+  if(n.mediaDevices?.enumerateDevices) {
+    try {
+      const list=await timeout(
+        n.mediaDevices.enumerateDevices(),2000);
+      add(g,"Laitteiden määrä",list.length);
+      add(g,"Laitetyypit",list.map(x=>x.kind));
+      add(g,"Näkyvät nimet",
+        list.map(x=>x.label||"Piilotettu"));
+    }catch(e){add(g,"Kysely",e.message)}
+  }
+
+  // 19 — KÄYTTÖOIKEUDET
+  g="Käyttöoikeuksien tilat";
+
+  for(const name of [
+    "geolocation","camera","microphone",
+    "notifications","clipboard-read","clipboard-write",
+    "accelerometer","gyroscope","magnetometer","midi"
+  ]) {
+    try {
+      const result=await timeout(
+        n.permissions.query({name}),1000);
+      add(g,name,result.state);
+    }catch(e){add(g,name,"Ei tuettu / ei tiedossa")}
+  }
+
+  // 20 — AKKU
+  g="Akku ja energiatiedot";
+
+  if(n.getBattery) {
+    try {
+      const battery=await timeout(n.getBattery(),1500);
+      add(g,"Varausaste",
+        Math.round(battery.level*100)+" %");
+      add(g,"Latautuu",battery.charging);
+      add(g,"Latausajan arvio",battery.chargingTime);
+    }catch(e){add(g,"Akku",e.message)}
+  }else add(g,"Battery API","Ei saatavilla");
+
+  // 21 — PIKSELIKOKEILU
+  g="Yhden pikselin kokeilu";
+
+  add(g,"Upotettu pikseli","1 × 1 GIF, data-URI");
+  add(g,"Erillinen verkkopyyntö",false);
+  add(g,"Perinteisen seurantapikselin palvelinhavainnot",
+    "IP, aika, User-Agent, HTTP-otsakkeet ja sallittu Referer");
+  add(g,"Evästeet","Ei käytetä");
+  add(g,"Tietojen lähettäminen","Ei");
+
+  // 22 — LUVALLISET KOKEET
+  g="Luvalliset kokeet";
+
+  add(g,"Tarkka sijainti","Ei pyydetty automaattisesti");
+  add(g,"Liike ja suunta","Ei pyydetty automaattisesti");
+  add(g,"Kamera / mikrofoni","Ei avata automaattisesti");
+
+  // 23 — RAJOITUKSET
+  g="Mitä selain ei voi tietää";
+
+  const restrictions={
+    "Koko selaushistoria":"Ei sallittu",
+    "Kaikki asennetut ohjelmat":"Ei yleisesti saatavilla",
+    "Tiedostojen sisältö":"Ei ilman käyttäjän valintaa",
+    "Varma laitemalli":"Ei yleisesti saatavilla",
+    "Käyttäjän henkilöllisyys":"Ei pääteltävissä varmasti",
+    "IP ja HTTP-pyyntöotsakkeet":
+      "Vaativat palvelimen tai erillisen verkkokyselyn",
+    "Yksikäsitteinen fingerprint":"Ei taattu",
+    "Yksityinen IP":
+      "WebRTC:n suojaukset rajoittavat näkyvyyttä"
+  };
+
+  for(const [key,value] of Object.entries(restrictions))
+    add(g,key,value);
+
+  // 24 — KOOSTETTU SORMENJÄLKI
+  g="Koostettu selaimen sormenjälki";
+
+  const components=[
+    "Selain ja identiteettivihjeet",
+    "Näyttö ja ikkuna",
+    "Laitteisto ja syöttölaitteet",
+    "WebGL ja näytönohjain",
+    "Canvas-sormenjälki",
+    "Audio-sormenjälki",
+    "Fontit ja tekstin mittaus"
+  ];
+
+  add(g,"SHA-256",await hash(JSON.stringify(
+    components.map(key=>data[key])
+  )));
+  add(g,"Tulkinta",
+    "Havainnollistava ja muutosherkkä tiiviste, ei pysyvä henkilötunniste.");
+
+  render();
+  $("status").textContent="Valmis · "+
+    new Date().toLocaleString("fi-FI")+
+    " · tiedot pysyvät selaimessa";
+  running=false;
+  $("scan").disabled=false;
+}
+
+// PAINIKKEET
+$("scan").onclick=()=>measure().catch(e=>{
+  $("status").textContent="Mittausvirhe: "+e.message;
+  running=false;
+  $("scan").disabled=false;
+  render();
+});
+
+function exportData() {
+  return {
+    title:"Browser Mirror 2.0",
+    timestamp:new Date().toISOString(),
+    measurements:data
+  };
+}
+
+$("download").onclick=()=>{
+  const blob=new Blob(
+    [JSON.stringify(exportData(),null,2)],
+    {type:"application/json"}
+  );
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="browser-mirror-v2.json";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+
+$("copy").onclick=async()=>{
+  try {
+    await navigator.clipboard.writeText(
+      JSON.stringify(exportData(),null,2)
+    );
+    $("status").textContent="JSON kopioitu.";
+  }catch(e){
+    $("status").textContent="Leikepöytä ei käytettävissä.";
+  }
+};
+
+// SIJAINTI — VAIN KÄYTTÄJÄN PYYNNÖSTÄ
+$("location").onclick=()=>{
+  if(!navigator.geolocation) {
+    $("status").textContent="Paikannus ei ole saatavilla.";
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    position=>{
+      add("Luvalliset kokeet","Tarkka sijainti",{
+        latitude:position.coords.latitude,
+        longitude:position.coords.longitude,
+        accuracyMeters:position.coords.accuracy
+      });
+      render();
+    },
+    error=>{
+      add("Luvalliset kokeet","Tarkka sijainti",
+        "Ei saatu: "+error.message);
+      render();
+    },
+    {timeout:12000}
+  );
+};
+
+// LIIKETUNNISTIMET — VAIN PYYNNÖSTÄ
+$("sensors").onclick=async()=>{
+  try {
+    if(!window.DeviceOrientationEvent) {
+      add("Luvalliset kokeet","Liike ja suunta",
+        "Ei tuettu");
+      render();
+      return;
+    }
+
+    if(typeof DeviceOrientationEvent.requestPermission==="function") {
+      const result=await DeviceOrientationEvent.requestPermission();
+      if(result!=="granted") {
+        add("Luvalliset kokeet","Liike ja suunta",
+          "Lupaa ei saatu");
+        render();
+        return;
+      }
+    }
+
+    let received=false;
+    const handler=event=>{
+      if(received)return;
+      received=true;
+      add("Luvalliset kokeet","Liike ja suunta",{
+        alpha:event.alpha,
+        beta:event.beta,
+        gamma:event.gamma,
+        absolute:event.absolute
+      });
+      render();
+    };
+
+    window.addEventListener("deviceorientation",handler,{once:true});
+    setTimeout(()=>{
+      if(!received) {
+        window.removeEventListener("deviceorientation",handler);
+        add("Luvalliset kokeet","Liike ja suunta",
+          "Mittaus ei saatavilla");
+        render();
+      }
+    },4000);
+  }catch(e){
+    add("Luvalliset kokeet","Liike ja suunta",e.message);
+    render();
+  }
+};
+
+// KAMERA JA MIKROFONI — VAIN PYYNNÖSTÄ
+$("devices").onclick=async()=>{
+  if(!navigator.mediaDevices?.getUserMedia) {
+    $("status").textContent="MediaDevices ei saatavilla.";
+    return;
+  }
+
+  let stream;
+  try {
+    stream=await navigator.mediaDevices.getUserMedia({
+      audio:true,video:true
+    });
+
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    add("Luvalliset kokeet","Kamera / mikrofoni",
+      devices.map(x=>({
+        kind:x.kind,
+        label:x.label||"Piilotettu"
+      })));
+  }catch(e){
+    add("Luvalliset kokeet","Kamera / mikrofoni",
+      "Lupa tai laite puuttuu: "+e.name);
+  }finally {
+    if(stream)stream.getTracks().forEach(t=>t.stop());
+    render();
+  }
+};
+
+// AUTOMAATTINEN ENSIMITTAUS
+measure().catch(e=>{
+  $("status").textContent="Mittaus keskeytyi: "+e.message;
+  running=false;
+  $("scan").disabled=false;
+  render();
+});
+</script>
+</body>
+</html>
