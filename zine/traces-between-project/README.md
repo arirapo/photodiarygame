@@ -21,6 +21,10 @@ jolloin verkkoversio on:
 `https://photodiarygame.com/zine/traces-between-project/`
 
 ## Nykyinen versio
-Versio 0.1 käyttää väliaikaisesti jo olemassa olevan dokumentaatiozinen kuvia julkisina URL-osoitteina, jotta rakenne toimii heti.
+Versio 0.2 · 30.10.2026 · 19 A4-vaakasivua.
 
-Kun kuvat on kuratoitu, kopioi valitut kuvat tämän hakemiston omaan `assets/images/`-hakemistoon ja vaihda HTML:n kuvapolut paikallisiksi.
+Kuvat on kopioitu tämän julkaisun omaan `assets/images/`-hakemistoon alkuperäisessä koossa. Osa aineistosta ja Välineiden välillä -sivu on samaa kuin arviointidokumentaatiossa, mutta julkaisu ei tarvitse sen tiedostoja tai verkko-osoitteita toimiakseen.
+
+Historiallinen esine -sivun katsomistilanne on tekoälykuvitus. Muut kuvat ovat Ari Rapon valokuvia.
+
+PDF: avaa verkkoversio Chromessa ja valitse Tulosta / tallenna PDF. Sivukoko A4 vaaka, mittakaava 100 %, ei selaimen ylä- tai alatunnisteita.
