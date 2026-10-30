@@ -21,7 +21,7 @@ jolloin verkkoversio on:
 `https://photodiarygame.com/zine/traces-between-project/`
 
 ## Nykyinen versio
-Versio 0.2 · 30.10.2026 · 19 A4-vaakasivua.
+Versio 0.2 · 30.10.2026 · 22 A4-vaakasivua.
 
 Kuvat on kopioitu tämän julkaisun omaan `assets/images/`-hakemistoon alkuperäisessä koossa. Osa aineistosta ja Välineiden välillä -sivu on samaa kuin arviointidokumentaatiossa, mutta julkaisu ei tarvitse sen tiedostoja tai verkko-osoitteita toimiakseen.
 
