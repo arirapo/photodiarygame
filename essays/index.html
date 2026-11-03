@@ -1,0 +1,99 @@
+
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <meta name="theme-color" content="#101217">
+  <meta name="description"
+        content="Visual Essay Engine – kokeellinen multimediaesseen julkaisupohja">
+
+  <title>Visual Essay Engine — Demo</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<a class="skip" href="#content">
+  Siirry sisältöön
+</a>
+
+<header class="topbar">
+  <a class="brand" href="#top">
+    V / E
+    <span>VISUAL ESSAY ENGINE</span>
+  </a>
+
+  <div class="topright">
+    <span id="chapter">ESSEE 01 / DEMO</span>
+
+    <button
+      id="motion"
+      type="button"
+      aria-pressed="false"
+      title="Vähennä liikettä">
+      Liike: päällä
+    </button>
+  </div>
+</header>
+
+<div class="progress" aria-hidden="true">
+  <div id="progressbar"></div>
+</div>
+
+<main id="content">
+  <div id="story">
+
+    <section class="hero" id="top">
+
+      <div class="hero-visual"
+           id="heroVisual"></div>
+
+      <div class="hero-overlay"></div>
+
+      <div class="hero-copy">
+        <p class="eyebrow" id="heroLabel"></p>
+        <h1 id="heroTitle"></h1>
+        <p class="lead" id="heroSub"></p>
+
+        <a class="start" href="#story-start">
+          Aloita essee
+          <span aria-hidden="true">↓</span>
+        </a>
+      </div>
+
+      <span class="hero-side">
+        SCROLL TO EXPLORE · 2026
+      </span>
+
+    </section>
+
+    <div id="sections"></div>
+
+    <footer class="footer">
+      <p class="eyebrow">LOPPU / THE END</p>
+
+      <h2>Kiitos, että kuljit mukana.</h2>
+
+      <p>
+        Tämä on muokattava prototyyppi –
+        korvaa kuvat, tekstit ja mediat omillasi.
+      </p>
+
+      <a href="#top">Takaisin alkuun ↑</a>
+
+      <span>
+        VISUAL ESSAY ENGINE · VERSIO 0.1
+      </span>
+    </footer>
+
+  </div>
+</main>
+
+<script src="app.js" defer></script>
+
+</body>
+</html>
