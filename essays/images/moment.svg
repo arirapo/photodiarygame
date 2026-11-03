@@ -1,0 +1,163 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1600 900"
+     role="img"
+     aria-labelledby="title desc">
+
+  <title id="title">Pysähtynyt hetki</title>
+  <desc id="desc">
+    Abstrakti maisema, jossa vaalea ikkuna
+    hehkuu tumman horisontin yläpuolella.
+  </desc>
+
+  <defs>
+    <linearGradient id="sky"
+                    x1="0" y1="0"
+                    x2="0" y2="1">
+      <stop offset="0%"
+            stop-color="#141c27"/>
+      <stop offset="55%"
+            stop-color="#647984"/>
+      <stop offset="100%"
+            stop-color="#c7b9a0"/>
+    </linearGradient>
+
+    <linearGradient id="ground"
+                    x1="0" y1="0"
+                    x2="0" y2="1">
+      <stop offset="0%"
+            stop-color="#283139"/>
+      <stop offset="100%"
+            stop-color="#0b0e13"/>
+    </linearGradient>
+
+    <linearGradient id="window"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%"
+            stop-color="#fff2cd"/>
+      <stop offset="100%"
+            stop-color="#a7c2c7"/>
+    </linearGradient>
+
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="48"/>
+    </filter>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+
+  </defs>
+
+  <!-- Taivas -->
+  <rect width="1600"
+        height="900"
+        fill="url(#sky)"/>
+
+  <!-- Hajanainen valo -->
+  <ellipse cx="800"
+           cy="390"
+           rx="480"
+           ry="180"
+           fill="#f7e1ba"
+           opacity="0.28"
+           filter="url(#softBlur)"/>
+
+  <!-- Kaukaiset maisemakerrokset -->
+  <path d="
+    M0 540
+    C250 500 380 560 600 530
+    C850 490 1100 550 1600 510
+    L1600 900 L0 900 Z"
+    fill="#59666b"
+    opacity="0.52"/>
+
+  <path d="
+    M0 625
+    C300 595 490 665 750 615
+    C1050 570 1320 650 1600 615
+    L1600 900 L0 900 Z"
+    fill="url(#ground)"/>
+
+  <!-- Muistin ikkuna -->
+  <rect x="605"
+        y="190"
+        width="390"
+        height="470"
+        fill="#fff2cd"
+        opacity="0.22"
+        filter="url(#glow)"/>
+
+  <rect x="625"
+        y="210"
+        width="350"
+        height="430"
+        fill="url(#window)"
+        opacity="0.75"/>
+
+  <!-- Ikkunan varjo -->
+  <rect x="625"
+        y="210"
+        width="350"
+        height="430"
+        fill="none"
+        stroke="#f9f1df"
+        stroke-width="3"
+        opacity="0.7"/>
+
+  <line x1="800"
+        y1="210"
+        x2="800"
+        y2="640"
+        stroke="#42505a"
+        stroke-width="5"
+        opacity="0.65"/>
+
+  <line x1="625"
+        y1="425"
+        x2="975"
+        y2="425"
+        stroke="#42505a"
+        stroke-width="5"
+        opacity="0.65"/>
+
+  <!-- Etualan hämärä -->
+  <rect x="0"
+        y="770"
+        width="1600"
+        height="130"
+        fill="#090b0f"
+        opacity="0.5"/>
+
+  <!-- Tekninen placeholder-merkintä -->
+  <g font-family="Helvetica, Arial, sans-serif"
+     text-anchor="middle">
+
+    <text x="800"
+          y="720"
+          font-size="18"
+          letter-spacing="7"
+          fill="#e3c9a1">
+      VISUAL ESSAY ENGINE
+    </text>
+
+    <text x="800"
+          y="765"
+          font-size="38"
+          font-weight="300"
+          letter-spacing="4"
+          fill="#f3f1ec">
+      MOMENT / 02
+    </text>
+
+    <text x="800"
+          y="810"
+          font-size="17"
+          fill="#c4c9cc">
+      Pysähtynyt hetki
+    </text>
+
+  </g>
+
+</svg>
