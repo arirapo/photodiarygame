@@ -1,0 +1,190 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1600 900"
+     role="img"
+     aria-labelledby="title desc">
+
+  <title id="title">Jälkiä välitilassa</title>
+  <desc id="desc">
+    Abstrakti kuva ajan kerrostumista,
+    läpikuultavista kehyksistä ja
+    häilyvästä ihmishahmosta.
+  </desc>
+
+  <defs>
+
+    <linearGradient id="background"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%"
+            stop-color="#090c13"/>
+      <stop offset="48%"
+            stop-color="#303b49"/>
+      <stop offset="100%"
+            stop-color="#74675c"/>
+    </linearGradient>
+
+    <radialGradient id="light">
+      <stop offset="0%"
+            stop-color="#e7d5b5"
+            stop-opacity="0.55"/>
+      <stop offset="100%"
+            stop-color="#e7d5b5"
+            stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+
+    <filter id="figureBlur">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+
+  </defs>
+
+  <!-- Tumma tausta -->
+  <rect width="1600"
+        height="900"
+        fill="url(#background)"/>
+
+  <!-- Valon kerrostumia -->
+  <ellipse cx="1120"
+           cy="370"
+           rx="520"
+           ry="390"
+           fill="url(#light)"/>
+
+  <ellipse cx="400"
+           cy="700"
+           rx="420"
+           ry="240"
+           fill="#a3b0ba"
+           opacity="0.12"
+           filter="url(#blur)"/>
+
+  <!-- Päällekkäiset muistikehykset -->
+  <g fill="none"
+     stroke="#e9ddd0">
+
+    <rect x="760" y="120"
+          width="470" height="610"
+          stroke-width="3"
+          opacity="0.32"
+          transform="rotate(-7 995 425)"/>
+
+    <rect x="810" y="150"
+          width="470" height="610"
+          stroke-width="2"
+          opacity="0.22"
+          transform="rotate(5 1045 455)"/>
+
+    <rect x="710" y="170"
+          width="470" height="610"
+          stroke-width="2"
+          opacity="0.16"
+          transform="rotate(-13 945 475)"/>
+
+  </g>
+
+  <!-- Häilyvä hahmo -->
+  <g filter="url(#figureBlur)"
+     opacity="0.45"
+     fill="#d3c9bc">
+
+    <!-- Pää -->
+    <ellipse cx="1050"
+             cy="345"
+             rx="78"
+             ry="105"/>
+
+    <!-- Vartalo -->
+    <path d="
+      M950 440
+      C890 460 860 540 845 650
+      L825 900
+      L1260 900
+      L1220 640
+      C1205 530 1155 455 1105 440
+      Z"/>
+
+  </g>
+
+  <!-- Toinen ajallinen jälki -->
+  <g opacity="0.18"
+     filter="url(#figureBlur)"
+     fill="#f3e7d6"
+     transform="translate(-110 20)">
+
+    <ellipse cx="1050"
+             cy="345"
+             rx="78"
+             ry="105"/>
+
+    <path d="
+      M950 440
+      C890 460 860 540 845 650
+      L825 900
+      L1260 900
+      L1220 640
+      C1205 530 1155 455 1105 440
+      Z"/>
+
+  </g>
+
+  <!-- Aikajälkien pystylinjat -->
+  <g stroke="#ffffff"
+     stroke-width="1"
+     opacity="0.12">
+
+    <line x1="210" y1="0"
+          x2="210" y2="900"/>
+
+    <line x1="430" y1="0"
+          x2="430" y2="900"/>
+
+    <line x1="685" y1="0"
+          x2="685" y2="900"/>
+
+    <line x1="1370" y1="0"
+          x2="1370" y2="900"/>
+
+  </g>
+
+  <!-- Hento vaakasuuntainen aikajana -->
+  <line x1="0" y1="780"
+        x2="1600" y2="780"
+        stroke="#e3c9a1"
+        stroke-width="2"
+        opacity="0.32"/>
+
+  <!-- Placeholder-merkintä -->
+  <g font-family="Helvetica, Arial, sans-serif">
+
+    <text x="110"
+          y="750"
+          font-size="16"
+          letter-spacing="6"
+          fill="#e3c9a1">
+      VISUAL ESSAY ENGINE
+    </text>
+
+    <text x="110"
+          y="815"
+          font-size="46"
+          font-weight="300"
+          letter-spacing="4"
+          fill="#f3f1ec">
+      TRACE / 04
+    </text>
+
+    <text x="110"
+          y="852"
+          font-size="17"
+          fill="#c4c9cc">
+      Jälki · muisti · välitila
+    </text>
+
+  </g>
+
+</svg>
