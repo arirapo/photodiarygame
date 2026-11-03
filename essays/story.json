@@ -1,0 +1,69 @@
+
+{
+  "title": "Jälkiä",
+  "chapter": "ESSEE 01 / KOKEILU",
+  "hero": {
+    "label": "VISUAL ESSAY ENGINE / 2026",
+    "title": "Jälkiä",
+    "subtitle": "Kokeellinen kuva- ja multimediaessee ajasta, havainnosta ja muistista.",
+    "image": "images/hero.svg"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "label": "01 / ALKU",
+      "title": "Kaikki alkaa havainnosta.",
+      "paragraphs": [
+        "Aamu ei ala tiettyyn aikaan. Se alkaa silloin, kun jokin kiinnittää huomion.",
+        "Valo osuu ikkunaan. Huone on hetken erilainen. Kamera tallentaa sen, minkä katse olisi muuten unohtanut.",
+        "Mutta mitä tapahtuu kuvalle, kun aika kulkee eteenpäin?"
+      ]
+    },
+    {
+      "type": "fullscreen-image",
+      "label": "02 / HETKI",
+      "title": "Jokainen kuva on pysähtynyt hetki.",
+      "image": "images/moment.svg"
+    },
+    {
+      "type": "text",
+      "label": "03 / MUISTI",
+      "title": "Muisti ei ole arkisto.",
+      "paragraphs": [
+        "Muistaminen ei ole vain menneisyyden palauttamista. Se on myös uuden merkityksen antamista sille, mikä kerran tapahtui.",
+        "Kuvat pysyvät, mutta niiden merkitykset muuttuvat. Sama valokuva voi kertoa eri tarinan eri päivänä."
+      ]
+    },
+    {
+      "type": "sticky-image",
+      "label": "04 / VÄLITILA",
+      "title": "Jotakin jää näkyviin.",
+      "text": "Vieritä hitaasti. Kuva pysyy paikallaan, mutta aika jatkaa kulkuaan. Ehkä juuri tässä syntyy muistamisen ja unohtamisen välinen tila.",
+      "image": "images/trace.svg"
+    },
+    {
+      "type": "video",
+      "label": "05 / LIIKE",
+      "title": "Aika liikkuu kuvien välissä.",
+      "text": "Tähän voidaan sijoittaa video, esimerkiksi valokuvapäiväkirjan aikajana, timelapse tai lyhyt liikkuvan kuvan teos.",
+      "src": "media/timelapse.mp4"
+    },
+    {
+      "type": "audio",
+      "label": "06 / ÄÄNI",
+      "title": "Myös hiljaisuudella on ääni.",
+      "text": "Äänimaisema voi muodostua ympäristön äänistä, puheesta, kellon tikityksestä tai hiljaisuudesta. Kuuntelija käynnistää äänen itse.",
+      "src": "media/soundscape.mp3"
+    },
+    {
+      "type": "text",
+      "label": "07 / LOPPU",
+      "title": "Jälki ei ole sama kuin muisto.",
+      "paragraphs": [
+        "Valokuva voi säilyttää näkyvän jäljen hetkestä, mutta se ei voi palauttaa hetkeä kokonaisuudessaan.",
+        "Kun palaamme kuvaan, kohtaamme samalla jotakin itsestämme — tässä hetkessä.",
+        "Ehkä kuva ei lopulta kerro vain siitä, mitä oli, vaan myös siitä, mitä nyt näemme."
+      ]
+    }
+  ]
+}
