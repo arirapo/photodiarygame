@@ -1,0 +1,747 @@
+
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+<title>Living Traces IV — Autonomous Memory</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: system-ui, sans-serif;
+  }
+
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+    background: #000;
+    overflow: hidden;
+  }
+
+  #photo {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  #memoryCanvas, #svgLayer {
+    position: absolute;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  #info {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    color: white;
+    background: rgba(0,0,0,.65);
+    padding: 12px 15px;
+    border-radius: 9px;
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 290px;
+  }
+
+  #info strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  #controls {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  button {
+    border: 1px solid #777;
+    background: rgba(0,0,0,.75);
+    color: white;
+    padding: 9px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+
+  button.active {
+    background: white;
+    color: black;
+  }
+
+  #counter {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    color: #ddd;
+    background: rgba(0,0,0,.65);
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    z-index: 10;
+  }
+
+  @media(max-width: 650px) {
+    #info { font-size: 11px; }
+    #counter { bottom: 65px; }
+  }
+</style>
+</head>
+
+<body>
+
+<div id="stage">
+
+  <img id="photo"
+       src="R0016549.jpeg"
+       alt="Living Traces - alkuperäinen valokuva">
+
+  <canvas id="memoryCanvas"></canvas>
+  <div id="svgLayer"></div>
+
+  <div id="info">
+    <strong>Living Traces IV</strong>
+    Autonomous Memory<br>
+    A photograph slowly remembers itself.
+  </div>
+
+  <div id="counter">
+    Aika: <span id="clock">00:00</span> ·
+    Jälkiä: <span id="count">0</span>
+  </div>
+
+  <div id="controls">
+    <button data-speed="1" class="active">1×</button>
+    <button data-speed="5">5×</button>
+    <button data-speed="20">20×</button>
+    <button id="flashToggle">Välähdykset: päällä</button>
+    <button id="restart">Alusta</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js"></script>
+
+<script>
+"use strict";
+
+const photo = document.getElementById('photo');
+const stage = document.getElementById('stage');
+const svgLayer = document.getElementById('svgLayer');
+const canvas = document.getElementById('memoryCanvas');
+const ctx = canvas.getContext('2d');
+
+const clockEl = document.getElementById('clock');
+const countEl = document.getElementById('count');
+
+const palette = [
+  '#ffffff',
+  '#ff3030',
+  '#43d5ff',
+  '#4dff87',
+  '#ffd54a',
+  '#ff63cf',
+  '#b688ff',
+  '#ff872f'
+];
+
+// TEOKSEN PERUSASETUKSET
+
+const CONFIG = {
+  firstInterval: 30,   // sekuntia
+  minimumInterval: 9,  // sekuntia
+  developmentTime: 2400, // 40 minuuttia
+
+  maxTraces: 120,
+  trailLength: 220,
+
+  // Pysyvien jälkien läpikuultavuus
+  memoryOpacity: 0.075,
+
+  // Nopeuden yksikkö: kuvakoordinaattia/sekunti
+  slowSpeed: [9, 22],
+  fastSpeed: [28, 55]
+};
+
+let draw;
+let traces = [];
+
+let imageW = 1000;
+let imageH = 500;
+
+let analysisData = null;
+let analysisWidth = 400;
+let analysisHeight = 200;
+
+let elapsed = 0;
+let nextBirth = 30;
+let speedMultiplier = 1;
+let flashesEnabled = true;
+
+let nextFlash = 20;
+let flashRemaining = 0;
+
+let lastFrame = 0;
+let running = false;
+
+function rand(a, b) {
+  return a + Math.random() * (b - a);
+}
+
+function randomColor() {
+  return palette[
+    Math.floor(Math.random() * palette.length)
+  ];
+}
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+// KUVAN SIJOITTELU
+
+function layout() {
+  const sw = stage.clientWidth;
+  const sh = stage.clientHeight;
+
+  const scale = Math.min(
+    sw / photo.naturalWidth,
+    sh / photo.naturalHeight
+  );
+
+  const w = photo.naturalWidth * scale;
+  const h = photo.naturalHeight * scale;
+
+  const left = (sw - w) / 2;
+  const top = (sh - h) / 2;
+
+  for (const element of [canvas, svgLayer]) {
+    element.style.left = left + 'px';
+    element.style.top = top + 'px';
+    element.style.width = w + 'px';
+    element.style.height = h + 'px';
+  }
+
+  if (draw) {
+    draw.viewbox(0, 0, imageW, imageH);
+  }
+}
+
+// KUVAN ANALYSOINTI
+
+function prepareAnalysis() {
+  const temp = document.createElement('canvas');
+
+  analysisHeight = Math.round(
+    analysisWidth * imageH / imageW
+  );
+
+  temp.width = analysisWidth;
+  temp.height = analysisHeight;
+
+  const tctx = temp.getContext('2d', {
+    willReadFrequently: true
+  });
+
+  tctx.drawImage(
+    photo, 0, 0,
+    analysisWidth, analysisHeight
+  );
+
+  analysisData = tctx.getImageData(
+    0, 0,
+    analysisWidth,
+    analysisHeight
+  );
+}
+
+function brightness(x, y) {
+  if (!analysisData) return 0.5;
+
+  const px = clamp(
+    Math.floor(x / imageW * analysisWidth),
+    0, analysisWidth - 1
+  );
+
+  const py = clamp(
+    Math.floor(y / imageH * analysisHeight),
+    0, analysisHeight - 1
+  );
+
+  const i = (py * analysisWidth + px) * 4;
+  const d = analysisData.data;
+
+  return (
+    d[i] * 0.299 +
+    d[i+1] * 0.587 +
+    d[i+2] * 0.114
+  ) / 255;
+}
+
+function contrast(x, y) {
+  const c = brightness(x, y);
+
+  return (
+    Math.abs(c - brightness(x+6, y)) +
+    Math.abs(c - brightness(x-6, y)) +
+    Math.abs(c - brightness(x, y+6)) +
+    Math.abs(c - brightness(x, y-6))
+  ) / 4;
+}
+
+// JÄLJEN SYNTYMINEN
+
+function createTrace(initial = false) {
+
+  if (traces.length >= CONFIG.maxTraces) {
+    return;
+  }
+
+  let x, y;
+
+  if (initial) {
+    x = imageW * 0.34;
+    y = imageH * 0.60;
+  } else {
+    x = rand(15, imageW-15);
+    y = rand(15, imageH-15);
+  }
+
+  const fast = !initial && Math.random() < 0.3;
+  const color = initial ? '#ff3030' : randomColor();
+
+  const group = draw.group();
+
+  const poly = group.polyline([[x,y]])
+    .fill('none')
+    .stroke({
+      color,
+      width: fast ? 1.3 : 1.8,
+      linecap: 'round',
+      linejoin: 'round',
+      opacity: 0.85
+    });
+
+  const glow = group.circle(fast ? 12 : 16)
+    .fill(color)
+    .opacity(0.14)
+    .center(x, y);
+
+  const head = group.circle(fast ? 5 : 7)
+    .fill(color)
+    .center(x, y);
+
+  const range = fast
+    ? CONFIG.fastSpeed
+    : CONFIG.slowSpeed;
+
+  const trace = {
+    x, y,
+    angle: rand(0, Math.PI*2),
+
+    speed: rand(range[0], range[1]),
+    maximum: fast ? rand(65,100) : rand(25,40),
+    acceleration: fast ? rand(0.8,2.0) : rand(0.03,0.2),
+
+    fast,
+    color,
+
+    waterAffinity: Math.random() < 0.65,
+    contrastAffinity: Math.random() < 0.65,
+
+    points: [[x,y]],
+    poly,
+    glow,
+    head
+  };
+
+  traces.push(trace);
+  countEl.textContent = traces.length;
+}
+
+// KUVAA LUKEVA SUUNNAN VALINTA
+
+function chooseDirection(t) {
+  const alternatives = [
+    -0.50, -0.25, 0, 0.25, 0.50
+  ];
+
+  let best = 0;
+  let scoreBest = -Infinity;
+
+  for (const turn of alternatives) {
+    const a = t.angle + turn;
+
+    const x = t.x + Math.cos(a)*18;
+    const y = t.y + Math.sin(a)*18;
+
+    if (
+      x < 5 || x > imageW-5 ||
+      y < 5 || y > imageH-5
+    ) continue;
+
+    let score = rand(-0.3,0.3);
+
+    const b = brightness(x,y);
+    const c = contrast(x,y);
+
+    if (t.contrastAffinity) {
+      score += c * 8;
+    }
+
+    if (t.waterAffinity &&
+        y > imageH*0.50 &&
+        b < 0.60 &&
+        c < 0.12) {
+      score += 1.3;
+    }
+
+    score += (0.5-Math.abs(b-0.45))*0.5;
+
+    if (score > scoreBest) {
+      scoreBest = score;
+      best = turn;
+    }
+  }
+
+  return best;
+}
+
+// JÄLKI LIIKKUU JA JÄTTÄÄ MUISTIN
+
+function updateTrace(t, dt) {
+
+  const oldX = t.x;
+  const oldY = t.y;
+
+  t.speed = Math.min(
+    t.maximum,
+    t.speed + t.acceleration * dt
+  );
+
+  // Uusien jälkien syntymisen nopeutuksessa
+  // myös pisteiden liike nopeutuu maltillisesti.
+  const motionFactor = Math.sqrt(speedMultiplier);
+
+  const guided = chooseDirection(t);
+
+  t.angle += (
+    guided*0.35 + rand(-0.07,0.07)
+  ) * Math.min(1.5, dt*30);
+
+  const step = t.speed * dt * motionFactor;
+
+  let nx = t.x + Math.cos(t.angle)*step;
+  let ny = t.y + Math.sin(t.angle)*step;
+
+  // Kuvan reuna palauttaa pisteen.
+  if (
+    nx < 4 || nx > imageW-4 ||
+    ny < 4 || ny > imageH-4
+  ) {
+    t.angle = Math.atan2(
+      imageH/2-t.y,
+      imageW/2-t.x
+    ) + rand(-0.5,0.5);
+
+    nx = t.x + Math.cos(t.angle)*step;
+    ny = t.y + Math.sin(t.angle)*step;
+  }
+
+  t.x = clamp(nx, 4, imageW-4);
+  t.y = clamp(ny, 4, imageH-4);
+
+  // PYSYVÄ MUISTIKERROS
+  // Piirretään haalea viiva Canvasille.
+  // Tätä kerrosta ei tyhjennetä animaatiossa.
+
+  ctx.beginPath();
+  ctx.moveTo(oldX,oldY);
+  ctx.lineTo(t.x,t.y);
+  ctx.strokeStyle = t.color;
+  ctx.globalAlpha = CONFIG.memoryOpacity;
+  ctx.lineWidth = t.fast ? 1.3 : 1.8;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ELÄVÄ SVG-JÄLKI
+  t.points.push([t.x,t.y]);
+
+  if (t.points.length > CONFIG.trailLength) {
+    t.points.shift();
+  }
+
+  t.poly.plot(t.points);
+
+  t.head.center(t.x,t.y);
+  t.glow.center(t.x,t.y);
+}
+
+// AUTOMAATTINEN JÄLKIEN SYNTYMINEN
+
+function birthInterval() {
+
+  const progress = clamp(
+    elapsed / CONFIG.developmentTime,
+    0, 1
+  );
+
+  return (
+    CONFIG.firstInterval -
+    (
+      CONFIG.firstInterval -
+      CONFIG.minimumInterval
+    ) * progress
+  );
+}
+
+function updateBirths() {
+
+  while (elapsed >= nextBirth) {
+
+    if (traces.length < CONFIG.maxTraces) {
+      createTrace();
+    }
+
+    nextBirth += birthInterval();
+
+    if (traces.length >= CONFIG.maxTraces) {
+      break;
+    }
+  }
+}
+
+// VÄRIVÄLÄHDYKSET
+
+const flashFilters = [
+  'invert(1) contrast(1.15)',
+  'grayscale(1) sepia(1) saturate(5) hue-rotate(-35deg)',
+  'grayscale(1) sepia(1) saturate(5) hue-rotate(55deg)',
+  'grayscale(1) sepia(1) saturate(5) hue-rotate(170deg)',
+  'brightness(1.3) contrast(1.25)',
+  'saturate(1.8) contrast(1.1)'
+];
+
+function scheduleFlash() {
+  // Välähdyksiä aluksi harvoin.
+  // Jälkien lisääntyessä keskimääräinen
+  // odotusaika lyhenee, mutta pysyy maltillisena.
+
+  const progress = clamp(
+    traces.length / CONFIG.maxTraces,
+    0,1
+  );
+
+  const interval = 32 - progress*23;
+
+  nextFlash = elapsed + rand(
+    interval*0.65,
+    interval*1.5
+  );
+}
+
+function updateFlash(dt) {
+
+  if (!flashesEnabled) {
+    photo.style.filter = 'none';
+    flashRemaining = 0;
+    return;
+  }
+
+  if (flashRemaining > 0) {
+    flashRemaining -= dt;
+
+    if (flashRemaining <= 0) {
+      photo.style.filter = 'none';
+    }
+
+    return;
+  }
+
+  if (elapsed >= nextFlash) {
+
+    photo.style.filter = flashFilters[
+      Math.floor(Math.random()*flashFilters.length)
+    ];
+
+    flashRemaining = rand(0.3,0.55);
+    scheduleFlash();
+  }
+}
+
+// AJASTIN
+
+function updateClock() {
+  const minutes = Math.floor(elapsed/60);
+  const seconds = Math.floor(elapsed%60);
+
+  clockEl.textContent =
+    String(minutes).padStart(2,'0') +
+    ':' +
+    String(seconds).padStart(2,'0');
+}
+
+// ANIMAATIO
+
+function animate(timestamp) {
+
+  if (!running) return;
+
+  if (!lastFrame) lastFrame = timestamp;
+
+  // Päivitetään noin 30 kertaa sekunnissa.
+  const realDt = Math.min(
+    (timestamp-lastFrame)/1000,
+    0.1
+  );
+
+  if (realDt < 1/30) {
+    requestAnimationFrame(animate);
+    return;
+  }
+
+  lastFrame = timestamp;
+
+  // Nopeutus kasvattaa teoksen sisäistä aikaa.
+  const simulatedDt = realDt*speedMultiplier;
+  elapsed += simulatedDt;
+
+  updateBirths();
+
+  for (const t of traces) {
+    updateTrace(t,realDt);
+  }
+
+  updateFlash(simulatedDt);
+  updateClock();
+
+  requestAnimationFrame(animate);
+}
+
+// ALUSTUS JA UUDELLEENKÄYNNISTYS
+
+function reset() {
+
+  elapsed = 0;
+  nextBirth = CONFIG.firstInterval;
+  nextFlash = 20;
+  flashRemaining = 0;
+
+  lastFrame = 0;
+  traces = [];
+
+  photo.style.filter = 'none';
+
+  if (draw) draw.remove();
+
+  draw = SVG()
+    .addTo('#svgLayer')
+    .size('100%','100%')
+    .viewbox(0,0,imageW,imageH);
+
+  canvas.width = imageW;
+  canvas.height = imageH;
+
+  ctx.clearRect(0,0,imageW,imageH);
+
+  layout();
+
+  createTrace(true);
+  scheduleFlash();
+  updateClock();
+}
+
+function initialize() {
+
+  imageH = 1000 *
+    photo.naturalHeight/photo.naturalWidth;
+
+  prepareAnalysis();
+
+  reset();
+
+  if (!running) {
+    running = true;
+    requestAnimationFrame(animate);
+  }
+}
+
+// KOKEILUN NOPEUSVALITSIMET
+
+document.querySelectorAll('[data-speed]')
+.forEach(button => {
+
+  button.addEventListener('click',() => {
+
+    speedMultiplier = Number(
+      button.dataset.speed
+    );
+
+    document.querySelectorAll('[data-speed]')
+      .forEach(b => b.classList.remove('active'));
+
+    button.classList.add('active');
+  });
+});
+
+// Välähdykset voi poistaa kokonaan.
+
+document.getElementById('flashToggle')
+.addEventListener('click', function() {
+
+  flashesEnabled = !flashesEnabled;
+
+  this.textContent = flashesEnabled
+    ? 'Välähdykset: päällä'
+    : 'Välähdykset: pois';
+
+  if (!flashesEnabled) {
+    photo.style.filter = 'none';
+  } else {
+    scheduleFlash();
+  }
+});
+
+// Aloita uusi muistiprosessi.
+
+document.getElementById('restart')
+.addEventListener('click',reset);
+
+// Näytön kääntyminen ei katkaise muistia.
+
+window.addEventListener('resize',layout);
+
+// Käynnistys kuvan latauduttua.
+
+if (photo.complete && photo.naturalWidth) {
+  initialize();
+} else {
+  photo.addEventListener('load',initialize,{once:true});
+}
+
+photo.addEventListener('error',() => {
+  document.getElementById('info').textContent =
+    'Kuvaa R0016549.jpeg ei löytynyt.';
+});
+
+</script>
+</body>
+</html>
