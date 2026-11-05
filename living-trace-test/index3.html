@@ -1,14 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Living Trace / 360 test / index3</title>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <title>Living Traces / 360 / index3</title>
 
   <style>
     html, body {
       margin: 0;
-      padding: 0;
       width: 100%;
       height: 100%;
       background: #000;
@@ -19,10 +20,11 @@
     #stage {
       position: relative;
       width: 100vw;
-      height: 100vh;
-      background: #000;
+      height: 100dvh;
       overflow: hidden;
+      background: #000;
       cursor: crosshair;
+      touch-action: manipulation;
       user-select: none;
     }
 
@@ -32,11 +34,18 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      background: #000;
+      pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
-      transition: filter 120ms linear, transform 160ms ease-out, opacity 100ms linear;
-      will-change: filter, transform, opacity;
+      will-change: filter;
+    }
+
+    #flashOverlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      mix-blend-mode: screen;
     }
 
     #overlay {
@@ -49,510 +58,670 @@
 
     #controls {
       position: absolute;
-      left: 16px;
       top: 16px;
-      z-index: 20;
-      color: rgba(255,255,255,0.88);
-      font-size: 13px;
-      line-height: 1.4;
-      letter-spacing: 0.02em;
-      background: rgba(0,0,0,0.38);
-      backdrop-filter: blur(6px);
+      left: 16px;
+      z-index: 10;
       padding: 10px 12px;
-      border-radius: 10px;
-      max-width: 340px;
+      color: rgba(255,255,255,0.9);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      border-radius: 9px;
+      font-size: 13px;
+      line-height: 1.5;
+      pointer-events: none;
     }
 
     #controls strong {
       display: block;
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-
-    #flashOverlay {
-      position: absolute;
-      inset: 0;
-      background: transparent;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      opacity: 0;
-      transition: opacity 120ms linear, background 120ms linear;
+      margin-bottom: 3px;
+      font-size: 15px;
     }
 
     #bottomInfo {
       position: absolute;
-      left: 16px;
       bottom: 16px;
-      z-index: 20;
-      color: rgba(255,255,255,0.75);
-      font-size: 12px;
-      background: rgba(0,0,0,0.3);
-      padding: 8px 10px;
+      left: 16px;
+      z-index: 10;
+      padding: 8px 11px;
+      color: rgba(255,255,255,0.85);
+      background: rgba(0,0,0,0.4);
       border-radius: 8px;
-      backdrop-filter: blur(4px);
+      font-size: 12px;
+      pointer-events: none;
     }
   </style>
 </head>
+
 <body>
-  <div id="stage">
-    <div id="controls">
-      <strong>Living Trace / index3</strong>
-      Klikkaa kuvaa: jokainen klikkaus synnyttää uuden jäljen.<br>
-      Jäljet ovat eri värisiä ja eri nopeuksisia.<br>
-      Osa kiihtyy. Kuva välähtää satunnaisesti yhä useammin, mitä enemmän jälkiä syntyy.
-    </div>
 
-    <!-- Vaihda tiedostonimi tarvittaessa -->
-    <img id="photo" src="R0016549.jpeg" alt="360-kuva" />
-    <div id="flashOverlay"></div>
-    <div id="overlay"></div>
+<div id="stage">
 
-    <div id="bottomInfo">
-      Klikkauksia: <span id="clickCount">0</span> ·
-      Jälkiä aktiivisena: <span id="traceCount">0</span>
-    </div>
+  <img
+    id="photo"
+    src="R0016549.jpeg"
+    alt="360-valokuva"
+  >
+
+  <div id="flashOverlay"></div>
+  <div id="overlay"></div>
+
+  <div id="controls">
+    <strong>Living Traces / 360</strong>
+    Kosketa kuvaa synnyttääksesi uuden jäljen.<br>
+    Jäljet jatkavat elämäänsä kuvan pinnalla.
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js"></script>
-  <script>
-    const stage = document.getElementById('stage');
-    const photo = document.getElementById('photo');
-    const overlay = document.getElementById('overlay');
-    const flashOverlay = document.getElementById('flashOverlay');
-    const clickCountEl = document.getElementById('clickCount');
-    const traceCountEl = document.getElementById('traceCount');
-
-    let draw;
-    let stageRect;
-
-    let traces = [];
-    let clickCount = 0;
-    let animationRunning = false;
-    let lastTime = 0;
-
-    // Kuvan analyysia varten
-    let analysisCanvas = document.createElement('canvas');
-    let analysisCtx = analysisCanvas.getContext('2d', { willReadFrequently: true });
-    let imageData = null;
-    let imageMap = null; // missä kohtaa itse kuva näkyy object-fit: contain -tilassa
-
-    const palette = [
-      '#ffffff',
-      '#ff2b2b',
-      '#4fd1ff',
-      '#52ff7a',
-      '#ffd54a',
-      '#ff66d9',
-      '#b884ff',
-      '#ff7a30'
-    ];
-
-    function updateStageRect() {
-      stageRect = stage.getBoundingClientRect();
-    }
-
-    function getContainFitRect(imgNaturalW, imgNaturalH, containerW, containerH) {
-      const imgRatio = imgNaturalW / imgNaturalH;
-      const containerRatio = containerW / containerH;
-
-      let drawWidth, drawHeight, offsetX, offsetY;
-
-      if (imgRatio > containerRatio) {
-        drawWidth = containerW;
-        drawHeight = containerW / imgRatio;
-        offsetX = 0;
-        offsetY = (containerH - drawHeight) / 2;
-      } else {
-        drawHeight = containerH;
-        drawWidth = containerH * imgRatio;
-        offsetY = 0;
-        offsetX = (containerW - drawWidth) / 2;
-      }
-
-      return { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight };
-    }
-
-    function stageToImagePixel(x, y) {
-      if (!imageMap || !photo.naturalWidth || !photo.naturalHeight) return null;
-
-      const { x: ix, y: iy, width: iw, height: ih } = imageMap;
-
-      if (x < ix || x > ix + iw || y < iy || y > iy + ih) return null;
-
-      const relX = (x - ix) / iw;
-      const relY = (y - iy) / ih;
-
-      const px = Math.max(0, Math.min(photo.naturalWidth - 1, Math.floor(relX * photo.naturalWidth)));
-      const py = Math.max(0, Math.min(photo.naturalHeight - 1, Math.floor(relY * photo.naturalHeight)));
-
-      return { px, py };
-    }
-
-    function sampleBrightness(x, y) {
-      if (!imageData) return 0.5;
-
-      const p = stageToImagePixel(x, y);
-      if (!p) return 0.5;
-
-      const idx = (p.py * photo.naturalWidth + p.px) * 4;
-      const r = imageData.data[idx];
-      const g = imageData.data[idx + 1];
-      const b = imageData.data[idx + 2];
-
-      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    }
-
-    function sampleContrast(x, y) {
-      if (!imageData) return 0;
-
-      const center = stageToImagePixel(x, y);
-      if (!center) return 0;
-
-      const offsets = [
-        [-6, 0], [6, 0], [0, -6], [0, 6]
-      ];
-
-      const centerBrightness = sampleBrightness(x, y);
-      let diffSum = 0;
-      let count = 0;
-
-      for (const [dx, dy] of offsets) {
-        const p = stageToImagePixel(x + dx, y + dy);
-        if (!p) continue;
-
-        const idx = (p.py * photo.naturalWidth + p.px) * 4;
-        const r = imageData.data[idx];
-        const g = imageData.data[idx + 1];
-        const b = imageData.data[idx + 2];
-        const bright = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-        diffSum += Math.abs(bright - centerBrightness);
-        count++;
-      }
-
-      return count ? diffSum / count : 0;
-    }
-
-    function isProbablyWater(x, y) {
-      // Tässä kuvassa veden pinta on alemmalla alueella.
-      // Lisäksi suositaan tummempia / tasaisempia alueita.
-      const brightness = sampleBrightness(x, y);
-      const contrast = sampleContrast(x, y);
-      const lowerBias = y > stageRect.height * 0.42;
-
-      return lowerBias && brightness < 0.58 && contrast < 0.12;
-    }
-
-    function isInsideImageArea(x, y) {
-      if (!imageMap) return true;
-      return (
-        x >= imageMap.x &&
-        x <= imageMap.x + imageMap.width &&
-        y >= imageMap.y &&
-        y <= imageMap.y + imageMap.height
-      );
-    }
-
-    function initScene() {
-      updateStageRect();
-      overlay.innerHTML = '';
-      draw = SVG().addTo('#overlay').size(stageRect.width, stageRect.height);
-
-      imageMap = getContainFitRect(
-        photo.naturalWidth,
-        photo.naturalHeight,
-        stageRect.width,
-        stageRect.height
-      );
-
-      analysisCanvas.width = photo.naturalWidth;
-      analysisCanvas.height = photo.naturalHeight;
-      analysisCtx.drawImage(photo, 0, 0, photo.naturalWidth, photo.naturalHeight);
-      imageData = analysisCtx.getImageData(0, 0, photo.naturalWidth, photo.naturalHeight);
-
-      traces = [];
-      updateCounters();
-    }
-
-    function updateCounters() {
-      clickCountEl.textContent = String(clickCount);
-      traceCountEl.textContent = String(traces.length);
-    }
-
-    function randomFrom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function createTrace(startX, startY) {
-      const fast = Math.random() < 0.35;         // osa jäljistä selvästi nopeampia
-      const waterAffinity = Math.random() < 0.75; // useimmat hakeutuvat veden suuntaan
-      const contrastAffinity = Math.random() < 0.65;
-      const color = randomFrom(palette);
-
-      const baseRadius = fast ? 4 : 5.5;
-      const glowRadius = fast ? 16 : 22;
-
-      const traceGroup = draw.group();
-
-      const poly = traceGroup.polyline([[startX, startY]])
-        .fill('none')
-        .stroke({
-          color,
-          width: fast ? 1.8 : 2.2,
-          linecap: 'round',
-          linejoin: 'round',
-          opacity: 0.95
-        });
-
-      const glow = traceGroup.circle(glowRadius)
-        .fill(color)
-        .opacity(fast ? 0.12 : 0.18)
-        .center(startX, startY);
-
-      const head = traceGroup.circle(baseRadius * 2)
-        .fill(color)
-        .opacity(0.95)
-        .center(startX, startY);
-
-      const trace = {
-        x: startX,
-        y: startY,
-        angle: Math.random() * Math.PI * 2,
-        speed: fast ? (1.6 + Math.random() * 1.8) : (0.45 + Math.random() * 1.0),
-        acceleration: fast ? (0.0008 + Math.random() * 0.0035) : (Math.random() * 0.0007),
-        maxSpeed: fast ? (4.8 + Math.random() * 2.2) : (1.6 + Math.random() * 1.4),
-        jitter: fast ? 0.22 : 0.1,
-        fast,
-        color,
-        waterAffinity,
-        contrastAffinity,
-        points: [[startX, startY]],
-        life: 1,
-        fadeRate: 0.0016 + Math.random() * 0.0024,
-        poly,
-        head,
-        glow,
-        group: traceGroup
-      };
-
-      traces.push(trace);
-      updateCounters();
-    }
-
-    function spawnInitialTraceIfWanted() {
-      // Halutessa voidaan aloittaa yhdellä rauhallisella jäljellä
-      const x = stageRect.width * 0.34;
-      const y = stageRect.height * 0.60;
-      createTrace(x, y);
-    }
-
-    function getBestTurn(trace) {
-      // Tunnustellaan muutamaa mahdollista suuntaa ja valitaan "mielekkäin"
-      const candidates = [-0.65, -0.35, -0.15, 0, 0.15, 0.35, 0.65];
-      let bestDelta = 0;
-      let bestScore = -Infinity;
-
-      for (const delta of candidates) {
-        const testAngle = trace.angle + delta;
-        const testX = trace.x + Math.cos(testAngle) * (trace.speed * 8);
-        const testY = trace.y + Math.sin(testAngle) * (trace.speed * 8);
-
-        if (!isInsideImageArea(testX, testY)) continue;
-
-        let score = 0;
-
-        // Suosi veden suuntaa
-        if (trace.waterAffinity && isProbablyWater(testX, testY)) score += 2.2;
-
-        // Suosi kontrastialueita / reunoja
-        if (trace.contrastAffinity) {
-          const c = sampleContrast(testX, testY);
-          score += c * 10;
-        }
-
-        // Tummemmat alueet voivat olla kiinnostavia
-        const b = sampleBrightness(testX, testY);
-        score += (0.55 - Math.abs(b - 0.42)) * 1.2;
-
-        // Pidä pieni satunnaisuus mukana
-        score += (Math.random() - 0.5) * 0.8;
-
-        if (score > bestScore) {
-          bestScore = score;
-          bestDelta = delta;
-        }
-      }
-
-      return bestDelta;
-    }
-
-    function updateTrace(trace, dt) {
-      // Hidas haalistuminen
-      trace.life -= trace.fadeRate * dt;
-      if (trace.life <= 0) {
-        trace.group.remove();
-        return false;
-      }
-
-      // Kiihtyminen
-      trace.speed = Math.min(trace.maxSpeed, trace.speed + trace.acceleration * dt);
-
-      // Kuvan sisältöön reagoiva ohjautuminen
-      const guidedTurn = getBestTurn(trace);
-
-      // Jitter tuo orgaanisuutta
-      const jitterTurn = (Math.random() - 0.5) * trace.jitter;
-
-      trace.angle += guidedTurn * 0.12 + jitterTurn;
-
-      let nextX = trace.x + Math.cos(trace.angle) * trace.speed;
-      let nextY = trace.y + Math.sin(trace.angle) * trace.speed;
-
-      // Jos mennään kuvan ulkopuolelle, käännetään suuntaa
-      if (!isInsideImageArea(nextX, nextY)) {
-        trace.angle += Math.PI * (0.6 + Math.random() * 0.6);
-        nextX = trace.x + Math.cos(trace.angle) * trace.speed;
-        nextY = trace.y + Math.sin(trace.angle) * trace.speed;
-      }
-
-      // Turvarajat
-      const margin = 10;
-      nextX = Math.max(margin, Math.min(stageRect.width - margin, nextX));
-      nextY = Math.max(margin, Math.min(stageRect.height - margin, nextY));
-
-      trace.x = nextX;
-      trace.y = nextY;
-
-      trace.points.push([trace.x, trace.y]);
-
-      // Hitaasti haalistuva jälki: säilytetään historiaa,
-      // mutta eri määrä eri jäljille
-      const pointLimit = trace.fast ? 120 : 260;
-      if (trace.points.length > pointLimit) {
-        trace.points.shift();
-      }
-
-      trace.poly.plot(trace.points);
-      trace.poly.opacity(Math.max(0, trace.life));
-
-      trace.head.center(trace.x, trace.y).opacity(Math.max(0, trace.life * 0.95));
-      trace.glow.center(trace.x, trace.y).opacity(Math.max(0, trace.life * (trace.fast ? 0.1 : 0.17)));
-
-      return true;
-    }
-
-    function maybeFlash() {
-      // Mitä enemmän klikkauksia, sitä suurempi todennäköisyys välähdyksiin
-      const baseChance = 0.0025;
-      const clickBoost = Math.min(0.08, clickCount * 0.0025);
-      const chance = baseChance + clickBoost;
-
-      if (Math.random() > chance) return;
-
-      const modes = [
-        'invert',
-        'red',
-        'green',
-        'blue',
-        'wash',
-        'bright'
-      ];
-
-      const mode = randomFrom(modes);
-
-      if (mode === 'invert') {
-        photo.style.filter = 'invert(1) contrast(1.15) saturate(1.2)';
-        flashOverlay.style.background = 'rgba(255,255,255,0.08)';
-      } else if (mode === 'red') {
-        photo.style.filter = 'sepia(1) hue-rotate(-35deg) saturate(3.2) contrast(1.1)';
-        flashOverlay.style.background = 'rgba(255,40,40,0.12)';
-      } else if (mode === 'green') {
-        photo.style.filter = 'sepia(1) hue-rotate(35deg) saturate(3.5) contrast(1.1)';
-        flashOverlay.style.background = 'rgba(50,255,120,0.10)';
-      } else if (mode === 'blue') {
-        photo.style.filter = 'sepia(1) hue-rotate(160deg) saturate(3.8) contrast(1.05)';
-        flashOverlay.style.background = 'rgba(70,140,255,0.11)';
-      } else if (mode === 'wash') {
-        photo.style.filter = 'brightness(1.35) contrast(0.95) saturate(0.7)';
-        flashOverlay.style.background = 'rgba(255,255,255,0.10)';
-      } else if (mode === 'bright') {
-        photo.style.filter = 'contrast(1.35) saturate(1.8) brightness(1.08)';
-        flashOverlay.style.background = 'rgba(255,255,255,0.06)';
-      }
-
-      photo.style.transform = `scale(${1 + Math.random() * 0.012})`;
-      flashOverlay.style.opacity = '1';
-
-      setTimeout(() => {
-        photo.style.filter = 'none';
-        photo.style.transform = 'scale(1)';
-        flashOverlay.style.opacity = '0';
-        flashOverlay.style.background = 'transparent';
-      }, 80 + Math.random() * 150);
-    }
-
-    function animate(timestamp) {
-      if (!animationRunning) return;
-
-      if (!lastTime) lastTime = timestamp;
-      const dt = Math.min(32, timestamp - lastTime);
-      lastTime = timestamp;
-
-      maybeFlash();
-
-      traces = traces.filter(trace => updateTrace(trace, dt));
-      updateCounters();
-
-      requestAnimationFrame(animate);
-    }
-
-    function startAnimation() {
-      if (animationRunning) return;
-      animationRunning = true;
-      lastTime = 0;
-      requestAnimationFrame(animate);
-    }
-
-    function addTraceFromClick(event) {
-      updateStageRect();
-
-      const x = event.clientX - stageRect.left;
-      const y = event.clientY - stageRect.top;
-
-      if (!isInsideImageArea(x, y)) return;
-
-      clickCount++;
-      updateCounters();
-      createTrace(x, y);
-    }
-
-    photo.addEventListener('load', () => {
-      initScene();
-      spawnInitialTraceIfWanted();
-      startAnimation();
+  <div id="bottomInfo">
+    Kosketuksia: <span id="clickCount">0</span>
+    · Eläviä jälkiä: <span id="traceCount">0</span>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js"></script>
+
+<script>
+const stage = document.getElementById('stage');
+const photo = document.getElementById('photo');
+const overlay = document.getElementById('overlay');
+const flashOverlay = document.getElementById('flashOverlay');
+
+const clickCountEl = document.getElementById('clickCount');
+const traceCountEl = document.getElementById('traceCount');
+
+const palette = [
+  '#ffffff',
+  '#ff3030',
+  '#4fd1ff',
+  '#52ff7a',
+  '#ffd54a',
+  '#ff66d9',
+  '#b884ff',
+  '#ff8730'
+];
+
+let draw;
+let traces = [];
+let clickCount = 0;
+let imageMap = null;
+let imageData = null;
+
+let lastTime = 0;
+let animationStarted = false;
+
+let flashRemaining = 0;
+let flashCooldown = 0;
+
+const analysisCanvas = document.createElement('canvas');
+const analysisCtx = analysisCanvas.getContext(
+  '2d',
+  { willReadFrequently: true }
+);
+
+// Analyysi tehdään pienennetystä kuvasta,
+// jotta toiminta pysyy kevyenä myös iPadissa.
+const analysisWidth = 480;
+
+function random(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function randomItem(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function stageSize() {
+  return {
+    width: stage.clientWidth,
+    height: stage.clientHeight
+  };
+}
+
+// Selvitetään kuvan todellinen näkyvä alue,
+// kun käytössä on object-fit: contain.
+function calculateImageMap() {
+  const { width, height } = stageSize();
+
+  const scale = Math.min(
+    width / photo.naturalWidth,
+    height / photo.naturalHeight
+  );
+
+  const imageWidth = photo.naturalWidth * scale;
+  const imageHeight = photo.naturalHeight * scale;
+
+  imageMap = {
+    x: (width - imageWidth) / 2,
+    y: (height - imageHeight) / 2,
+    width: imageWidth,
+    height: imageHeight
+  };
+}
+
+function insideImage(x, y) {
+  if (!imageMap) return false;
+
+  return (
+    x >= imageMap.x &&
+    x <= imageMap.x + imageMap.width &&
+    y >= imageMap.y &&
+    y <= imageMap.y + imageMap.height
+  );
+}
+
+// Muunnetaan näyttökoordinaatit analyysikuvan
+// pikseleiksi.
+function imagePixel(x, y) {
+  if (!insideImage(x, y) || !imageData) {
+    return null;
+  }
+
+  const px = Math.min(
+    imageData.width - 1,
+    Math.max(
+      0,
+      Math.floor(
+        (x - imageMap.x) /
+        imageMap.width * imageData.width
+      )
+    )
+  );
+
+  const py = Math.min(
+    imageData.height - 1,
+    Math.max(
+      0,
+      Math.floor(
+        (y - imageMap.y) /
+        imageMap.height * imageData.height
+      )
+    )
+  );
+
+  return { px, py };
+}
+
+function brightness(x, y) {
+  const p = imagePixel(x, y);
+  if (!p) return 0.5;
+
+  const i = (p.py * imageData.width + p.px) * 4;
+  const d = imageData.data;
+
+  return (
+    0.299 * d[i] +
+    0.587 * d[i + 1] +
+    0.114 * d[i + 2]
+  ) / 255;
+}
+
+function contrast(x, y) {
+  const center = brightness(x, y);
+  const offsets = [
+    [-8, 0], [8, 0],
+    [0, -8], [0, 8]
+  ];
+
+  let sum = 0;
+
+  for (const [dx, dy] of offsets) {
+    sum += Math.abs(
+      center - brightness(x + dx, y + dy)
+    );
+  }
+
+  return sum / offsets.length;
+}
+
+function waterScore(x, y) {
+  if (!insideImage(x, y)) return 0;
+
+  const relativeY = (
+    y - imageMap.y
+  ) / imageMap.height;
+
+  const b = brightness(x, y);
+  const c = contrast(x, y);
+
+  // Kokeellinen arvio veden alueesta:
+  // alaosa, kohtuullisen tumma ja tasainen.
+  if (relativeY > 0.5 && b < 0.6 && c < 0.13) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function prepareImageAnalysis() {
+  const ratio = photo.naturalHeight /
+                photo.naturalWidth;
+
+  analysisCanvas.width = analysisWidth;
+  analysisCanvas.height = Math.round(
+    analysisWidth * ratio
+  );
+
+  analysisCtx.drawImage(
+    photo,
+    0, 0,
+    analysisCanvas.width,
+    analysisCanvas.height
+  );
+
+  imageData = analysisCtx.getImageData(
+    0, 0,
+    analysisCanvas.width,
+    analysisCanvas.height
+  );
+}
+
+function updateCounters() {
+  clickCountEl.textContent = clickCount;
+  traceCountEl.textContent = traces.length;
+}
+
+// Luodaan uusi itsenäinen, pysyvästi liikkuva jälki.
+function createTrace(x, y) {
+  if (!draw || !insideImage(x, y)) return;
+
+  const fast = Math.random() < 0.35;
+  const color = randomItem(palette);
+
+  const group = draw.group();
+
+  const poly = group.polyline([[x, y]])
+    .fill('none')
+    .stroke({
+      color: color,
+      width: fast ? 1.6 : 2.2,
+      linecap: 'round',
+      linejoin: 'round',
+      opacity: 0.9
     });
 
-    if (photo.complete) {
-      initScene();
-      spawnInitialTraceIfWanted();
-      startAnimation();
+  const glow = group.circle(fast ? 18 : 24)
+    .fill(color)
+    .opacity(0.16)
+    .center(x, y);
+
+  const head = group.circle(fast ? 8 : 10)
+    .fill(color)
+    .opacity(1)
+    .center(x, y);
+
+  const trace = {
+    x,
+    y,
+    angle: random(0, Math.PI * 2),
+
+    fast,
+    color,
+
+    speed: fast
+      ? random(1.5, 3.0)
+      : random(0.4, 1.2),
+
+    acceleration: fast
+      ? random(0.0008, 0.0035)
+      : random(0.00005, 0.0005),
+
+    maxSpeed: fast
+      ? random(4.5, 7.0)
+      : random(1.5, 2.8),
+
+    jitter: fast ? 0.20 : 0.09,
+
+    waterAffinity: Math.random() < 0.75,
+    contrastAffinity: Math.random() < 0.65,
+
+    points: [[x, y]],
+
+    // Jälki on pysyvästi elossa.
+    // Vain viivan vanhimmat pisteet poistuvat.
+    pointLimit: fast ? 150 : 300,
+
+    poly,
+    head,
+    glow,
+    group
+  };
+
+  traces.push(trace);
+  updateCounters();
+}
+
+// Piste etsii kuvasta kiinnostavia kulkusuuntia.
+function findDirection(trace) {
+  const candidates = [
+    -0.7, -0.4, -0.2,
+    0,
+    0.2, 0.4, 0.7
+  ];
+
+  let bestDelta = 0;
+  let bestScore = -Infinity;
+
+  for (const delta of candidates) {
+    const angle = trace.angle + delta;
+
+    const distance = Math.max(
+      12,
+      trace.speed * 8
+    );
+
+    const tx = trace.x +
+      Math.cos(angle) * distance;
+
+    const ty = trace.y +
+      Math.sin(angle) * distance;
+
+    if (!insideImage(tx, ty)) continue;
+
+    let score = 0;
+
+    if (trace.waterAffinity) {
+      score += waterScore(tx, ty) * 2.2;
     }
 
-    stage.addEventListener('click', addTraceFromClick);
+    if (trace.contrastAffinity) {
+      score += contrast(tx, ty) * 10;
+    }
 
-    window.addEventListener('resize', () => {
-      const oldTraces = traces.map(t => ({
-        x: t.x / stageRect.width,
-        y: t.y / stageRect.height
-      }));
+    const b = brightness(tx, ty);
 
-      initScene();
+    score += (
+      0.55 - Math.abs(b - 0.42)
+    ) * 1.2;
 
-      // Palautetaan jälkiä suunnilleen samoihin suhteellisiin kohtiin
-      oldTraces.forEach(t => {
-        createTrace(t.x * stageRect.width, t.y * stageRect.height);
-      });
-    });
-  </script>
+    score += random(-0.4, 0.4);
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestDelta = delta;
+    }
+  }
+
+  return bestDelta;
+}
+
+function updateTrace(trace, dt) {
+  // Nopeus skaalataan kuluneen ajan mukaan.
+  const frameFactor = dt / 16.667;
+
+  // Kiihtyminen, mutta ei rajattomasti.
+  trace.speed = Math.min(
+    trace.maxSpeed,
+    trace.speed + trace.acceleration * dt
+  );
+
+  const guidedTurn = findDirection(trace);
+  const jitter = random(
+    -trace.jitter / 2,
+    trace.jitter / 2
+  );
+
+  trace.angle += (
+    guidedTurn * 0.12 + jitter
+  ) * frameFactor;
+
+  let nx = trace.x +
+    Math.cos(trace.angle) *
+    trace.speed * frameFactor;
+
+  let ny = trace.y +
+    Math.sin(trace.angle) *
+    trace.speed * frameFactor;
+
+  // Kuvan reunasta takaisin sisään.
+  if (!insideImage(nx, ny)) {
+    const centerX = imageMap.x +
+      imageMap.width / 2;
+
+    const centerY = imageMap.y +
+      imageMap.height / 2;
+
+    trace.angle = Math.atan2(
+      centerY - trace.y,
+      centerX - trace.x
+    ) + random(-0.5, 0.5);
+
+    nx = trace.x +
+      Math.cos(trace.angle) *
+      trace.speed * frameFactor;
+
+    ny = trace.y +
+      Math.sin(trace.angle) *
+      trace.speed * frameFactor;
+  }
+
+  if (insideImage(nx, ny)) {
+    trace.x = nx;
+    trace.y = ny;
+  }
+
+  trace.points.push([trace.x, trace.y]);
+
+  // Vanha viiva lyhenee, mutta piste ei kuole.
+  if (trace.points.length > trace.pointLimit) {
+    trace.points.shift();
+  }
+
+  trace.poly.plot(trace.points);
+
+  trace.head.center(trace.x, trace.y);
+  trace.glow.center(trace.x, trace.y);
+
+  // Hento hengittävä hohde.
+  const pulse = (
+    Math.sin(performance.now() * 0.003 +
+    trace.x * 0.01) + 1
+  ) / 2;
+
+  trace.glow.opacity(
+    0.08 + pulse * 0.14
+  );
+}
+
+// Kuvan välähdykset.
+const flashModes = [
+  {
+    name: 'negative',
+    filter: 'invert(1) contrast(1.15) saturate(1.2)',
+    overlay: 'rgba(255,255,255,0.08)'
+  },
+  {
+    name: 'red',
+    filter: 'grayscale(1) sepia(1) saturate(5) hue-rotate(-35deg)',
+    overlay: 'rgba(255,30,30,0.14)'
+  },
+  {
+    name: 'green',
+    filter: 'grayscale(1) sepia(1) saturate(5) hue-rotate(55deg)',
+    overlay: 'rgba(30,255,90,0.12)'
+  },
+  {
+    name: 'blue',
+    filter: 'grayscale(1) sepia(1) saturate(5) hue-rotate(170deg)',
+    overlay: 'rgba(50,110,255,0.13)'
+  },
+  {
+    name: 'bright',
+    filter: 'brightness(1.4) contrast(1.3) saturate(1.5)',
+    overlay: 'rgba(255,255,255,0.08)'
+  },
+  {
+    name: 'washed',
+    filter: 'brightness(1.3) contrast(0.85) saturate(0.5)',
+    overlay: 'rgba(255,255,255,0.1)'
+  }
+];
+
+function startFlash() {
+  const mode = randomItem(flashModes);
+
+  photo.style.filter = mode.filter;
+  flashOverlay.style.background = mode.overlay;
+  flashOverlay.style.opacity = '1';
+
+  flashRemaining = random(80, 220);
+}
+
+function stopFlash() {
+  photo.style.filter = 'none';
+  flashOverlay.style.opacity = '0';
+  flashOverlay.style.background = 'transparent';
+
+  flashRemaining = 0;
+  flashCooldown = 100;
+}
+
+function updateFlashes(dt) {
+  if (flashRemaining > 0) {
+    flashRemaining -= dt;
+
+    if (flashRemaining <= 0) {
+      stopFlash();
+    }
+
+    return;
+  }
+
+  if (flashCooldown > 0) {
+    flashCooldown -= dt;
+    return;
+  }
+
+  // Todennäköisyys kasvaa kosketusten myötä.
+  // Yläraja estää jatkuvan yhtäjaksoisen välkkymisen.
+  const frameChance = Math.min(
+    0.08,
+    0.0025 + clickCount * 0.0025
+  );
+
+  const probability = 1 -
+    Math.pow(1 - frameChance, dt / 16.667);
+
+  if (Math.random() < probability) {
+    startFlash();
+  }
+}
+
+function animate(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+
+  const dt = Math.min(
+    32,
+    timestamp - lastTime
+  );
+
+  lastTime = timestamp;
+
+  for (const trace of traces) {
+    updateTrace(trace, dt);
+  }
+
+  updateFlashes(dt);
+
+  requestAnimationFrame(animate);
+}
+
+function initialize() {
+  if (animationStarted) return;
+
+  animationStarted = true;
+
+  calculateImageMap();
+  prepareImageAnalysis();
+
+  const { width, height } = stageSize();
+
+  draw = SVG()
+    .addTo('#overlay')
+    .size('100%', '100%')
+    .viewbox(0, 0, width, height);
+
+  // Ensimmäinen jälki syntyy automaattisesti.
+  const initialX = imageMap.x +
+    imageMap.width * 0.34;
+
+  const initialY = imageMap.y +
+    imageMap.height * 0.60;
+
+  createTrace(initialX, initialY);
+
+  requestAnimationFrame(animate);
+}
+
+// Kosketus tai hiiren klikkaus.
+stage.addEventListener('pointerdown', event => {
+  if (!animationStarted) return;
+
+  const rect = stage.getBoundingClientRect();
+
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  if (!insideImage(x, y)) return;
+
+  clickCount++;
+
+  createTrace(x, y);
+  updateCounters();
+});
+
+// Näytön koon muuttuessa sovitetaan
+// olemassa olevat jäljet uuteen kuvakokoon.
+window.addEventListener('resize', () => {
+  if (!animationStarted) return;
+
+  const oldMap = { ...imageMap };
+
+  calculateImageMap();
+
+  const { width, height } = stageSize();
+  draw.viewbox(0, 0, width, height);
+
+  for (const trace of traces) {
+    function remap(p) {
+      return [
+        imageMap.x +
+          (p[0] - oldMap.x) /
+          oldMap.width * imageMap.width,
+
+        imageMap.y +
+          (p[1] - oldMap.y) /
+          oldMap.height * imageMap.height
+      ];
+    }
+
+    trace.points = trace.points.map(remap);
+
+    [trace.x, trace.y] = remap([
+      trace.x,
+      trace.y
+    ]);
+
+    trace.poly.plot(trace.points);
+    trace.head.center(trace.x, trace.y);
+    trace.glow.center(trace.x, trace.y);
+  }
+});
+
+// Käynnistetään vasta kuvan latauduttua.
+if (photo.complete && photo.naturalWidth > 0) {
+  initialize();
+} else {
+  photo.addEventListener('load', initialize, {
+    once: true
+  });
+}
+
+photo.addEventListener('error', () => {
+  document.getElementById('controls').innerHTML =
+    '<strong>Kuvaa ei löytynyt</strong>' +
+    'Tarkista tiedostonimi R0016549.jpeg';
+});
+</script>
+
 </body>
 </html>
