@@ -21,17 +21,17 @@ const trace = draw
     linejoin: 'round'
   });
 
-// Pieni hehkuva piste viivan kärkeen
+// Pieni punainen piste viivan kärkeen
 const head = draw
   .circle(8)
-  .fill('#ffffff')
+  .fill('#ff2b2b')
   .center(x, y);
 
-// Pehmeä taustahohde
+// Pehmeä punainen taustahohde
 const glow = draw
   .circle(22)
-  .fill('#ffffff')
-  .opacity(0.12)
+  .fill('#ff2b2b')
+  .opacity(0.16)
   .center(x, y);
 
 // Liikkeen suunta
