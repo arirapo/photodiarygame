@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Living Trace / 360 test</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+    }
+
+    /* Taustakuva */
+    #photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    /* SVG-kerros kuvan päällä */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Pieni otsikkolappu */
+    .label {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      color: rgba(255,255,255,0.75);
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      z-index: 10;
+      background: rgba(0,0,0,0.35);
+      padding: 8px 10px;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div class="label">Living Trace / 360 test</div>
+
+    <!-- Vaihda src jos käytät eri tiedostonimeä -->
+    <img id="photo" src="360-test.jpg" alt="360-kuva" />
+
+    <div id="overlay"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js"></script>
+  <script>
+    const stage = document.getElementById('stage');
+    const photo = document.getElementById('photo');
+    const overlay = document.getElementById('overlay');
+
+    let draw;
+    let trace;
+    let head;
+    let glow;
+
+    let x, y;
+    let angle;
+    let speed = 1.4;
+    let points = [];
+    let maxPoints = 260;
+
+    function initTrace() {
+      overlay.innerHTML = '';
+
+      const rect = stage.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      draw = SVG().addTo('#overlay').size(width, height);
+
+      // Aloitus hieman vasemmalta keskialueelta
+      x = width * 0.32;
+      y = height * 0.42;
+
+      points = [[x, y]];
+      angle = Math.random() * Math.PI * 2;
+
+      trace = draw
+        .polyline(points)
+        .fill('none')
+        .stroke({
+          color: '#ffffff',
+          width: 2,
+          linecap: 'round',
+          linejoin: 'round'
+        });
+
+      glow = draw
+        .circle(26)
+        .fill('#ff2b2b')
+        .opacity(0.16)
+        .center(x, y);
+
+      head = draw
+        .circle(8)
+        .fill('#ff2b2b')
+        .center(x, y);
+    }
+
+    function step() {
+      const rect = stage.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      // Orgaaninen suuntavaihtelu
+      angle += (Math.random() - 0.5) * 0.22;
+
+      // Liike
+      x += Math.cos(angle) * speed;
+      y += Math.sin(angle) * speed;
+
+      // Reunoista kimpoaminen
+      const margin = 20;
+
+      if (x < margin || x > width - margin) {
+        angle = Math.PI - angle;
+      }
+
+      if (y < margin || y > height - margin) {
+        angle = -angle;
+      }
+
+      // Pidetään näkyvissä
+      x = Math.max(margin, Math.min(width - margin, x));
+      y = Math.max(margin, Math.min(height - margin, y));
+
+      // Talletetaan jälki
+      points.push([x, y]);
+
+      if (points.length > maxPoints) {
+        points.shift();
+      }
+
+      trace.plot(points);
+      head.center(x, y);
+      glow.center(x, y);
+
+      requestAnimationFrame(step);
+    }
+
+    // Käynnistys kun kuva on ladattu
+    photo.addEventListener('load', () => {
+      initTrace();
+      step();
+    });
+
+    // Jos kuva on jo välimuistissa
+    if (photo.complete) {
+      initTrace();
+      step();
+    }
+
+    // Päivitä koko jos ikkuna muuttuu
+    window.addEventListener('resize', () => {
+      initTrace();
+    });
+  </script>
+</body>
+</html>
