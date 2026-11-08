@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Impossible Structure Study 03 — v3.2</title>
+
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0f1015;
+  --panel:#141722;
+  --fg:#f0eee8;
+  --muted:#a9abb4;
+  --edge:#353947;
+  --accent:#e5d28c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font:15px/1.5 system-ui,-apple-system,sans-serif;
+}
+main{
+  max-width:1100px;
+  margin:auto;
+  padding:clamp(16px,3vw,30px);
+}
+header{margin-bottom:20px}
+.eyebrow{
+  color:var(--muted);
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+h1{
+  margin:5px 0;
+  font-size:clamp(28px,4vw,42px);
+  font-weight:450;
+}
+.subtitle{color:var(--muted);margin:0}
+.art{
+  background:#07080d;
+  padding:10px;
+  border-radius:6px;
+}
+.art svg{
+  display:block;
+  width:100%;
+  max-width:860px;
+  height:auto;
+  margin:auto;
+}
+.controls{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:18px;
+  margin-top:20px;
+  padding:20px;
+  border:1px solid var(--edge);
+  border-radius:10px;
+  background:rgba(255,255,255,.02);
+}
+.field{
+  display:grid;
+  gap:8px;
+  align-content:start;
+}
+label{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--muted);
+}
+output{color:var(--fg)}
+input[type=range]{
+  width:100%;
+  accent-color:var(--accent);
+}
+select,button{
+  font:inherit;
+  color:var(--fg);
+  background:#272b36;
+  border:1px solid #575d6d;
+  border-radius:6px;
+  padding:10px 12px;
+  cursor:pointer;
+}
+button:hover{background:#353947}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.note{
+  color:var(--muted);
+  max-width:860px;
+  margin-top:20px;
+}
+#status{
+  min-height:20px;
+  font-size:13px;
+  color:var(--accent);
+  margin-top:10px;
+}
+footer{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:30px;
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">Optical Studies / 003 / Version 3.2</div>
+  <h1>Impossible Structure Study 03</h1>
+  <p class="subtitle">Penrose triangle refinement — geometry first</p>
+</header>
+
+<div class="art">
+<svg
+  id="artwork"
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 900 900"
+  role="img"
+  aria-label="Refined Penrose triangle with subtle surface flow">
+
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+
+    <!-- Default palette: yellow / violet -->
+    <linearGradient id="gradLeft" gradientUnits="userSpaceOnUse" x1="250" y1="180" x2="430" y2="670">
+      <stop offset="0%" stop-color="#a59dcb"/>
+      <stop offset="42%" stop-color="#ecec39"/>
+      <stop offset="78%" stop-color="#9e9a2f"/>
+      <stop offset="100%" stop-color="#2a233d"/>
+    </linearGradient>
+
+    <linearGradient id="gradTop" gradientUnits="userSpaceOnUse" x1="470" y1="150" x2="720" y2="560">
+      <stop offset="0%" stop-color="#1a1844"/>
+      <stop offset="45%" stop-color="#6f6c2d"/>
+      <stop offset="78%" stop-color="#f1ef2b"/>
+      <stop offset="100%" stop-color="#b7ab66"/>
+    </linearGradient>
+
+    <linearGradient id="gradBottom" gradientUnits="userSpaceOnUse" x1="260" y1="560" x2="720" y2="720">
+      <stop offset="0%" stop-color="#f4f335"/>
+      <stop offset="42%" stop-color="#cbc84b"/>
+      <stop offset="100%" stop-color="#69663f"/>
+    </linearGradient>
+
+    <linearGradient id="gradInner" gradientUnits="userSpaceOnUse" x1="390" y1="360" x2="585" y2="560">
+      <stop offset="0%" stop-color="#35305a"/>
+      <stop offset="40%" stop-color="#f0eb36"/>
+      <stop offset="100%" stop-color="#5d5738"/>
+    </linearGradient>
+
+    <linearGradient id="gradInnerDark" gradientUnits="userSpaceOnUse" x1="430" y1="350" x2="485" y2="500">
+      <stop offset="0%" stop-color="#16152f"/>
+      <stop offset="100%" stop-color="#02030b"/>
+    </linearGradient>
+  </defs>
+
+  <rect id="bgRect" width="900" height="900" fill="#07080d"/>
+
+  <g id="scene" filter="url(#softShadow)">
+
+    <!-- Outer silhouette hint -->
+    <path
+      id="outlineSilhouette"
+      d="M387 162 L513 162 L716 515 L658 631 L242 631 L184 515 Z"
+      fill="none"
+      stroke="#181923"
+      stroke-width="7"
+      stroke-linejoin="round"
+    />
+
+    <!-- LEFT MAIN FACE -->
+    <path
+      id="faceLeft"
+      d="
+        M387 162
+        L455 281
+        L295 562
+        L242 631
+        L184 515
+        Z
+      "
+      fill="url(#gradLeft)"
+    />
+
+    <!-- TOP / RIGHT MAIN FACE -->
+    <path
+      id="faceTop"
+      d="
+        M387 162
+        L513 162
+        L716 515
+        L590 440
+        L455 281
+        Z
+      "
+      fill="url(#gradTop)"
+    />
+
+    <!-- BOTTOM MAIN FACE -->
+    <path
+      id="faceBottom"
+      d="
+        M295 562
+        L430 485
+        L716 515
+        L658 631
+        L242 631
+        Z
+      "
+      fill="url(#gradBottom)"
+    />
+
+    <!-- INNER SLOPE -->
+    <path
+      id="faceInner"
+      d="
+        M455 281
+        L590 440
+        L430 485
+        L295 562
+        Z
+      "
+      fill="url(#gradInner)"
+      opacity="0.96"
+    />
+
+    <!-- INNER DARK WEDGE -->
+    <path
+      id="innerDark"
+      d="
+        M438 343
+        L476 410
+        L450 454
+        L420 372
+        Z
+      "
+      fill="url(#gradInnerDark)"
+    />
+
+    <!-- Small right highlight to tighten the impossible corner -->
+    <path
+      id="rightCornerHighlight"
+      d="
+        M590 440
+        L716 515
+        L664 516
+        L565 457
+        Z
+      "
+      fill="#fff12b"
+      opacity="0.50"
+    />
+
+    <!-- Small bottom-left bridge highlight -->
+    <path
+      id="leftCornerHighlight"
+      d="
+        M242 631
+        L295 562
+        L335 538
+        L252 625
+        Z
+      "
+      fill="#fff236"
+      opacity="0.45"
+    />
+
+    <!-- Edge drawing -->
+    <g id="edges" stroke="#1a1c26" stroke-linejoin="round" fill="none">
+      <path id="edgeOuter" d="M387 162 L513 162 L716 515 L658 631 L242 631 L184 515 Z" stroke-width="2.8"/>
+      <path id="edgeLeftInner" d="M387 162 L455 281 L295 562 L242 631" stroke-width="1.9"/>
+      <path id="edgeTopInner" d="M455 281 L590 440 L716 515" stroke-width="1.9"/>
+      <path id="edgeBottomInner" d="M295 562 L430 485 L716 515" stroke-width="1.9"/>
+      <path id="edgeInnerDark" d="M438 343 L476 410 L450 454 L420 372 Z" stroke-width="1.4"/>
+    </g>
+
+  </g>
+</svg>
+</div>
+
+<section class="controls">
+
+  <div class="field">
+    <label for="mode">
+      Animation
+      <output id="modeLabel">Static</output>
+    </label>
+    <select id="mode">
+      <option value="static">0 · Static</option>
+      <option value="flow">1 · Gentle Surface Flow</option>
+      <option value="pulse">2 · Flow / Stillness</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="speed">
+      Animation period
+      <output id="speedLabel">16 s</output>
+    </label>
+    <input id="speed" type="range" min="4" max="40" value="16">
+  </div>
+
+  <div class="field">
+    <label for="movement">
+      Surface movement
+      <output id="movementLabel">42</output>
+    </label>
+    <input id="movement" type="range" min="0" max="180" value="42">
+  </div>
+
+  <div class="field">
+    <label for="outline">
+      Edge definition
+      <output id="outlineLabel">2.8</output>
+    </label>
+    <input id="outline" type="range" min="0.4" max="6" step="0.2" value="2.8">
+  </div>
+
+  <div class="field">
+    <label for="palette">
+      Color palette
+    </label>
+    <select id="palette">
+      <option value="yellow">Yellow / Violet</option>
+      <option value="mono">Monochrome</option>
+      <option value="blue">Blue / Silver</option>
+      <option value="gold">Gold / Graphite</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="shadow">
+      Shadow strength
+      <output id="shadowLabel">45 %</output>
+    </label>
+    <input id="shadow" type="range" min="0" max="100" value="45">
+  </div>
+
+</section>
+
+<div class="actions">
+  <button id="saveSvg">Export SVG</button>
+  <button id="savePng">Export PNG</button>
+  <button id="reset">Reset</button>
+</div>
+
+<div id="status" role="status" aria-live="polite"></div>
+
+<p class="note">
+  This version intentionally focuses on the static Penrose triangle first.
+  The structure should work as an impossible object even before animation begins.
+</p>
+
+<p class="note">
+  Only a gentle surface-flow animation is included here. Structural drifting
+  is deliberately left out until the base geometry feels convincing enough.
+</p>
+
+<footer>
+  Optical Studies · Study 03 / v3.2 · Geometry first
+</footer>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+const controls = {
+  mode: $('mode'),
+  speed: $('speed'),
+  movement: $('movement'),
+  outline: $('outline'),
+  palette: $('palette'),
+  shadow: $('shadow')
+};
+
+const gradients = [
+  $('gradLeft'),
+  $('gradTop'),
+  $('gradBottom'),
+  $('gradInner'),
+  $('gradInnerDark')
+];
+
+const gradientDefaults = gradients.map(g => ({
+  x1: Number(g.getAttribute('x1')),
+  y1: Number(g.getAttribute('y1')),
+  x2: Number(g.getAttribute('x2')),
+  y2: Number(g.getAttribute('y2'))
+}));
+
+const palettes = {
+  yellow: {
+    gradLeft:  ['#a59dcb','#ecec39','#9e9a2f','#2a233d'],
+    gradTop:   ['#1a1844','#6f6c2d','#f1ef2b','#b7ab66'],
+    gradBottom:['#f4f335','#cbc84b','#69663f'],
+    gradInner: ['#35305a','#f0eb36','#5d5738'],
+    gradInnerDark:['#16152f','#02030b'],
+    bg:'#07080d',
+    edge:'#1a1c26'
+  },
+  mono: {
+    gradLeft:  ['#d7d7d7','#f7f7f7','#8d8d8d','#1a1a1a'],
+    gradTop:   ['#343434','#7d7d7d','#f0f0f0','#aaaaaa'],
+    gradBottom:['#efefef','#bcbcbc','#5b5b5b'],
+    gradInner: ['#424242','#d9d9d9','#666666'],
+    gradInnerDark:['#202020','#050505'],
+    bg:'#0a0a0d',
+    edge:'#151515'
+  },
+  blue: {
+    gradLeft:  ['#8ea8cf','#e5f5ff','#7ba5c5','#1a2437'],
+    gradTop:   ['#15253f','#43688f','#a4d9f1','#dcecf6'],
+    gradBottom:['#d9eefc','#88b0cb','#384c61'],
+    gradInner: ['#24415f','#c4ebff','#57728a'],
+    gradInnerDark:['#15253d','#03060f'],
+    bg:'#06090f',
+    edge:'#16212f'
+  },
+  gold: {
+    gradLeft:  ['#b8a27b','#f2d48c','#9f7f45','#2b241e'],
+    gradTop:   ['#2e241d','#7c6338','#f1cf7d','#c3a46b'],
+    gradBottom:['#f0d184','#bb9759','#5e4b33'],
+    gradInner: ['#443523','#efca71','#7c6540'],
+    gradInnerDark:['#241b15','#060504'],
+    bg:'#0b0908',
+    edge:'#241d17'
+  }
+};
+
+function setStops(gradient, colors) {
+  const stops = gradient.querySelectorAll('stop');
+  stops.forEach((stop, i) => {
+    if (colors[i]) stop.setAttribute('stop-color', colors[i]);
+  });
+}
+
+function applyPalette() {
+  const p = palettes[controls.palette.value];
+
+  setStops($('gradLeft'), p.gradLeft);
+  setStops($('gradTop'), p.gradTop);
+  setStops($('gradBottom'), p.gradBottom);
+  setStops($('gradInner'), p.gradInner);
+  setStops($('gradInnerDark'), p.gradInnerDark);
+
+  $('bgRect').setAttribute('fill', p.bg);
+
+  $('outlineSilhouette').setAttribute('stroke', p.edge);
+  $('edgeOuter').setAttribute('stroke', p.edge);
+  $('edgeLeftInner').setAttribute('stroke', p.edge);
+  $('edgeTopInner').setAttribute('stroke', p.edge);
+  $('edgeBottomInner').setAttribute('stroke', p.edge);
+  $('edgeInnerDark').setAttribute('stroke', p.edge);
+}
+
+function updateLabels() {
+  const names = {
+    static: 'Static',
+    flow: 'Gentle Flow',
+    pulse: 'Flow / Still'
+  };
+
+  $('modeLabel').textContent = names[controls.mode.value];
+  $('speedLabel').textContent = controls.speed.value + ' s';
+  $('movementLabel').textContent = controls.movement.value;
+  $('outlineLabel').textContent = controls.outline.value;
+  $('shadowLabel').textContent = controls.shadow.value + ' %';
+
+  const w = controls.outline.value;
+  $('edgeOuter').setAttribute('stroke-width', w);
+  $('outlineSilhouette').setAttribute('stroke-width', Number(w) + 4.2);
+  $('edgeLeftInner').setAttribute('stroke-width', Math.max(.8, Number(w) * .68));
+  $('edgeTopInner').setAttribute('stroke-width', Math.max(.8, Number(w) * .68));
+  $('edgeBottomInner').setAttribute('stroke-width', Math.max(.8, Number(w) * .68));
+  $('edgeInnerDark').setAttribute('stroke-width', Math.max(.7, Number(w) * .5));
+
+  const shadowOpacity = Number(controls.shadow.value) / 100;
+  const filter = document.querySelector('#softShadow feDropShadow');
+  filter.setAttribute('flood-opacity', (shadowOpacity * 0.95).toFixed(3));
+}
+
+function resetGradients() {
+  gradients.forEach((g, i) => {
+    const d = gradientDefaults[i];
+    g.setAttribute('x1', d.x1);
+    g.setAttribute('y1', d.y1);
+    g.setAttribute('x2', d.x2);
+    g.setAttribute('y2', d.y2);
+  });
+}
+
+function moveGradients(phase, amount) {
+  gradients.forEach((g, i) => {
+    const d = gradientDefaults[i];
+    const dx = Math.sin(phase + i * 1.41) * amount;
+    const dy = Math.cos(phase * 0.85 + i * 1.17) * amount * 0.65;
+
+    g.setAttribute('x1', (d.x1 + dx).toFixed(2));
+    g.setAttribute('x2', (d.x2 + dx).toFixed(2));
+    g.setAttribute('y1', (d.y1 + dy).toFixed(2));
+    g.setAttribute('y2', (d.y2 + dy).toFixed(2));
+  });
+}
+
+let start = performance.now();
+
+function animate(now) {
+  const mode = controls.mode.value;
+
+  if (mode === 'static') {
+    resetGradients();
+    requestAnimationFrame(animate);
+    return;
+  }
+
+  const seconds = (now - start) / 1000;
+  const period = Number(controls.speed.value);
+  const phase = seconds * 2 * Math.PI / period;
+  const amount = Number(controls.movement.value);
+
+  let envelope = 1;
+
+  if (mode === 'pulse') {
+    const cycle = (seconds % (period * 2)) / period;
+    envelope = cycle < 1 ? Math.sin(Math.PI * cycle) ** 2 : 0;
+  }
+
+  moveGradients(phase, amount * envelope);
+
+  requestAnimationFrame(animate);
+}
+
+function exportSvgString() {
+  const clone = $('artwork').cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', '900');
+  clone.setAttribute('height', '900');
+  return new XMLSerializer().serializeToString(clone);
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+$('saveSvg').addEventListener('click', () => {
+  const blob = new Blob([exportSvgString()], {
+    type: 'image/svg+xml;charset=utf-8'
+  });
+  download(blob, 'impossible-structure-study-03-v3.2.svg');
+  $('status').textContent = 'SVG exported.';
+});
+
+$('savePng').addEventListener('click', () => {
+  const blob = new Blob([exportSvgString()], {
+    type: 'image/svg+xml;charset=utf-8'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1800;
+    canvas.height = 1800;
+    canvas.getContext('2d').drawImage(img, 0, 0, 1800, 1800);
+
+    canvas.toBlob(result => {
+      if (result) {
+        download(result, 'impossible-structure-study-03-v3.2.png');
+        $('status').textContent = 'PNG exported.';
+      }
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    $('status').textContent = 'PNG export failed.';
+  };
+
+  img.src = url;
+});
+
+$('reset').addEventListener('click', () => {
+  controls.mode.value = 'static';
+  controls.speed.value = 16;
+  controls.movement.value = 42;
+  controls.outline.value = 2.8;
+  controls.palette.value = 'yellow';
+  controls.shadow.value = 45;
+
+  start = performance.now();
+
+  applyPalette();
+  updateLabels();
+  resetGradients();
+
+  $('status').textContent = 'Settings reset.';
+});
+
+Object.values(controls).forEach(control => {
+  control.addEventListener('input', () => {
+    if (control === controls.palette) applyPalette();
+    if (control === controls.mode) start = performance.now();
+    updateLabels();
+  });
+});
+
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  controls.mode.value = 'static';
+}
+
+applyPalette();
+updateLabels();
+resetGradients();
+requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
