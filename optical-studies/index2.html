@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interference Field 02</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#101217;
+  --text:#f1eee8;
+  --muted:#adaeb6;
+  --edge:#383b45;
+  --accent:#d9c07a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:15px/1.5 system-ui,-apple-system,sans-serif;
+}
+main{
+  max-width:1100px;
+  margin:auto;
+  padding:clamp(16px,3vw,30px);
+}
+header{margin-bottom:20px}
+.eyebrow{
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  color:var(--muted);
+  font-size:12px;
+}
+h1{
+  font-size:clamp(28px,4vw,42px);
+  margin:4px 0 2px;
+  font-weight:450;
+  letter-spacing:-.02em;
+}
+.sub{
+  margin:0;
+  color:var(--muted);
+}
+.art{
+  background:#f4f1eb;
+  border-radius:4px;
+  padding:12px;
+}
+.art svg{
+  display:block;
+  width:100%;
+  max-width:920px;
+  margin:auto;
+  height:auto;
+  aspect-ratio:1;
+}
+.controls{
+  margin-top:18px;
+  border:1px solid var(--edge);
+  border-radius:10px;
+  padding:18px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:18px;
+}
+.field{
+  display:grid;
+  gap:8px;
+  align-content:start;
+}
+.field label{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--muted);
+}
+output{
+  color:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+select,button{
+  font:inherit;
+  background:#272a32;
+  color:var(--text);
+  border:1px solid #575b67;
+  border-radius:6px;
+  padding:10px 12px;
+  cursor:pointer;
+}
+select:focus-visible,
+button:focus-visible,
+input:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+input[type="range"]{
+  width:100%;
+  accent-color:var(--accent);
+  cursor:pointer;
+}
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:16px;
+}
+.note{
+  color:var(--muted);
+  font-size:14px;
+  max-width:860px;
+  margin:18px 0;
+}
+.status{
+  color:var(--accent);
+  font-size:13px;
+  min-height:1.4em;
+}
+footer{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:28px;
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">Optical Studies / 002 / 2026</div>
+  <h1>Interference Field 02</h1>
+  <p class="sub">Häiriökenttä — aaltojen vaihe-ero, värähtely ja moiré</p>
+</header>
+
+<div class="art">
+  <svg
+    id="artwork"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 900 900"
+    role="img"
+    aria-label="Päällekkäisistä aaltoviivoista muodostuva optinen häiriökenttä">
+    <rect width="900" height="900" fill="#f4f1eb"/>
+    <g id="frame"></g>
+    <g id="baseLayer"></g>
+    <g id="overlayLayer"></g>
+  </svg>
+</div>
+
+<section class="controls" aria-label="Teoksen asetukset">
+
+  <div class="field">
+    <label for="mode">
+      Liikkeen tila
+      <output id="modeLabel">Staattinen</output>
+    </label>
+    <select id="mode">
+      <option value="static">0 · Staattinen</option>
+      <option value="subtle">1 · Hento värähtely</option>
+      <option value="strong">2 · Voimakas värähtely</option>
+      <option value="pulse">3 · Pulssi / pysähdys</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="spacing">
+      Viivojen väli
+      <output id="spacingLabel">12 px</output>
+    </label>
+    <input id="spacing" type="range" min="8" max="22" step="1" value="12">
+  </div>
+
+  <div class="field">
+    <label for="amplitude">
+      Aallon korkeus
+      <output id="amplitudeLabel">24 px</output>
+    </label>
+    <input id="amplitude" type="range" min="8" max="60" step="1" value="24">
+  </div>
+
+  <div class="field">
+    <label for="frequency">
+      Taajuus
+      <output id="frequencyLabel">4.0</output>
+    </label>
+    <input id="frequency" type="range" min="1.5" max="8" step="0.1" value="4.0">
+  </div>
+
+  <div class="field">
+    <label for="offset">
+      Kerrosten ero
+      <output id="offsetLabel">7 px</output>
+    </label>
+    <input id="offset" type="range" min="0" max="24" step="1" value="7">
+  </div>
+
+  <div class="field">
+    <label for="drift">
+      Liikkeen laajuus
+      <output id="driftLabel">8 px</output>
+    </label>
+    <input id="drift" type="range" min="0" max="30" step="1" value="8">
+  </div>
+
+  <div class="field">
+    <label for="period">
+      Liikejakso
+      <output id="periodLabel">10 s</output>
+    </label>
+    <input id="period" type="range" min="3" max="24" step="1" value="10">
+  </div>
+
+  <div class="field">
+    <label for="palette">
+      Paletti
+      <output id="paletteLabel">Musta / sininen</output>
+    </label>
+    <select id="palette">
+      <option value="blue">Musta / sininen</option>
+      <option value="gray">Harmaasävyt</option>
+      <option value="warm">Musta / ruskea</option>
+    </select>
+  </div>
+
+</section>
+
+<div class="actions">
+  <button id="exportSvg" type="button">Tallenna staattinen SVG</button>
+  <button id="exportPng" type="button">Tallenna PNG</button>
+  <button id="reset" type="button">Palauta oletukset</button>
+</div>
+
+<div class="status" id="status" role="status" aria-live="polite"></div>
+
+<p class="note">
+  Tässä teoksessa optinen ilmiö syntyy kahden lähes samankaltaisen aaltokerroksen kohtaamisesta.
+  Kun kerrosten välillä on pieni ero, kuvaan voi syntyä aaltoilua, syvyyttä ja näennäistä liikettä
+  jo ilman animaatiota.
+</p>
+
+<p class="note">
+  Kokeile ensin staattista kuvaa. Sen jälkeen vaihda hentoon tai voimakkaaseen liikkeeseen.
+  Erityisen kiinnostava on pulssi / pysähdys -tila, jossa värähtely vahvistuu hetkeksi ja pysähtyy sitten.
+</p>
+
+<footer>
+  Optical Studies · 2026 · Study 02 / SVG + JavaScript
+</footer>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+
+const svg = $('artwork');
+const frame = $('frame');
+const baseLayer = $('baseLayer');
+const overlayLayer = $('overlayLayer');
+
+const controls = {
+  mode: $('mode'),
+  spacing: $('spacing'),
+  amplitude: $('amplitude'),
+  frequency: $('frequency'),
+  offset: $('offset'),
+  drift: $('drift'),
+  period: $('period'),
+  palette: $('palette')
+};
+
+const palettes = {
+  blue: {
+    base: '#161616',
+    overlay: '#284f9e',
+    bg: '#f4f1eb'
+  },
+  gray: {
+    base: '#202020',
+    overlay: '#8e8e8e',
+    bg: '#f2f0ea'
+  },
+  warm: {
+    base: '#151515',
+    overlay: '#8f6840',
+    bg: '#f4f0e9'
+  }
+};
+
+let modeStart = performance.now();
+
+function el(tag, attrs = {}, parent) {
+  const node = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    node.setAttribute(k, String(v));
+  }
+  parent.appendChild(node);
+  return node;
+}
+
+function wavePath(yBase, amplitude, frequency, phase, bend = 0) {
+  const left = 80;
+  const right = 820;
+  const width = right - left;
+  const points = 140;
+
+  let d = '';
+
+  for (let i = 0; i <= points; i++) {
+    const t = i / points;
+    const x = left + width * t;
+
+    const y =
+      yBase +
+      Math.sin((t * Math.PI * 2 * frequency) + phase) * amplitude +
+      Math.sin((t * Math.PI * 2 * (frequency * 0.45)) + phase * 0.65) * (amplitude * 0.18) +
+      bend * Math.sin(t * Math.PI);
+
+    d += (i === 0 ? 'M' : ' L') + x.toFixed(2) + ',' + y.toFixed(2);
+  }
+
+  return d;
+}
+
+function clear(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+function drawFrame(bgColor) {
+  clear(frame);
+
+  svg.querySelector('rect').setAttribute('fill', bgColor);
+
+  el('rect', {
+    x: 58,
+    y: 58,
+    width: 784,
+    height: 784,
+    rx: 0,
+    fill: 'none',
+    stroke: '#ddd8cf',
+    'stroke-width': 1.5
+  }, frame);
+}
+
+function buildStaticLayers() {
+  clear(baseLayer);
+  clear(overlayLayer);
+
+  const spacing = Number(controls.spacing.value);
+  const amplitude = Number(controls.amplitude.value);
+  const frequency = Number(controls.frequency.value);
+  const offset = Number(controls.offset.value);
+
+  const palette = palettes[controls.palette.value];
+
+  drawFrame(palette.bg);
+
+  const lineYs = [];
+  for (let y = 110; y <= 790; y += spacing) {
+    lineYs.push(y);
+  }
+
+  lineYs.forEach((y, index) => {
+    const phaseA = index * 0.12;
+    const phaseB = phaseA + 0.3;
+
+    el('path', {
+      d: wavePath(y, amplitude, frequency, phaseA, 0),
+      fill: 'none',
+      stroke: palette.base,
+      'stroke-width': 1.2,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: 0.95
+    }, baseLayer);
+
+    el('path', {
+      d: wavePath(y + offset, amplitude, frequency * 1.01, phaseB, 0),
+      fill: 'none',
+      stroke: palette.overlay,
+      'stroke-width': 1.1,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: 0.55
+    }, overlayLayer);
+  });
+}
+
+function updateLabels() {
+  $('spacingLabel').textContent = controls.spacing.value + ' px';
+  $('amplitudeLabel').textContent = controls.amplitude.value + ' px';
+  $('frequencyLabel').textContent = Number(controls.frequency.value).toFixed(1);
+  $('offsetLabel').textContent = controls.offset.value + ' px';
+  $('driftLabel').textContent = controls.drift.value + ' px';
+  $('periodLabel').textContent = controls.period.value + ' s';
+
+  const paletteNames = {
+    blue: 'Musta / sininen',
+    gray: 'Harmaasävyt',
+    warm: 'Musta / ruskea'
+  };
+  $('paletteLabel').textContent = paletteNames[controls.palette.value];
+
+  const modeNames = {
+    static: 'Staattinen',
+    subtle: 'Hento värähtely',
+    strong: 'Voimakas värähtely',
+    pulse: 'Pulssi / pysähdys'
+  };
+  $('modeLabel').textContent = modeNames[controls.mode.value];
+}
+
+function redraw() {
+  buildStaticLayers();
+  updateLabels();
+
+  if (controls.mode.value === 'static') {
+    overlayLayer.setAttribute('transform', '');
+  }
+}
+
+function animate(now) {
+  const mode = controls.mode.value;
+
+  if (mode === 'static') {
+    overlayLayer.setAttribute('transform', '');
+    requestAnimationFrame(animate);
+    return;
+  }
+
+  const period = Number(controls.period.value);
+  const drift = Number(controls.drift.value);
+  const t = (now - modeStart) / 1000;
+  const cycle = (t * Math.PI * 2) / period;
+
+  let intensity = 1;
+  if (mode === 'subtle') intensity = 0.35;
+  if (mode === 'strong') intensity = 1.0;
+
+  if (mode === 'pulse') {
+    const pulse = (t % (period * 2)) / period;
+    intensity = pulse < 1 ? Math.sin(Math.PI * pulse) ** 2 : 0;
+  }
+
+  const dx = Math.sin(cycle) * drift * intensity;
+  const dy = Math.cos(cycle * 0.7) * drift * 0.32 * intensity;
+  const sx = 1 + (Math.sin(cycle * 0.5) * 0.008 * intensity);
+  const sy = 1 - (Math.sin(cycle * 0.5) * 0.008 * intensity);
+
+  overlayLayer.setAttribute(
+    'transform',
+    `translate(${dx.toFixed(3)} ${dy.toFixed(3)}) scale(${sx.toFixed(5)} ${sy.toFixed(5)})`
+  );
+
+  requestAnimationFrame(animate);
+}
+
+function exportStaticSvg() {
+  const clone = svg.cloneNode(true);
+  clone.querySelector('#overlayLayer').removeAttribute('transform');
+  clone.setAttribute('xmlns', NS);
+  clone.setAttribute('width', '900');
+  clone.setAttribute('height', '900');
+  return new XMLSerializer().serializeToString(clone);
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+$('exportSvg').addEventListener('click', () => {
+  const blob = new Blob([exportStaticSvg()], {
+    type: 'image/svg+xml;charset=utf-8'
+  });
+  download(blob, 'interference-field-02.svg');
+  $('status').textContent = 'Staattinen SVG tallennettu.';
+});
+
+$('exportPng').addEventListener('click', () => {
+  const src = URL.createObjectURL(new Blob([exportStaticSvg()], {
+    type: 'image/svg+xml;charset=utf-8'
+  }));
+
+  const img = new Image();
+
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1800;
+    canvas.height = 1800;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, 1800, 1800);
+
+    URL.revokeObjectURL(src);
+
+    canvas.toBlob(blob => {
+      if (blob) {
+        download(blob, 'interference-field-02.png');
+        $('status').textContent = 'PNG tallennettu.';
+      }
+    }, 'image/png');
+  };
+
+  img.onerror = () => {
+    URL.revokeObjectURL(src);
+    $('status').textContent = 'PNG-vienti ei onnistunut.';
+  };
+
+  img.src = src;
+});
+
+$('reset').addEventListener('click', () => {
+  controls.mode.value = 'static';
+  controls.spacing.value = '12';
+  controls.amplitude.value = '24';
+  controls.frequency.value = '4.0';
+  controls.offset.value = '7';
+  controls.drift.value = '8';
+  controls.period.value = '10';
+  controls.palette.value = 'blue';
+
+  modeStart = performance.now();
+  redraw();
+  $('status').textContent = 'Oletusasetukset palautettu.';
+});
+
+Object.values(controls).forEach(control => {
+  control.addEventListener('input', () => {
+    if (control === controls.mode) {
+      modeStart = performance.now();
+    }
+    redraw();
+  });
+});
+
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  controls.mode.value = 'static';
+}
+
+redraw();
+requestAnimationFrame(animate);
+
+})();
+</script>
+</body>
+</html>
