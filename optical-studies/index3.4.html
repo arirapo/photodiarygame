@@ -18,7 +18,9 @@
   --accent: #efda80;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -39,7 +41,9 @@ h1 {
   margin: 5px 0;
 }
 
-small, .subtitle { color: var(--muted); }
+small, .subtitle {
+  color: var(--muted);
+}
 
 small {
   letter-spacing: .15em;
@@ -84,7 +88,9 @@ label {
   gap: 12px;
 }
 
-output { color: var(--fg); }
+output {
+  color: var(--fg);
+}
 
 select, button {
   background: #292c35;
@@ -132,8 +138,12 @@ footer {
 <main>
 
 <header>
-  <small>Optical Studies / 003 / Version 3.4</small>
+  <small>
+    Optical Studies / 003 / Version 3.4
+  </small>
+
   <h1>Impossible Structure Study 03</h1>
+
   <p class="subtitle">
     Impossible geometry — continuous inner surface
   </p>
@@ -150,41 +160,56 @@ footer {
 
 <defs>
 
-  <linearGradient id="gRight"
+  <linearGradient
+    id="gRight"
     gradientUnits="userSpaceOnUse"
-    x1="500" y1="170" x2="840" y2="830">
+    x1="500" y1="170"
+    x2="840" y2="830"
+  >
     <stop offset="0" stop-color="#191539"/>
     <stop offset=".57" stop-color="#68632b"/>
     <stop offset="1" stop-color="#f6f02b"/>
   </linearGradient>
 
-  <linearGradient id="gBottom"
+  <linearGradient
+    id="gBottom"
     gradientUnits="userSpaceOnUse"
-    x1="640" y1="620" x2="640" y2="980">
+    x1="640" y1="620"
+    x2="640" y2="980"
+  >
     <stop offset="0" stop-color="#e7e136"/>
     <stop offset=".55" stop-color="#b1aa59"/>
     <stop offset="1" stop-color="#3c335e"/>
   </linearGradient>
 
-  <linearGradient id="gInnerLeft"
+  <linearGradient
+    id="gInnerLeft"
     gradientUnits="userSpaceOnUse"
-    x1="540" y1="460" x2="430" y2="940">
+    x1="540" y1="460"
+    x2="430" y2="940"
+  >
     <stop offset="0" stop-color="#17172b"/>
     <stop offset=".45" stop-color="#c7c22c"/>
     <stop offset="1" stop-color="#6a6262"/>
   </linearGradient>
 
-  <linearGradient id="gInnerBottom"
+  <linearGradient
+    id="gInnerBottom"
     gradientUnits="userSpaceOnUse"
-    x1="630" y1="610" x2="850" y2="840">
+    x1="630" y1="610"
+    x2="850" y2="840"
+  >
     <stop offset="0" stop-color="#afa52b"/>
     <stop offset=".5" stop-color="#fff531"/>
     <stop offset="1" stop-color="#e6db7c"/>
   </linearGradient>
 
-  <linearGradient id="gLeft"
+  <linearGradient
+    id="gLeft"
     gradientUnits="userSpaceOnUse"
-    x1="400" y1="190" x2="460" y2="940">
+    x1="400" y1="190"
+    x2="460" y2="940"
+  >
     <stop offset="0" stop-color="#b0a4ce"/>
     <stop offset=".48" stop-color="#f4ee28"/>
     <stop offset="1" stop-color="#3c325b"/>
@@ -213,18 +238,27 @@ footer {
 </svg>
 </div>
 
-<section class="controls"
-         aria-label="Artwork controls">
+<section
+  class="controls"
+  aria-label="Artwork controls"
+>
 
   <div class="field">
     <label for="mode">
       Animation
       <output id="modeText">Static</output>
     </label>
+
     <select id="mode">
-      <option value="static">0 · Static</option>
-      <option value="flow">1 · Surface Flow</option>
-      <option value="pause">2 · Flow / Stillness</option>
+      <option value="static">
+        0 · Static
+      </option>
+      <option value="flow">
+        1 · Surface Flow
+      </option>
+      <option value="pause">
+        2 · Flow / Stillness
+      </option>
     </select>
   </div>
 
@@ -233,9 +267,14 @@ footer {
       Animation period
       <output id="speedText">18 s</output>
     </label>
-    <input type="range"
-           id="speed"
-           min="4" max="45" value="18">
+
+    <input
+      type="range"
+      id="speed"
+      min="4"
+      max="45"
+      value="18"
+    >
   </div>
 
   <div class="field">
@@ -243,55 +282,88 @@ footer {
       Light movement
       <output id="movementText">55</output>
     </label>
-    <input type="range"
-           id="movement"
-           min="0" max="200" value="55">
+
+    <input
+      type="range"
+      id="movement"
+      min="0"
+      max="200"
+      value="55"
+    >
   </div>
 
   <div class="field">
-    <label for="palette">Color palette</label>
+    <label for="palette">
+      Color palette
+    </label>
+
     <select id="palette">
-      <option value="yellow">Yellow / Violet</option>
-      <option value="mono">Monochrome</option>
-      <option value="blue">Blue / Silver</option>
+      <option value="yellow">
+        Yellow / Violet
+      </option>
+      <option value="mono">
+        Monochrome
+      </option>
+      <option value="blue">
+        Blue / Silver
+      </option>
     </select>
   </div>
 
   <div class="field">
-    <label for="geometry">Geometry inspection</label>
+    <label for="geometry">
+      Geometry inspection
+    </label>
+
     <select id="geometry">
-      <option value="off">Hide seams</option>
-      <option value="on">Show geometry</option>
+      <option value="off">
+        Hide seams
+      </option>
+      <option value="on">
+        Show geometry
+      </option>
     </select>
   </div>
 
   <div class="field">
     <label for="junction">
       Inner junction
-      <output id="junctionText">670</output>
+      <output id="junctionText">630</output>
     </label>
-    <input type="range"
-           id="junction"
-           min="630" max="715"
-           value="680" step="1">
+
+    <input
+      type="range"
+      id="junction"
+      min="500"
+      max="715"
+      value="630"
+      step="1"
+    >
   </div>
 
 </section>
 
 <div class="buttons">
-  <button id="saveSvg">Export SVG</button>
-  <button id="savePng">Export PNG</button>
-  <button id="reset">Reset</button>
+  <button id="saveSvg">
+    Export SVG
+  </button>
+
+  <button id="savePng">
+    Export PNG
+  </button>
+
+  <button id="reset">
+    Reset
+  </button>
 </div>
 
 <p id="status" role="status"></p>
 
 <p class="note">
-  Version 3.4 replaces the separate corner shadow
-  and artificial triangular opening with a
-  continuous inner surface. The junction between
-  the inner wall and horizontal surface shares
-  exactly the same coordinates.
+  Version 3.4 explores a continuous inner
+  surface without additional shadow wedges.
+  Adjust the inner junction to refine the
+  perspective of the impossible structure.
 </p>
 
 <footer>
@@ -306,20 +378,25 @@ footer {
 'use strict';
 
 const NS = 'http://www.w3.org/2000/svg';
-const $ = id => document.getElementById(id);
 
-// --------------------------------------------------
+const $ = id =>
+  document.getElementById(id);
+
+// --------------------------------------------
 // GEOMETRY
-// --------------------------------------------------
+// --------------------------------------------
 
-// Shared coordinate system.
-// Every adjacent surface uses the same vertices.
+// All adjacent surfaces share
+// the same named coordinate points.
 
 const points = {
+
   A: [560,186],
   B: [720,186],
+
   C: [1068,787],
   D: [994,934],
+
   E: [288,934],
   F: [213,787],
 
@@ -327,169 +404,238 @@ const points = {
   T: [563,459],
   U: [528,787],
 
-  // Shared inner junction.
-  J: [670,646]
+  // Inner junction
+  J: [630,646]
+
 };
 
-// Five principal surfaces.
-// There is NO separate corner shadow,
-// NO aperture overlay, and NO repair wedge.
+// Five continuous surfaces.
 
 const parts = [
+
   {
     id: 'right',
     fill: 'gRight',
     verts: ['A','B','C','P']
   },
+
   {
     id: 'bottom',
     fill: 'gBottom',
     verts: ['E','D','C','U']
   },
+
   {
     id: 'innerLeft',
     fill: 'gInnerLeft',
     verts: ['T','J','U','E']
   },
+
   {
     id: 'innerBottom',
     fill: 'gInnerBottom',
     verts: ['J','P','C','U']
   },
+
   {
     id: 'left',
     fill: 'gLeft',
     verts: ['A','P','J','T','E','F']
   }
+
 ];
 
-// --------------------------------------------------
-// PALETTES
-// --------------------------------------------------
+// --------------------------------------------
+// COLOR PALETTES
+// --------------------------------------------
 
 const palettes = {
+
   yellow: [
+
     ['#191539','#68632b','#f6f02b'],
+
     ['#e7e136','#b1aa59','#3c335e'],
+
     ['#17172b','#c7c22c','#6a6262'],
+
     ['#afa52b','#fff531','#e6db7c'],
+
     ['#b0a4ce','#f4ee28','#3c325b']
+
   ],
+
   mono: [
+
     ['#252525','#777777','#eeeeee'],
+
     ['#e2e2e2','#919191','#292929'],
+
     ['#1b1b1b','#bbbbbb','#555555'],
+
     ['#777777','#fafafa','#cccccc'],
+
     ['#c5c5c5','#eeeeee','#383838']
+
   ],
+
   blue: [
+
     ['#0f1b42','#416c91','#b8e8f8'],
+
     ['#d4eaf4','#7fa4c5','#273659'],
+
     ['#111e35','#8db5cf','#45637d'],
+
     ['#648fa7','#ddf6ff','#94bbd4'],
+
     ['#718bc2','#d0f2ff','#26395d']
+
   ]
+
 };
 
 const gradIds = [
+
   'gRight',
   'gBottom',
   'gInnerLeft',
   'gInnerBottom',
   'gLeft'
+
 ];
 
-const gradients = gradIds.map(id => $(id));
+const gradients =
+  gradIds.map(id => $(id));
 
-const defaults = gradients.map(g => ({
-  x1: +g.getAttribute('x1'),
-  y1: +g.getAttribute('y1'),
-  x2: +g.getAttribute('x2'),
-  y2: +g.getAttribute('y2')
-}));
+const defaults =
+  gradients.map(g => ({
 
-// --------------------------------------------------
+    x1: Number(g.getAttribute('x1')),
+    y1: Number(g.getAttribute('y1')),
+
+    x2: Number(g.getAttribute('x2')),
+    y2: Number(g.getAttribute('y2'))
+
+  }));
+
+// --------------------------------------------
 // SVG HELPERS
-// --------------------------------------------------
+// --------------------------------------------
 
 function node(tag, attrs, parent) {
-  const n = document.createElementNS(NS,tag);
 
-  for (const [key,value] of Object.entries(attrs)) {
-    n.setAttribute(key,value);
+  const n =
+    document.createElementNS(NS, tag);
+
+  for (const [key, value]
+       of Object.entries(attrs)) {
+
+    n.setAttribute(key, String(value));
+
   }
 
   parent.append(n);
+
   return n;
 }
 
 function route(keys) {
-  return keys.map((key,i) =>
-    (i ? 'L' : 'M') + points[key].join(' ')
-  ).join(' ') + ' Z';
+
+  return keys.map((key, i) => {
+
+    return (
+      (i ? 'L' : 'M') +
+      points[key].join(' ')
+    );
+
+  }).join(' ') + ' Z';
+
 }
 
-// --------------------------------------------------
-// DRAW
-// --------------------------------------------------
+// --------------------------------------------
+// DRAW GEOMETRY
+// --------------------------------------------
 
 function build() {
 
   $('faces').replaceChildren();
+
   $('seams').replaceChildren();
 
-  // Dynamic shared junction coordinate.
+  // Update shared junction point.
+
   points.J = [
+
     Number($('junction').value),
+
     646
+
   ];
+
+  // Draw surfaces in their fixed order.
 
   parts.forEach(part => {
 
     const d = route(part.verts);
 
     node('path', {
+
       d: d,
+
       fill: `url(#${part.fill})`,
+
       'data-face': part.id
+
     }, $('faces'));
 
     node('path', {
+
       d: d
+
     }, $('seams'));
+
   });
+
 }
 
-// --------------------------------------------------
-// COLORS
-// --------------------------------------------------
+// --------------------------------------------
+// PALETTE
+// --------------------------------------------
 
 function applyPalette() {
 
-  const colors = palettes[$('palette').value];
+  const colors =
+    palettes[$('palette').value];
 
-  gradients.forEach((gradient,i) => {
+  gradients.forEach((gradient, i) => {
 
     gradient.querySelectorAll('stop')
-      .forEach((stop,j) => {
+      .forEach((stop, j) => {
+
         stop.setAttribute(
           'stop-color',
           colors[i][j]
         );
+
       });
+
   });
+
 }
 
-// --------------------------------------------------
-// CONTROLS
-// --------------------------------------------------
+// --------------------------------------------
+// CONTROL LABELS
+// --------------------------------------------
 
 function labels() {
 
   $('modeText').textContent = {
+
     static: 'Static',
     flow: 'Flow',
     pause: 'Flow / Still'
+
   }[$('mode').value];
 
   $('speedText').textContent =
@@ -505,129 +651,202 @@ function labels() {
     $('geometry').value === 'on'
       ? ''
       : 'none';
+
 }
 
-// --------------------------------------------------
+// --------------------------------------------
 // ANIMATION
-// --------------------------------------------------
+// --------------------------------------------
 
 function gradientPosition(phase, amount) {
 
-  gradients.forEach((g,i) => {
+  gradients.forEach((gradient, i) => {
 
     const d = defaults[i];
 
     const dx =
-      Math.sin(phase + i*1.17) * amount;
+      Math.sin(phase + i * 1.17)
+      * amount;
 
     const dy =
-      Math.cos(phase*.85 + i*1.37)
+      Math.cos(phase * .85 + i * 1.37)
       * amount * .65;
 
     for (const key of ['x1','x2']) {
-      g.setAttribute(
+
+      gradient.setAttribute(
         key,
-        (d[key]+dx).toFixed(2)
+        (d[key] + dx).toFixed(2)
       );
+
     }
 
     for (const key of ['y1','y2']) {
-      g.setAttribute(
+
+      gradient.setAttribute(
         key,
-        (d[key]+dy).toFixed(2)
+        (d[key] + dy).toFixed(2)
       );
+
     }
 
   });
+
 }
 
 let started = performance.now();
 
 function tick(now) {
 
-  const mode = $('mode').value;
+  const mode =
+    $('mode').value;
 
-  const t = (now-started)/1000;
-  const period = Number($('speed').value);
+  const t =
+    (now - started) / 1000;
+
+  const period =
+    Number($('speed').value);
 
   let envelope = 1;
 
   if (mode === 'pause') {
 
     const cycle =
-      (t % (period*2)) / period;
+      (t % (period * 2)) / period;
 
-    envelope = cycle < 1
-      ? Math.sin(Math.PI*cycle)**2
-      : 0;
+    envelope =
+      cycle < 1
+        ? Math.sin(Math.PI * cycle) ** 2
+        : 0;
+
   }
 
   const amount =
     mode === 'static'
       ? 0
-      : Number($('movement').value)*envelope;
+      : Number($('movement').value)
+        * envelope;
 
   gradientPosition(
-    t*2*Math.PI/period,
+    t * 2 * Math.PI / period,
     amount
   );
 
   requestAnimationFrame(tick);
+
 }
 
-// --------------------------------------------------
+// --------------------------------------------
 // EXPORT
-// --------------------------------------------------
+// --------------------------------------------
 
-function file() {
+function exportSvgString() {
 
-  const clone = $('artwork').cloneNode(true);
+  const clone =
+    $('artwork').cloneNode(true);
 
-  clone.setAttribute('width','1280');
-  clone.setAttribute('height','1280');
+  clone.setAttribute(
+    'xmlns',
+    NS
+  );
+
+  clone.setAttribute(
+    'width',
+    '1280'
+  );
+
+  clone.setAttribute(
+    'height',
+    '1280'
+  );
+
+  // Hide geometry guide lines in export.
+
+  const seams =
+    clone.querySelector('#seams');
+
+  if (seams) {
+    seams.remove();
+  }
 
   return new XMLSerializer()
     .serializeToString(clone);
+
 }
 
-function download(blob,name) {
+function download(blob, filename) {
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement('a');
 
   a.href = url;
-  a.download = name;
+
+  a.download = filename;
 
   document.body.append(a);
+
   a.click();
+
   a.remove();
 
   setTimeout(() => {
+
     URL.revokeObjectURL(url);
-  },3000);
+
+  }, 3000);
+
 }
+
+// SVG export
 
 $('saveSvg').onclick = () => {
 
+  const blob =
+    new Blob(
+
+      [exportSvgString()],
+
+      {
+        type:
+          'image/svg+xml;charset=utf-8'
+      }
+
+    );
+
   download(
-    new Blob([file()],{
-      type:'image/svg+xml;charset=utf-8'
-    }),
+    blob,
     'impossible-structure-03-v3.4.svg'
   );
 
-  $('status').textContent = 'SVG exported.';
+  $('status').textContent =
+    'SVG exported.';
+
 };
+
+// PNG export
 
 $('savePng').onclick = () => {
 
-  const url = URL.createObjectURL(
-    new Blob([file()],{
-      type:'image/svg+xml;charset=utf-8'
-    })
-  );
+  const blob =
+    new Blob(
 
-  const img = new Image();
+      [exportSvgString()],
+
+      {
+        type:
+          'image/svg+xml;charset=utf-8'
+      }
+
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const img =
+    new Image();
 
   img.onload = () => {
 
@@ -635,105 +854,145 @@ $('savePng').onclick = () => {
       document.createElement('canvas');
 
     canvas.width = 1800;
+
     canvas.height = 1800;
 
-    canvas.getContext('2d').drawImage(
-      img,0,0,1800,1800
+    const ctx =
+      canvas.getContext('2d');
+
+    ctx.drawImage(
+      img,
+      0, 0,
+      1800, 1800
     );
 
     URL.revokeObjectURL(url);
 
-    canvas.toBlob(blob => {
+    canvas.toBlob(result => {
 
-      if (blob) {
+      if (result) {
+
         download(
-          blob,
+          result,
           'impossible-structure-03-v3.4.png'
         );
 
         $('status').textContent =
           'PNG exported.';
+
       }
-    },'image/png');
+
+    }, 'image/png');
+
   };
 
   img.onerror = () => {
+
     URL.revokeObjectURL(url);
+
     $('status').textContent =
       'PNG export failed.';
+
   };
 
   img.src = url;
+
 };
 
-// --------------------------------------------------
+// --------------------------------------------
 // RESET
-// --------------------------------------------------
+// --------------------------------------------
 
 $('reset').onclick = () => {
 
   $('mode').value = 'static';
+
   $('speed').value = 18;
+
   $('movement').value = 55;
+
   $('palette').value = 'yellow';
+
   $('geometry').value = 'off';
-  $('junction').value = 670;
+
+  $('junction').value = 630;
 
   started = performance.now();
 
   build();
+
   applyPalette();
+
   labels();
 
   $('status').textContent =
     'Settings reset.';
+
 };
 
-// --------------------------------------------------
+// --------------------------------------------
 // EVENTS
-// --------------------------------------------------
+// --------------------------------------------
 
 for (const id of [
+
   'mode',
   'speed',
   'movement',
   'palette',
   'geometry',
   'junction'
+
 ]) {
 
-  $(id).addEventListener('input',() => {
+  $(id).addEventListener('input', () => {
 
     if (id === 'palette') {
+
       applyPalette();
+
     }
 
     if (id === 'junction') {
+
       build();
+
     }
 
     if (id === 'mode') {
+
       started = performance.now();
+
     }
 
     labels();
+
   });
+
 }
 
-// Respect reduced motion preference.
-if (matchMedia(
-  '(prefers-reduced-motion: reduce)'
-).matches) {
+// Accessibility: respect reduced motion.
+
+if (
+  window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches
+) {
+
   $('mode').value = 'static';
+
 }
 
-// --------------------------------------------------
+// --------------------------------------------
 // START
-// --------------------------------------------------
+// --------------------------------------------
 
 build();
+
 applyPalette();
+
 labels();
+
 requestAnimationFrame(tick);
 
 })();
