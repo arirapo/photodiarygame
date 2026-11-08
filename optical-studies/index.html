@@ -1,0 +1,552 @@
+
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optical Studies 01 – False Motion</title>
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #101114;
+  --fg: #f2f0eb;
+  --muted: #a4a5aa;
+  --line: #303138;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 system-ui, sans-serif;
+}
+
+main {
+  max-width: 1080px;
+  margin: auto;
+  padding: 24px;
+}
+
+header {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 400;
+  margin: 5px 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.art {
+  background: #f5f2ed;
+  padding: 12px;
+}
+
+.art svg {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  aspect-ratio: 1;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit, minmax(190px, 1fr)
+  );
+  gap: 20px;
+  margin-top: 25px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #d2c7b0;
+}
+
+button {
+  background: #292a30;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 5px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:hover {
+  background: #404149;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.info {
+  max-width: 760px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+footer {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 35px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated .disk {
+    animation: none !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<header>
+  <div class="subtitle">
+    Optical Studies / 001 / 2026
+  </div>
+  <h1>False Motion Study 01</h1>
+  <div class="subtitle">Hengitys — Breathing</div>
+</header>
+
+<div class="art">
+  <svg
+    id="artwork"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 800 800"
+    role="img"
+    aria-label="Yhdeksän geometrista optista kiekkoa"
+  >
+    <rect
+      width="800"
+      height="800"
+      fill="#f5f2ed"
+    />
+    <g id="disks"></g>
+  </svg>
+</div>
+
+<section class="controls">
+
+  <div>
+    <label>
+      Tila
+      <output id="modeValue">Staattinen</output>
+    </label>
+    <button id="toggle">Käynnistä liike</button>
+  </div>
+
+  <div>
+    <label>
+      Hengitys
+      <output id="ampValue">0,6 %</output>
+    </label>
+    <input
+      id="amp"
+      type="range"
+      min="0"
+      max="30"
+      value="6"
+    >
+  </div>
+
+  <div>
+    <label>
+      Kiertoliike
+      <output id="rotValue">0,5°</output>
+    </label>
+    <input
+      id="rot"
+      type="range"
+      min="0"
+      max="30"
+      value="5"
+    >
+  </div>
+
+  <div>
+    <label>
+      Hengityksen jakso
+      <output id="speedValue">9 s</output>
+    </label>
+    <input
+      id="speed"
+      type="range"
+      min="3"
+      max="30"
+      value="9"
+    >
+  </div>
+
+  <div class="buttons">
+    <button id="saveSVG">Tallenna SVG</button>
+    <button id="savePNG">Tallenna PNG</button>
+    <button id="reset">Palauta</button>
+  </div>
+
+</section>
+
+<p class="info">
+  This study explores the relationship between
+  actual movement and perceived movement.
+  Observe the static image before activating
+  the subtle animation. The visual experience
+  may vary between observers.
+</p>
+
+<footer>
+  Optical Studies · Generative SVG Experiments · 2026
+</footer>
+
+</main>
+
+<script>
+(() => {
+
+const NS = "http://www.w3.org/2000/svg";
+
+const svg = document.getElementById("artwork");
+const group = document.getElementById("disks");
+
+const amp = document.getElementById("amp");
+const rot = document.getElementById("rot");
+const speed = document.getElementById("speed");
+
+const positions = [
+  [160,160], [400,155], [640,160],
+  [160,400], [400,400], [640,400],
+  [160,640], [400,645], [640,640]
+];
+
+const colors = [
+  "#151515",
+  "#666666",
+  "#ffffff",
+  "#b9b9b9"
+];
+
+let active = false;
+
+// SVG-elementin luonti
+function element(tag, attributes, parent) {
+  const node = document.createElementNS(NS, tag);
+
+  for (const [key,value] of Object.entries(attributes)) {
+    node.setAttribute(key,value);
+  }
+
+  parent.appendChild(node);
+  return node;
+}
+
+// Napakoordinaatit
+function polar(radius, angle) {
+  return [
+    radius * Math.cos(angle),
+    radius * Math.sin(angle)
+  ];
+}
+
+// Luo yhden kaarevan segmentin
+function segmentPath(ri, ro, a0, a1, bend) {
+
+  const outer = [];
+  const inner = [];
+  const steps = 7;
+
+  for (let i = 0; i <= steps; i++) {
+
+    const f = i / steps;
+    const angle = a0 + (a1-a0)*f;
+
+    outer.push(
+      polar(
+        ro + 2.6*Math.sin(Math.PI*f),
+        angle + bend*Math.sin(Math.PI*f)
+      )
+    );
+
+    inner.push(
+      polar(
+        ri + 1.9*Math.sin(Math.PI*f),
+        angle + bend*.46*Math.sin(Math.PI*f)
+      )
+    );
+  }
+
+  const xy = p =>
+    p[0].toFixed(2) + " " + p[1].toFixed(2);
+
+  return "M" +
+    outer.map(xy).join(" L") +
+    " L" +
+    inner.reverse().map(xy).join(" L") +
+    " Z";
+}
+
+// Piirretään kiekot
+positions.forEach(([x,y], index) => {
+
+  const disk = element(
+    "g",
+    {
+      class: "disk",
+      transform: `translate(${x} ${y})`
+    },
+    group
+  );
+
+  const rings = 5;
+  const count = 32;
+  const width = 19.8;
+
+  for (let ring = 0; ring < rings; ring++) {
+
+    const ri = 14 + ring*width;
+    const ro = ri + width - 1.7;
+
+    for (let j = 0; j < count; j++) {
+
+      const step = 2*Math.PI/count;
+      const phase =
+        (ring%2)*step*.5 + index*.11;
+
+      const a0 = j*step + phase;
+      const a1 = a0 + step*.90;
+
+      const colorIndex =
+        (j + ring*2 + Math.floor(j/4)) % 4;
+
+      element(
+        "path",
+        {
+          d: segmentPath(
+            ri,ro,a0,a1,
+            ring%2 ? -.07 : .07
+          ),
+          fill: colors[colorIndex]
+        },
+        disk
+      );
+    }
+  }
+
+  element(
+    "circle",
+    {
+      cx: 0,
+      cy: 0,
+      r: 8,
+      fill: "#777"
+    },
+    disk
+  );
+
+  disk.style.setProperty("--x", x+"px");
+  disk.style.setProperty("--y", y+"px");
+});
+
+// Animaatio
+const style = document.createElement("style");
+
+style.textContent = `
+.animated .disk {
+  animation:
+    breath var(--period, 9s)
+    ease-in-out infinite alternate;
+  transform-origin: 0px 0px;
+  transform-box: fill-box;
+}
+
+@keyframes breath {
+  from {
+    transform:
+      translate(var(--x),var(--y))
+      rotate(calc(-1 * var(--rotation)))
+      scale(calc(1 - var(--scale)));
+  }
+  to {
+    transform:
+      translate(var(--x),var(--y))
+      rotate(var(--rotation))
+      scale(calc(1 + var(--scale)));
+  }
+}
+`;
+
+document.head.appendChild(style);
+
+// Päivitä säätimet
+function update() {
+
+  const amplitude = Number(amp.value)/1000;
+  const rotation = Number(rot.value)/10;
+  const period = Number(speed.value);
+
+  document.getElementById("ampValue").textContent =
+    (amplitude*100).toFixed(1).replace(".",",") + " %";
+
+  document.getElementById("rotValue").textContent =
+    rotation.toFixed(1).replace(".",",") + "°";
+
+  document.getElementById("speedValue").textContent =
+    period + " s";
+
+  [...group.children].forEach((disk,i) => {
+
+    disk.style.setProperty(
+      "--scale", amplitude
+    );
+
+    disk.style.setProperty(
+      "--rotation", rotation+"deg"
+    );
+
+    disk.style.setProperty(
+      "--period", (period+i*.3)+"s"
+    );
+  });
+}
+
+// Käynnistys ja pysäytys
+function setMode(on) {
+
+  active = on;
+
+  svg.classList.toggle("animated",on);
+
+  document.getElementById("toggle").textContent =
+    on ? "Pysäytä liike" : "Käynnistä liike";
+
+  document.getElementById("modeValue").textContent =
+    on ? "Animoitu" : "Staattinen";
+}
+
+document.getElementById("toggle").onclick =
+  () => setMode(!active);
+
+[amp,rot,speed].forEach(control => {
+  control.addEventListener("input",update);
+});
+
+// Palauta asetukset
+document.getElementById("reset").onclick = () => {
+  amp.value = 6;
+  rot.value = 5;
+  speed.value = 9;
+  update();
+  setMode(false);
+};
+
+// Staattisen SVG:n vienti
+function exportSVG() {
+
+  const clone = svg.cloneNode(true);
+
+  clone.classList.remove("animated");
+
+  clone.querySelectorAll(".disk").forEach(node => {
+    node.removeAttribute("style");
+  });
+
+  clone.setAttribute("xmlns",NS);
+
+  return new XMLSerializer().serializeToString(clone);
+}
+
+// Tiedoston lataus
+function download(blob, filename) {
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  setTimeout(() => URL.revokeObjectURL(url),1500);
+}
+
+// SVG-tallennus
+document.getElementById("saveSVG").onclick = () => {
+
+  const blob = new Blob(
+    [exportSVG()],
+    {type:"image/svg+xml;charset=utf-8"}
+  );
+
+  download(blob,"false-motion-study-01.svg");
+};
+
+// PNG-tallennus
+document.getElementById("savePNG").onclick = () => {
+
+  const blob = new Blob(
+    [exportSVG()],
+    {type:"image/svg+xml;charset=utf-8"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const image = new Image();
+
+  image.onload = () => {
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = 1600;
+    canvas.height = 1600;
+
+    canvas.getContext("2d").drawImage(
+      image,0,0,1600,1600
+    );
+
+    canvas.toBlob(result => {
+      if (result) {
+        download(result,"false-motion-study-01.png");
+      }
+      URL.revokeObjectURL(url);
+    },"image/png");
+  };
+
+  image.onerror = () => URL.revokeObjectURL(url);
+  image.src = url;
+};
+
+// Aloitus
+update();
+setMode(false);
+
+})();
+</script>
+
+</body>
+</html>
