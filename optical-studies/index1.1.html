@@ -1,0 +1,660 @@
+
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>False Motion Study 01 · versio 1.1</title>
+<style>
+:root {
+  color-scheme:dark;
+  --bg:#111217;
+  --text:#f1eee8;
+  --muted:#aaaab1;
+  --edge:#3b3d46;
+  --accent:#eed68b;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:15px/1.5 system-ui,-apple-system,sans-serif;
+}
+main {
+  max-width:1080px;
+  margin:auto;
+  padding:clamp(16px,3vw,30px);
+}
+header {margin-bottom:20px}
+.eyebrow {
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  color:var(--muted);
+  font-size:12px;
+}
+h1 {
+  font-weight:450;
+  letter-spacing:-.025em;
+  font-size:clamp(26px,4vw,40px);
+  margin:5px 0 3px;
+}
+.sub {color:var(--muted);margin:0}
+.art {
+  padding:12px;
+  background:#f4f1eb;
+  border-radius:3px;
+}
+.art svg {
+  display:block;
+  width:100%;
+  max-width:820px;
+  margin:auto;
+  height:auto;
+  aspect-ratio:1;
+}
+.controls {
+  margin-top:18px;
+  border:1px solid var(--edge);
+  border-radius:10px;
+  padding:18px;
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fit,minmax(210px,1fr));
+  gap:18px;
+}
+.field {
+  display:grid;
+  align-content:start;
+  gap:8px;
+}
+.field label {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--muted);
+}
+output {
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
+}
+select,button {
+  font:inherit;
+  background:#282b32;
+  color:var(--text);
+  border:1px solid #565963;
+  padding:10px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+select:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+input[type=range] {
+  width:100%;
+  accent-color:var(--accent);
+  cursor:pointer;
+}
+.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:16px;
+}
+.note {
+  color:var(--muted);
+  font-size:14px;
+  max-width:850px;
+  margin:18px 0;
+}
+.status {
+  color:var(--accent);
+  font-size:13px;
+  min-height:1.5em;
+}
+footer {
+  color:var(--muted);
+  font-size:12px;
+  margin-top:30px;
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">
+    Optical Studies / 001 / version 1.1
+  </div>
+  <h1>False Motion Study 01</h1>
+  <p class="sub">
+    Hengitys — Breathing /
+    luminanssijärjestyksen koe
+  </p>
+</header>
+
+<div class="art">
+  <svg
+    id="artwork"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 800 800"
+    role="img"
+    aria-label="Yhdeksän säteittäistä optista kiekkoa"
+  >
+    <rect
+      width="800"
+      height="800"
+      fill="#f4f1eb"
+    />
+    <g id="disks"></g>
+  </svg>
+</div>
+
+<section class="controls" aria-label="Teoksen asetukset">
+
+  <div class="field">
+    <label for="mode">
+      Liikkeen tila
+      <output id="stateLabel">Staattinen</output>
+    </label>
+    <select id="mode">
+      <option value="static">0 · Staattinen</option>
+      <option value="subtle">1 · Hento liike</option>
+      <option value="strong">2 · Voimakas liike</option>
+      <option value="pause">3 · Liike / pysähdys</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="rotation">
+      Kiertymän laajuus
+      <output id="rotationLabel">3,0°</output>
+    </label>
+    <input id="rotation" type="range"
+      min="0" max="15" step="0.5" value="3">
+  </div>
+
+  <div class="field">
+    <label for="breath">
+      Hengitys / mittakaava
+      <output id="breathLabel">1,5 %</output>
+    </label>
+    <input id="breath" type="range"
+      min="0" max="5" step="0.25" value="1.5">
+  </div>
+
+  <div class="field">
+    <label for="period">
+      Liikejakson pituus
+      <output id="periodLabel">8 s</output>
+    </label>
+    <input id="period" type="range"
+      min="3" max="24" step="1" value="8">
+  </div>
+
+  <div class="field">
+    <label for="contrast">
+      Sävypaletti
+      <output id="contrastLabel">Väri</output>
+    </label>
+    <select id="contrast">
+      <option value="color">
+        Sininen / musta / keltainen / valkoinen
+      </option>
+      <option value="gray">Harmaasävyt</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="direction">
+      Kiekkojen rytmi
+      <output id="directionLabel">Vuorotteleva</output>
+    </label>
+    <select id="direction">
+      <option value="alternate">Vuorotteleva</option>
+      <option value="same">Sama suunta</option>
+    </select>
+  </div>
+
+</section>
+
+<div class="actions">
+  <button id="exportSvg" type="button">
+    Tallenna staattinen SVG
+  </button>
+  <button id="exportPng" type="button">
+    Tallenna PNG
+  </button>
+  <button id="reset" type="button">
+    Palauta oletukset
+  </button>
+</div>
+
+<div class="status"
+  id="status"
+  role="status"
+  aria-live="polite"></div>
+
+<p class="note">
+  Koe ensin staattista kuvaa. Katso välillä
+  toiseen kohtaan kuvaa ja siirrä katsettasi
+  takaisin. Kokeile sen jälkeen hentoa tai
+  voimakasta liikettä sekä liike/pysähdys-tilaa.
+  Näennäisliike on yksilöllinen havaintokokemus.
+</p>
+
+<p class="note">
+  Huom. Tiheät kontrastikuviot ja liike voivat
+  rasittaa silmiä. Liike on oletuksena
+  pois päältä.
+</p>
+
+<footer>
+  Optical Studies · 2026 · Study 01 / v1.1
+  · SVG + JavaScript
+</footer>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const ns = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+
+const svg = $('artwork');
+const root = $('disks');
+
+const controls = {
+  mode: $('mode'),
+  rotation: $('rotation'),
+  breath: $('breath'),
+  period: $('period'),
+  contrast: $('contrast'),
+  direction: $('direction')
+};
+
+const colorful = [
+  '#152a67',
+  '#050505',
+  '#f4cd3a',
+  '#ffffff'
+];
+
+const grayscale = [
+  '#454545',
+  '#050505',
+  '#b2b2b2',
+  '#ffffff'
+];
+
+const positions = [];
+
+for (let row = 0; row < 3; row++) {
+  for (let col = 0; col < 3; col++) {
+    positions.push({
+      x: 145 + col * 255,
+      y: 145 + row * 255,
+      index: row * 3 + col
+    });
+  }
+}
+
+const disks = [];
+
+function el(tag, attrs = {}, parent = root) {
+  const node = document.createElementNS(ns, tag);
+
+  for (const [key, val] of Object.entries(attrs)) {
+    node.setAttribute(key, String(val));
+  }
+
+  parent.appendChild(node);
+  return node;
+}
+
+function polar(r, a) {
+  return [
+    r * Math.cos(a),
+    r * Math.sin(a)
+  ];
+}
+
+function pathSegment(r0, r1, a0, a1, skew) {
+  const outer = [];
+  const inner = [];
+
+  for (let k = 0; k <= 6; k++) {
+    const t = k / 6;
+    const a = a0 + (a1 - a0) * t;
+    const bend = skew * Math.sin(Math.PI * t);
+
+    outer.push(polar(r1, a + bend));
+    inner.push(polar(r0, a + bend * .35));
+  }
+
+  const toString = p =>
+    `${p[0].toFixed(2)},${p[1].toFixed(2)}`;
+
+  return 'M' +
+    outer.map(toString).join(' L') +
+    ' L' +
+    inner.reverse().map(toString).join(' L') +
+    ' Z';
+}
+
+// Rakennetaan yhdeksän kiekkoa.
+function draw() {
+  root.replaceChildren();
+  disks.length = 0;
+
+  const colors =
+    controls.contrast.value === 'gray'
+      ? grayscale
+      : colorful;
+
+  positions.forEach(({x, y, index}) => {
+
+    const outer = el('g', {
+      'data-disk': index,
+      transform: `translate(${x} ${y})`
+    });
+
+    const shape = el('g', {}, outer);
+
+    // Kuusi kehää ja 12 neliväristä jaksoa.
+    const rings = 6;
+    const groups = 12;
+    const n = groups * 4;
+    const step = 2 * Math.PI / n;
+
+    for (let ring = 0; ring < rings; ring++) {
+
+      const r0 = 11 + ring * 17.4;
+      const r1 = r0 + 16.7;
+      const phase =
+        (ring % 2) * step * .6 +
+        index * .025;
+
+      for (let j = 0; j < n; j++) {
+
+        const start = j * step + phase;
+        const end = start + step * .99;
+
+        const color =
+          colors[(j + (ring % 2 ? 2 : 0)) % 4];
+
+        el('path', {
+          d: pathSegment(
+            r0, r1, start, end,
+            (ring % 2 ? -1 : 1) * .045
+          ),
+          fill: color
+        }, shape);
+      }
+    }
+
+    el('circle', {
+      r: 9,
+      fill: '#f4f1eb'
+    }, shape);
+
+    disks.push({
+      outer, shape, x, y, index
+    });
+  });
+}
+
+// Säätimien tekstit.
+function updateLabels() {
+  $('rotationLabel').textContent =
+    Number(controls.rotation.value)
+      .toFixed(1).replace('.', ',') + '°';
+
+  $('breathLabel').textContent =
+    Number(controls.breath.value)
+      .toFixed(2).replace('.', ',')
+      .replace(/0$/, '') + ' %';
+
+  $('periodLabel').textContent =
+    controls.period.value + ' s';
+
+  $('contrastLabel').textContent =
+    controls.contrast.value === 'color'
+      ? 'Väri' : 'Harmaa';
+
+  $('directionLabel').textContent =
+    controls.direction.value === 'alternate'
+      ? 'Vuorotteleva' : 'Sama suunta';
+
+  const names = {
+    static: 'Staattinen',
+    subtle: 'Hento',
+    strong: 'Voimakas',
+    pause: 'Liike / pysähdys'
+  };
+
+  $('stateLabel').textContent =
+    names[controls.mode.value];
+}
+
+let modeStart = performance.now();
+
+function resetPositions() {
+  disks.forEach(d =>
+    d.shape.removeAttribute('transform')
+  );
+}
+
+// Varsinainen animaatio.
+function tick(now) {
+
+  const mode = controls.mode.value;
+
+  if (mode === 'static') {
+    resetPositions();
+    requestAnimationFrame(tick);
+    return;
+  }
+
+  const seconds = (now - modeStart) / 1000;
+  const period = Number(controls.period.value);
+  const phase = seconds * 2 * Math.PI / period;
+
+  let envelope = 1;
+
+  if (mode === 'pause') {
+    // Liike- ja pysähdysjaksot.
+    const cycle =
+      (seconds % (period * 2)) / period;
+
+    envelope = cycle < 1
+      ? Math.sin(Math.PI * cycle) ** 2
+      : 0;
+  }
+
+  disks.forEach(d => {
+
+    const parity =
+      controls.direction.value === 'alternate'
+      && d.index % 2 === 1
+        ? -1 : 1;
+
+    const offset = d.index * .39;
+
+    const strength =
+      mode === 'subtle' ? .22 : 1;
+
+    const angle =
+      Math.sin(phase + offset) *
+      Number(controls.rotation.value) *
+      strength * envelope * parity;
+
+    const scale =
+      1 + (
+        Math.cos(phase + offset) *
+        Number(controls.breath.value) / 100
+      ) * strength * envelope;
+
+    d.shape.setAttribute(
+      'transform',
+      `rotate(${angle.toFixed(4)})
+       scale(${scale.toFixed(5)})`
+    );
+  });
+
+  requestAnimationFrame(tick);
+}
+
+function update() {
+  updateLabels();
+
+  if (controls.mode.value === 'static') {
+    resetPositions();
+  }
+}
+
+Object.values(controls).forEach(control => {
+  control.addEventListener('input', () => {
+
+    if (control === controls.contrast) {
+      draw();
+    }
+
+    if (control === controls.mode) {
+      modeStart = performance.now();
+    }
+
+    update();
+  });
+});
+
+// Palauta asetukset.
+$('reset').addEventListener('click', () => {
+  controls.mode.value = 'static';
+  controls.rotation.value = '3';
+  controls.breath.value = '1.5';
+  controls.period.value = '8';
+  controls.contrast.value = 'color';
+  controls.direction.value = 'alternate';
+
+  modeStart = performance.now();
+
+  draw();
+  update();
+
+  $('status').textContent =
+    'Oletusasetukset palautettu.';
+});
+
+// SVG-vienti.
+function staticSvg() {
+
+  const clone = svg.cloneNode(true);
+
+  clone.querySelectorAll(
+    '[data-disk] > g'
+  ).forEach(n => n.removeAttribute('transform'));
+
+  clone.setAttribute('xmlns', ns);
+  clone.setAttribute('width', '800');
+  clone.setAttribute('height', '800');
+
+  return new XMLSerializer()
+    .serializeToString(clone);
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = filename;
+
+  document.body.append(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+$('exportSvg').addEventListener('click', () => {
+
+  download(
+    new Blob([staticSvg()], {
+      type: 'image/svg+xml;charset=utf-8'
+    }),
+    'false-motion-study-01-v1.1.svg'
+  );
+
+  $('status').textContent =
+    'Staattinen SVG tallennettu.';
+});
+
+// PNG-vienti.
+$('exportPng').addEventListener('click', () => {
+
+  const src = URL.createObjectURL(
+    new Blob([staticSvg()], {
+      type: 'image/svg+xml;charset=utf-8'
+    })
+  );
+
+  const img = new Image();
+
+  img.onload = () => {
+
+    const canvas =
+      document.createElement('canvas');
+
+    canvas.width = 1600;
+    canvas.height = 1600;
+
+    canvas.getContext('2d').drawImage(
+      img, 0, 0, 1600, 1600
+    );
+
+    URL.revokeObjectURL(src);
+
+    canvas.toBlob(blob => {
+      if (blob) {
+        download(
+          blob,
+          'false-motion-study-01-v1.1.png'
+        );
+        $('status').textContent =
+          'PNG tallennettu.';
+      }
+    }, 'image/png');
+  };
+
+  img.onerror = () => {
+    URL.revokeObjectURL(src);
+    $('status').textContent =
+      'PNG-vienti ei onnistunut.';
+  };
+
+  img.src = src;
+});
+
+// Käynnistys.
+if (
+  window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches
+) {
+  controls.mode.value = 'static';
+}
+
+draw();
+update();
+requestAnimationFrame(tick);
+
+})();
+</script>
+</body>
+</html>
