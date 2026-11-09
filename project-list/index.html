@@ -1,0 +1,1009 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+ content="width=device-width,initial-scale=1">
+<title>Project Index — Photodiary</title>
+
+<style>
+:root {
+  color-scheme:dark;
+  --bg:#101116;
+  --panel:#1a1c24;
+  --line:#353843;
+  --text:#f0eee8;
+  --muted:#a4a5ad;
+  --accent:#ddc68b;
+}
+* {box-sizing:border-box}
+html {scroll-behavior:smooth}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:15px/1.55 system-ui,
+    -apple-system,sans-serif;
+}
+main {
+  max-width:1300px;
+  margin:auto;
+  padding:clamp(18px,4vw,55px);
+}
+a {color:inherit}
+header {padding:30px 0 38px}
+.eyebrow {
+  color:var(--accent);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+h1 {
+  font-size:clamp(36px,6vw,70px);
+  font-weight:350;
+  letter-spacing:-.045em;
+  margin:8px 0;
+}
+.intro {
+  max-width:680px;
+  color:var(--muted);
+  font-size:clamp(15px,2vw,19px);
+}
+.stats {
+  display:flex;
+  flex-wrap:wrap;
+  gap:25px;
+  margin-top:30px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.stat strong {
+  display:block;
+  font-size:27px;
+  font-weight:450;
+}
+.stat span {
+  color:var(--muted);
+  font-size:12px;
+}
+.toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:18px;
+}
+input,select {
+  background:#242731;
+  color:var(--text);
+  border:1px solid #4b4e5b;
+  padding:12px 14px;
+  border-radius:7px;
+  font:inherit;
+}
+input[type=search] {
+  flex:1;
+  min-width:220px;
+}
+.filters {
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:30px;
+}
+.filters button {
+  font:12px system-ui,sans-serif;
+  color:var(--muted);
+  background:transparent;
+  border:1px solid var(--line);
+  padding:9px 12px;
+  border-radius:30px;
+  cursor:pointer;
+}
+.filters button.active {
+  color:#101116;
+  background:var(--accent);
+  border-color:var(--accent);
+}
+.section {
+  margin:36px 0 18px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+}
+.section h2 {
+  font-weight:450;
+  font-size:23px;
+  margin:0;
+}
+.section p {
+  color:var(--muted);
+  font-size:13px;
+  margin:4px 0 0;
+}
+.grid {
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fill,minmax(265px,1fr));
+  gap:14px;
+}
+.card {
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  padding:22px;
+  min-height:218px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:9px;
+}
+.card:hover {
+  border-color:#777568;
+}
+.meta {
+  color:var(--accent);
+  font-size:11px;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+.card h3 {
+  font-size:19px;
+  font-weight:500;
+  line-height:1.3;
+  margin:0;
+}
+.description {
+  color:var(--muted);
+  font-size:13px;
+  flex:1;
+}
+.tags {
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+.tag {
+  background:#292c35;
+  color:#b9bac3;
+  padding:3px 7px;
+  border-radius:4px;
+  font-size:10px;
+}
+.card-bottom {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+  font-size:12px;
+}
+.status {color:var(--muted)}
+.link {
+  color:var(--accent);
+  text-decoration:none;
+}
+.link:hover {text-decoration:underline}
+.versions {
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.versions a {
+  color:#b6bbc8;
+  font-size:12px;
+  text-decoration:none;
+}
+.versions a:hover {color:white}
+.empty {
+  color:var(--muted);
+  padding:40px 0;
+}
+footer {
+  margin-top:65px;
+  padding-top:25px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:13px;
+}
+@media(max-width:600px) {
+  .card {min-height:180px}
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">
+    Photodiary / Creative Research Archive
+  </div>
+  <h1>Project Index</h1>
+  <p class="intro">
+    An evolving collection of artistic experiments,
+    digital sketches, installations, interactive
+    artworks and unfinished ideas.
+    A working archive, not a finished portfolio.
+  </p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="toolbar">
+  <input type="search" id="search"
+    placeholder="Search projects, ideas, technologies...">
+  <select id="statusFilter">
+    <option value="all">All stages</option>
+    <option value="experiment">Experiments</option>
+    <option value="prototype">Prototypes</option>
+    <option value="project">Projects</option>
+    <option value="artwork">Artworks</option>
+    <option value="archive">Archive / to recover</option>
+  </select>
+</div>
+
+<nav class="filters" id="filters"
+ aria-label="Project categories"></nav>
+
+<div id="content"></div>
+
+<footer>
+  <strong>Photodiary — Project Index</strong>
+  <p>
+    An evolving research archive.
+    Some links lead to experimental versions.
+    Public exhibition editions may be developed
+    separately.
+  </p>
+  <p>
+    Source collection: photodiarygame.com
+    and related Photodiary projects.
+  </p>
+</footer>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+// =====================================
+// PROJECT REGISTRY
+//
+// Add projects by copying an object.
+// URL paths beginning with / refer to
+// photodiarygame.com.
+//
+// Status:
+// experiment / prototype / project
+// artwork / archive
+// =====================================
+
+const BASE = "https://photodiarygame.com";
+
+const projects = [
+
+  // ===================================
+  // OPTICAL STUDIES
+  // ===================================
+
+  {
+    title:"False Motion Study 01",
+    category:"Optical Studies",
+    status:"experiment",
+    year:"2026",
+    description:
+      "Radial geometry, false motion and subtle animation.",
+    url:"/optical-studies/index.html",
+    tags:["SVG","illusion","animation"],
+    versions:[
+      ["v1.1","/optical-studies/index1.1.html"]
+    ]
+  },
+
+  {
+    title:"Interference Field 02",
+    category:"Optical Studies",
+    status:"experiment",
+    year:"2026",
+    description:
+      "Layered wave structures and moiré interference.",
+    url:"/optical-studies/index2.html",
+    tags:["SVG","moire","waves"]
+  },
+
+  {
+    title:"Impossible Structure 03",
+    category:"Optical Studies",
+    status:"prototype",
+    year:"2026",
+    description:
+      "Parametric impossible geometry, lighting and surface flow.",
+    url:"/optical-studies/index3.6.html",
+    tags:["SVG","Penrose","geometry"],
+    versions:[
+      ["v1","/optical-studies/index3.html"],
+      ["3.1","/optical-studies/index3.1.html"],
+      ["3.2","/optical-studies/index3.2.html"],
+      ["3.3","/optical-studies/index3.3.html"],
+      ["3.4","/optical-studies/index3.4.html"],
+      ["3.5","/optical-studies/index3.5.html"]
+    ]
+  },
+
+  {
+    title:"Random Color Text 04",
+    category:"Optical Studies",
+    status:"experiment",
+    year:"2023 / 2026",
+    description:
+      "A reconstructed algorithmic text animation with random RGB colors.",
+    url:"/optical-studies/index4.html",
+    tags:["typography","random","color"]
+  },
+
+  {
+    title:"Random Color Grid 05",
+    category:"Optical Studies",
+    status:"experiment",
+    year:"2023 / 2026",
+    description:
+      "A continuously transforming grid of random hexadecimal colors.",
+    url:"/optical-studies/index5.html",
+    tags:["grid","generative","color"]
+  },
+
+  {
+    title:"Random QR Grid 06",
+    category:"Optical Studies",
+    status:"experiment",
+    year:"2026",
+    description:
+      "A living mosaic of QR codes retrieved from The Cradle.",
+    url:"/optical-studies/index6.html",
+    tags:["QR","Firebase","random"]
+  },
+
+  {
+    title:"QR Metamorphosis 07",
+    category:"Optical Studies",
+    status:"experiment",
+    year:"2026",
+    description:
+      "A readable QR code dissolves, transforms and returns to its original form.",
+    url:"/optical-studies/index7.html",
+    tags:["SVG","QR","animation"]
+  },
+
+  // ===================================
+  // GENERATIVE & SVG
+  // ===================================
+
+  {
+    title:"Living Traces — 360",
+    category:"Generative & SVG",
+    status:"experiment",
+    year:"2026",
+    description:
+      "Living vector marks generated over a 360-degree photograph.",
+    url:"/living-trace-test/index3.html",
+    tags:["360","SVG","interaction"],
+    versions:[
+      ["01","/living-trace-test/index.html"],
+      ["02","/living-trace-test/index2.html"]
+    ]
+  },
+
+  {
+    title:"Living Traces IV",
+    category:"Generative & SVG",
+    status:"experiment",
+    year:"2026",
+    description:
+      "Autonomous Memory — generative traces that continue without interaction.",
+    url:"/living-trace-test/index4.html",
+    tags:["memory","autonomous","SVG"]
+  },
+
+  {
+    title:"Neon Cat's Cradle",
+    category:"Generative & SVG",
+    status:"prototype",
+    year:"2026",
+    description:
+      "An experimental interactive artwork exploring gesture and movement.",
+    url:"/neoncatscradle/index.html",
+    tags:["p5.js","gesture","interaction"],
+    versions:[
+      ["02","/neoncatscradle/index2.html"],
+      ["03","/neoncatscradle/index3.html"],
+      ["04","/neoncatscradle/index4.html"]
+    ]
+  },
+
+  {
+    title:"ASCII Experiment",
+    category:"Generative & SVG",
+    status:"experiment",
+    year:"—",
+    description:
+      "A visual experiment using characters and digital image structures.",
+    url:"/ascii/index.html",
+    tags:["ASCII","image","code"]
+  },
+
+  // ===================================
+  // TRACES BETWEEN & MEMORY
+  // ===================================
+
+  {
+    title:"Traces Between",
+    category:"Traces & Memory",
+    status:"artwork",
+    year:"2026",
+    description:
+      "An evolving installation and family of works investigating memory, repetition and time.",
+    url:"/zine/traces-between-project/",
+    tags:["installation","memory","zine"]
+  },
+
+  {
+    title:"The Cradle",
+    category:"Traces & Memory",
+    status:"project",
+    year:"2026",
+    description:
+      "A participatory archive of submitted images and traces.",
+    url:"/cradle/index.html",
+    tags:["participation","Firebase","memory"],
+    versions:[
+      ["Gallery","/cradle/gallery.html"],
+      ["QR Gallery","/cradle/qr-gallery.html"]
+    ]
+  },
+
+  {
+    title:"Slow Side — Experiment",
+    category:"Traces & Memory",
+    status:"artwork",
+    year:"2026",
+    description:
+      "Random encounters with photographic traces, text and sound.",
+    url:"https://photodiary.gallery/experiment/",
+    tags:["random","QR","memory"]
+  },
+
+  {
+    title:"Spherical Memory",
+    category:"Traces & Memory",
+    status:"experiment",
+    year:"2026",
+    description:
+      "A spherical, photographic memory environment.",
+    url:"https://photodiary.gallery/spherical-memory/index3.html",
+    tags:["360","photography","memory"]
+  },
+
+  {
+    title:"The Face Between",
+    category:"Traces & Memory",
+    status:"prototype",
+    year:"2026",
+    description:
+      "A shared face composed from traces rather than conventional portraits.",
+    url:"/TheFaceBetween/index.html",
+    tags:["face","collaboration","identity"],
+    versions:[
+      ["Grid","/TheFaceBetween/index-grid.html"],
+      ["Unknown Faces","/TheFaceBetween/UnknownFaces.html"]
+    ]
+  },
+
+  {
+    title:"Tekijyyden jäljet",
+    category:"Traces & Memory",
+    status:"project",
+    year:"2026",
+    description:
+      "A visual timeline exploring the development of artistic authorship.",
+    url:"/T1M3L1N3/tekijyyden_jaljet_v9.html",
+    tags:["timeline","authorship","research"]
+  },
+
+  // ===================================
+  // PHOTO & POETRY
+  // ===================================
+
+  {
+    title:"Abstract Lab",
+    category:"Photography & Poetry",
+    status:"prototype",
+    year:"2026",
+    description:
+      "A digital environment for experiments in abstract photography.",
+    url:"/abstract-lab/abstract-lab.html",
+    tags:["abstract","photography","lab"],
+    versions:[
+      ["Gallery","/abstract-lab/abstract-lab-gallery.html"]
+    ]
+  },
+
+  {
+    title:"Miksang Practice",
+    category:"Photography & Poetry",
+    status:"project",
+    year:"—",
+    description:
+      "Photographic observation and contemplative seeing.",
+    url:"/miksang.html",
+    tags:["Miksang","photography"]
+  },
+
+  {
+    title:"Miksang Gallery",
+    category:"Photography & Poetry",
+    status:"project",
+    year:"—",
+    description:
+      "A photographic gallery based on observation.",
+    url:"/miksang-gallery.html",
+    tags:["gallery","Miksang"]
+  },
+
+  {
+    title:"QR Poetry",
+    category:"Photography & Poetry",
+    status:"experiment",
+    year:"—",
+    description:
+      "Poetry encoded and shared through QR structures.",
+    url:"/qr-poem-generator.html",
+    tags:["poetry","QR","text"],
+    versions:[
+      ["Gallery","/qr-poem-gallery.html"]
+    ]
+  },
+
+  {
+    title:"Photopoetry Oracle",
+    category:"Photography & Poetry",
+    status:"project",
+    year:"—",
+    description:
+      "An experimental photographic and poetic oracle.",
+    url:"https://photopoetry.xyz/oracle/",
+    tags:["poetry","random","image"]
+  },
+
+  {
+    title:"Image Poem QR",
+    category:"Photography & Poetry",
+    status:"experiment",
+    year:"—",
+    description:
+      "An experimental intersection of image, poem and QR code.",
+    url:"/image-poem-qr.html",
+    tags:["poetry","QR","image"]
+  },
+
+  // ===================================
+  // GAMES & PARTICIPATION
+  // ===================================
+
+  {
+    title:"SIX — S1X",
+    category:"Games & Participation",
+    status:"prototype",
+    year:"2026",
+    description:
+      "An experimental six-faced image and scanning game.",
+    url:"/S1X/index.html",
+    tags:["game","QR","cube"]
+  },
+
+  {
+    title:"SIX — Sixth Face",
+    category:"Games & Participation",
+    status:"prototype",
+    year:"2026",
+    description:
+      "An alternative version of the SIX image-based experience.",
+    url:"/S1X-6th-face/index.html",
+    tags:["game","image","cube"]
+  },
+
+  {
+    title:"The Great Code Hunt",
+    category:"Games & Participation",
+    status:"prototype",
+    year:"2026",
+    description:
+      "A code-scanning game using barcodes and QR fragments.",
+    url:"/TheGreatCodeHunt/index.html",
+    tags:["barcode","QR","game"]
+  },
+
+  {
+    title:"P1A — SIX Prototype",
+    category:"Games & Participation",
+    status:"prototype",
+    year:"2026",
+    description:
+      "An additional experimental version of the SIX project.",
+    url:"/P1A/index.html",
+    tags:["prototype","game"]
+  },
+
+  // ===================================
+  // MEDIA & WEB EXPERIMENTS
+  // ===================================
+
+  {
+    title:"Multimedia Essays",
+    category:"Media & Web",
+    status:"prototype",
+    year:"2026",
+    description:
+      "A scroll-based narrative system combining image, text, sound and movement.",
+    url:"/essays/index.html",
+    tags:["essay","scroll","multimedia"]
+  },
+
+  {
+    title:"Browser Mirror",
+    category:"Media & Web",
+    status:"experiment",
+    year:"2026",
+    description:
+      "An experiment in browser identity, representation and digital observation.",
+    url:"/browser-mirror/index.html",
+    tags:["browser","identity","web"]
+  },
+
+  {
+    title:"AI Experiments",
+    category:"Media & Web",
+    status:"experiment",
+    year:"—",
+    description:
+      "Experimental interfaces and artworks exploring generative AI.",
+    url:"/AI/index.html",
+    tags:["AI","generative","web"]
+  },
+
+  {
+    title:"Traces Between — Zine",
+    category:"Media & Web",
+    status:"project",
+    year:"2026",
+    description:
+      "An evolving publication documenting the installation and its related works.",
+    url:"/zine/traces-between/",
+    tags:["zine","documentation","publication"]
+  },
+
+  {
+    title:"QR Zine",
+    category:"Media & Web",
+    status:"experiment",
+    year:"2026",
+    description:
+      "An experimental publication format using QR codes.",
+    url:"/zine/qr-zine-a4.html",
+    tags:["QR","zine","print"]
+  },
+
+  // ===================================
+  // ARCHIVE & FUTURE RECOVERY
+  // ===================================
+
+  {
+    title:"NFT Experiments",
+    category:"Archive & Recovery",
+    status:"archive",
+    year:"To verify",
+    description:
+      "Earlier NFT and digital collectible projects. Publication links and original implementations to be recovered.",
+    url:"",
+    tags:["NFT","digital art","archive"]
+  },
+
+  {
+    title:"Recovered Color Experiments",
+    category:"Archive & Recovery",
+    status:"archive",
+    year:"2023",
+    description:
+      "Koder-era HTML color and typography experiments, reconstructed as Optical Studies 04 and 05.",
+    url:"/optical-studies/index4.html",
+    tags:["Koder","HTML","recovered"],
+    versions:[
+      ["Color Grid","/optical-studies/index5.html"]
+    ]
+  },
+
+  {
+    title:"Photodiary Method",
+    category:"Archive & Recovery",
+    status:"project",
+    year:"2010–",
+    description:
+      "The long-running daily photographic diary practice, methods and publications.",
+    url:"https://photodiary.gallery/",
+    tags:["photodiary","practice","research"]
+  }
+
+];
+
+// =====================================
+// PAGE CONFIGURATION
+// =====================================
+
+const categories = [
+  "Optical Studies",
+  "Generative & SVG",
+  "Traces & Memory",
+  "Photography & Poetry",
+  "Games & Participation",
+  "Media & Web",
+  "Archive & Recovery"
+];
+
+const categoryDescriptions = {
+  "Optical Studies":
+    "Optical illusion, SVG, chance, color and animated structures.",
+  "Generative & SVG":
+    "Autonomous images, living lines and algorithmic drawing.",
+  "Traces & Memory":
+    "Memory, photographic traces and evolving installations.",
+  "Photography & Poetry":
+    "Observation, photography, poetic systems and image-text experiments.",
+  "Games & Participation":
+    "Scanning, interaction and playful encounters.",
+  "Media & Web":
+    "Web-native artworks, publishing systems and media experiments.",
+  "Archive & Recovery":
+    "Older work, reconstructions and projects awaiting documentation."
+};
+
+const $ = id => document.getElementById(id);
+
+let currentCategory = "All";
+
+// =====================================
+// HELPERS
+// =====================================
+
+function resolveURL(url) {
+  if(!url) return "";
+  if(url.startsWith("/")) return BASE+url;
+  return url;
+}
+
+function element(tag,className,text) {
+  const e=document.createElement(tag);
+  if(className) e.className=className;
+  if(text!==undefined) e.textContent=text;
+  return e;
+}
+
+// =====================================
+// FILTERS
+// =====================================
+
+function renderFilters() {
+  const nav=$("filters");
+  nav.replaceChildren();
+
+  ["All",...categories].forEach(category=>{
+    const btn=element("button","",category);
+    btn.type="button";
+    btn.classList.toggle(
+      "active",
+      currentCategory===category
+    );
+
+    btn.addEventListener("click",()=>{
+      currentCategory=category;
+      renderFilters();
+      render();
+    });
+
+    nav.append(btn);
+  });
+}
+
+// =====================================
+// PROJECT CARDS
+// =====================================
+
+function createCard(project) {
+  const card=element("article","card");
+
+  card.append(
+    element(
+      "div","meta",
+      project.category+" · "+project.year
+    )
+  );
+
+  card.append(
+    element("h3","",project.title)
+  );
+
+  card.append(
+    element(
+      "div","description",
+      project.description
+    )
+  );
+
+  const tags=element("div","tags");
+
+  (project.tags||[]).forEach(tag=>{
+    tags.append(element("span","tag",tag));
+  });
+
+  card.append(tags);
+
+  const bottom=element("div","card-bottom");
+
+  bottom.append(
+    element("span","status",project.status)
+  );
+
+  if(project.url) {
+    const a=element("a","link","Open ↗");
+    a.href=resolveURL(project.url);
+    a.target="_blank";
+    a.rel="noopener noreferrer";
+    bottom.append(a);
+  } else {
+    bottom.append(
+      element("span","status","Link pending")
+    );
+  }
+
+  card.append(bottom);
+
+  if(project.versions?.length) {
+    const versions=element("div","versions");
+
+    project.versions.forEach(([name,url])=>{
+      const a=element("a","",name+" ↗");
+      a.href=resolveURL(url);
+      a.target="_blank";
+      a.rel="noopener noreferrer";
+      versions.append(a);
+    });
+
+    card.append(versions);
+  }
+
+  return card;
+}
+
+// =====================================
+// RENDER CONTENT
+// =====================================
+
+function render() {
+  const content=$("content");
+  content.replaceChildren();
+
+  const search=$("search").value
+    .trim().toLowerCase();
+
+  const status=$("statusFilter").value;
+
+  const filtered=projects.filter(p=>{
+
+    if(
+      currentCategory!=="All" &&
+      p.category!==currentCategory
+    ) return false;
+
+    if(
+      status!=="all" &&
+      p.status!==status
+    ) return false;
+
+    const combined=[
+      p.title,
+      p.description,
+      p.category,
+      p.year,
+      ...(p.tags||[])
+    ].join(" ").toLowerCase();
+
+    return combined.includes(search);
+  });
+
+  if(filtered.length===0) {
+    content.append(
+      element("p","empty","No matching projects.")
+    );
+    return;
+  }
+
+  categories.forEach(category=>{
+
+    const items=filtered.filter(
+      p=>p.category===category
+    );
+
+    if(items.length===0) return;
+
+    const section=element("section");
+
+    const head=element("div","section");
+    head.append(
+      element(
+        "h2","",
+        category+" ("+items.length+")"
+      )
+    );
+
+    head.append(
+      element(
+        "p","",
+        categoryDescriptions[category]
+      )
+    );
+
+    section.append(head);
+
+    const grid=element("div","grid");
+
+    items.forEach(p=>{
+      grid.append(createCard(p));
+    });
+
+    section.append(grid);
+    content.append(section);
+  });
+}
+
+// =====================================
+// STATISTICS
+// =====================================
+
+function renderStats() {
+  const stats=$("stats");
+
+  const entries=[
+    [projects.length,"Project records"],
+    [categories.length,"Categories"],
+    [
+      projects.filter(p=>p.status==="experiment").length,
+      "Experiments"
+    ],
+    [
+      projects.filter(p=>p.status==="archive").length,
+      "Archive entries"
+    ]
+  ];
+
+  entries.forEach(([number,label])=>{
+    const div=element("div","stat");
+    div.append(element("strong","",String(number)));
+    div.append(element("span","",label));
+    stats.append(div);
+  });
+}
+
+// =====================================
+// EVENTS AND START
+// =====================================
+
+$("search").addEventListener("input",render);
+$("statusFilter").addEventListener("change",render);
+
+renderStats();
+renderFilters();
+render();
+
+})();
+</script>
+</body>
+</html>
