@@ -1,0 +1,603 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+ content="width=device-width,initial-scale=1">
+
+<title>Random Color Text 04 — Optical Studies</title>
+
+<style>
+:root {
+  color-scheme:dark;
+  --bg:#111218;
+  --fg:#f1f0eb;
+  --muted:#a3a6b2;
+  --line:#393c47;
+  --accent:#efda80;
+}
+
+* {box-sizing:border-box}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font:15px/1.5 system-ui,
+       -apple-system,sans-serif;
+}
+
+main {
+  max-width:1060px;
+  margin:auto;
+  padding:clamp(16px,3vw,30px);
+}
+
+h1 {
+  font-size:clamp(27px,4vw,42px);
+  font-weight:450;
+  margin:5px 0;
+}
+
+small,.subtitle {color:var(--muted)}
+
+small {
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+
+.art {
+  min-height:430px;
+  margin-top:22px;
+  padding:clamp(20px,5vw,60px);
+  background:#050509;
+  border-radius:5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#colorText {
+  width:100%;
+  max-width:850px;
+  font-size:clamp(24px,4vw,48px);
+  line-height:1.5;
+  letter-spacing:.025em;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+
+#colorText span {
+  display:inline;
+}
+
+.controls {
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fit,minmax(190px,1fr));
+  gap:20px;
+  margin-top:20px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+
+.field {
+  display:grid;
+  gap:8px;
+  align-content:start;
+}
+
+label {
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  gap:10px;
+}
+
+output {color:var(--fg)}
+
+select,button,textarea {
+  background:#292c35;
+  color:var(--fg);
+  font:inherit;
+  border:1px solid #565b68;
+  border-radius:6px;
+  padding:10px 12px;
+}
+
+button,select {cursor:pointer}
+
+button:hover {background:#3b3e48}
+
+input[type=range] {
+  width:100%;
+  accent-color:var(--accent);
+}
+
+textarea {
+  width:100%;
+  min-height:115px;
+  resize:vertical;
+}
+
+.buttons {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+
+.note {
+  max-width:800px;
+  color:var(--muted);
+  margin-top:22px;
+}
+
+footer {
+  color:var(--muted);
+  font-size:12px;
+  margin:28px 0;
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header>
+  <small>
+    Optical Studies / 004 / Version 1.0
+  </small>
+
+  <h1>Random Color Text 04</h1>
+
+  <p class="subtitle">
+    A reconstructed experiment from October 2023
+  </p>
+</header>
+
+<div class="art">
+  <div id="colorText" aria-live="off"></div>
+</div>
+
+<section class="controls">
+
+  <div class="field">
+    <label for="mode">Animation</label>
+
+    <select id="mode">
+      <option value="running">Running</option>
+      <option value="paused">Paused</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="interval">
+      Color interval
+      <output id="intervalValue">500 ms</output>
+    </label>
+
+    <input
+      id="interval"
+      type="range"
+      min="100"
+      max="3000"
+      step="100"
+      value="500">
+  </div>
+
+  <div class="field">
+    <label for="size">
+      Font size
+      <output id="sizeValue">42 px</output>
+    </label>
+
+    <input
+      id="size"
+      type="range"
+      min="16"
+      max="80"
+      value="42">
+  </div>
+
+  <div class="field">
+    <label for="palette">
+      Color system
+    </label>
+
+    <select id="palette">
+      <option value="full">
+        Full hexadecimal RGB
+      </option>
+      <option value="gray">
+        Grayscale
+      </option>
+      <option value="bright">
+        Bright colors
+      </option>
+      <option value="warm">
+        Warm colors
+      </option>
+    </select>
+  </div>
+
+</section>
+
+<div class="field" style="margin-top:20px">
+  <label for="sourceText">Text</label>
+
+  <textarea id="sourceText">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+  </textarea>
+</div>
+
+<div class="buttons">
+  <button id="randomize">
+    New colors
+  </button>
+
+  <button id="toggle">
+    Pause
+  </button>
+
+  <button id="saveSvg">
+    Export SVG
+  </button>
+
+  <button id="reset">
+    Reset
+  </button>
+</div>
+
+<p class="note">
+  Each character is assigned a random hexadecimal
+  color. The composition changes automatically.
+  This study reconstructs an HTML experiment
+  originally explored in October 2023.
+</p>
+
+<footer>
+  Optical Studies · Study 04 · 2026
+  <br>
+  Recovered Experiments / Random Color Text / 2023
+</footer>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id =>
+  document.getElementById(id);
+
+const DEFAULT_TEXT =
+  'Lorem ipsum dolor sit amet, consectetur ' +
+  'adipiscing elit. Sed do eiusmod tempor ' +
+  'incididunt ut labore et dolore magna aliqua.';
+
+const hex = '0123456789ABCDEF';
+
+let timer = null;
+let colors = [];
+
+// -------------------------------------
+// ORIGINAL RANDOM HEX COLOR PRINCIPLE
+// -------------------------------------
+
+function getRandomColor() {
+  let color = '#';
+
+  for(let i=0;i<6;i++) {
+    color += hex[
+      Math.floor(Math.random()*16)
+    ];
+  }
+
+  return color;
+}
+
+// -------------------------------------
+// COLOR VARIATIONS
+// -------------------------------------
+
+function rgbToHex(r,g,b) {
+  return '#' + [r,g,b].map(value =>
+    Math.max(0,Math.min(255,value))
+      .toString(16)
+      .padStart(2,'0')
+  ).join('').toUpperCase();
+}
+
+function randomColor() {
+  const mode = $('palette').value;
+
+  if(mode==='full') {
+    return getRandomColor();
+  }
+
+  if(mode==='gray') {
+    const v=Math.floor(Math.random()*256);
+    return rgbToHex(v,v,v);
+  }
+
+  if(mode==='bright') {
+    const hue=Math.floor(Math.random()*360);
+    return `hsl(${hue},90%,65%)`;
+  }
+
+  if(mode==='warm') {
+    return rgbToHex(
+      150+Math.floor(Math.random()*106),
+      Math.floor(Math.random()*180),
+      Math.floor(Math.random()*100)
+    );
+  }
+}
+
+// -------------------------------------
+// BUILD TEXT
+// -------------------------------------
+
+function buildText() {
+  const container=$('colorText');
+  const source=$('sourceText').value;
+
+  container.replaceChildren();
+  colors=[];
+
+  for(const character of source) {
+
+    if(character===' ' ||
+       character==='\n') {
+
+      container.append(
+        document.createTextNode(character)
+      );
+
+      colors.push(null);
+      continue;
+    }
+
+    const span=document.createElement('span');
+
+    span.textContent=character;
+    span.style.color=randomColor();
+
+    colors.push(span.style.color);
+    container.append(span);
+  }
+}
+
+// -------------------------------------
+// ANIMATION
+// -------------------------------------
+
+function recolor() {
+  const spans=
+    $('colorText').querySelectorAll('span');
+
+  spans.forEach(span=>{
+    span.style.color=randomColor();
+  });
+}
+
+function stopTimer() {
+  if(timer!==null) {
+    clearInterval(timer);
+    timer=null;
+  }
+}
+
+function startTimer() {
+  stopTimer();
+
+  if($('mode').value==='running') {
+    timer=setInterval(
+      recolor,
+      Number($('interval').value)
+    );
+  }
+
+  updateButtons();
+}
+
+function updateButtons() {
+  const running=
+    $('mode').value==='running';
+
+  $('toggle').textContent=
+    running ? 'Pause' : 'Resume';
+}
+
+// -------------------------------------
+// CONTROLS
+// -------------------------------------
+
+$('mode').addEventListener('change',()=>{
+  startTimer();
+});
+
+$('interval').addEventListener('input',()=>{
+  $('intervalValue').textContent=
+    $('interval').value+' ms';
+
+  startTimer();
+});
+
+$('size').addEventListener('input',()=>{
+  const size=$('size').value;
+
+  $('sizeValue').textContent=
+    size+' px';
+
+  $('colorText').style.fontSize=
+    size+'px';
+});
+
+$('palette').addEventListener('change',()=>{
+  recolor();
+});
+
+$('sourceText').addEventListener('input',()=>{
+  buildText();
+});
+
+$('toggle').addEventListener('click',()=>{
+  $('mode').value=
+    $('mode').value==='running'
+      ? 'paused'
+      : 'running';
+
+  startTimer();
+});
+
+$('randomize').addEventListener('click',()=>{
+  recolor();
+});
+
+// -------------------------------------
+// SVG EXPORT
+// -------------------------------------
+
+function escapeXml(text) {
+  return text
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;');
+}
+
+function exportSvg() {
+  const source=$('sourceText').value;
+  const spans=
+    [...$('colorText').querySelectorAll('span')];
+
+  const fontSize=Number($('size').value);
+  const cell=fontSize*.64;
+  const lineHeight=fontSize*1.55;
+
+  const width=1200;
+  const margin=70;
+  const maxX=width-margin;
+
+  let x=margin;
+  let y=margin+fontSize;
+  let spanIndex=0;
+
+  let content='';
+
+  for(const ch of source) {
+    if(ch==='\n') {
+      x=margin;
+      y+=lineHeight;
+      continue;
+    }
+
+    if(x+cell>maxX) {
+      x=margin;
+      y+=lineHeight;
+    }
+
+    if(ch===' ') {
+      x+=cell;
+      continue;
+    }
+
+    const color=
+      spans[spanIndex++]?.style.color || '#fff';
+
+    content+=
+      `<text x="${x.toFixed(2)}" `+
+      `y="${y.toFixed(2)}" `+
+      `fill="${escapeXml(color)}">`+
+      escapeXml(ch)+
+      `</text>`;
+
+    x+=cell;
+  }
+
+  const height=Math.max(500,y+margin);
+
+  const svg=
+    `<svg xmlns="http://www.w3.org/2000/svg" `+
+    `width="${width}" height="${height}" `+
+    `viewBox="0 0 ${width} ${height}">`+
+    `<rect width="100%" height="100%" `+
+    `fill="#050509"/>`+
+    `<g font-family="monospace" `+
+    `font-size="${fontSize}">`+
+    content+
+    `</g></svg>`;
+
+  download(
+    new Blob([svg],{
+      type:'image/svg+xml;charset=utf-8'
+    }),
+    'random-color-text-04.svg'
+  );
+}
+
+function download(blob,name) {
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+
+  a.href=url;
+  a.download=name;
+
+  document.body.append(a);
+  a.click();
+  a.remove();
+
+  setTimeout(
+    ()=>URL.revokeObjectURL(url),
+    3000
+  );
+}
+
+$('saveSvg').addEventListener(
+  'click',exportSvg
+);
+
+// -------------------------------------
+// RESET
+// -------------------------------------
+
+$('reset').addEventListener('click',()=>{
+  $('sourceText').value=DEFAULT_TEXT;
+  $('mode').value='running';
+  $('interval').value=500;
+  $('size').value=42;
+  $('palette').value='full';
+
+  $('intervalValue').textContent='500 ms';
+  $('sizeValue').textContent='42 px';
+
+  $('colorText').style.fontSize='42px';
+
+  buildText();
+  startTimer();
+});
+
+// -------------------------------------
+// START
+// -------------------------------------
+
+$('sourceText').value=DEFAULT_TEXT;
+$('colorText').style.fontSize='42px';
+
+if(window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+).matches) {
+  $('mode').value='paused';
+}
+
+buildText();
+startTimer();
+
+})();
+</script>
+</body>
+</html>
