@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Optical Study 4.5 — Hidden QR Morph</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Lightweight QR generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script src="app5.js" defer></script>
+</head>
+
+<body>
+  <main class="study">
+
+    <header class="study-header">
+      <p class="eyebrow">OPTICAL STUDIES / 04.5</p>
+      <h1>Hidden QR Morph</h1>
+      <p class="subtitle">
+        A QR code emerges from noise and becomes legible as a hidden spatial form.
+      </p>
+    </header>
+
+    <section class="panel" aria-label="QR controls">
+      <div class="field-group">
+        <label for="qrText">QR content</label>
+        <input
+          id="qrText"
+          type="text"
+          value="https://photodiarygame.com/cradle/qr-gallery.html"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="field-group">
+        <label for="morphAmount">Morph amount</label>
+        <input
+          id="morphAmount"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+        >
+        <div class="range-readout">
+          <span>Abstract</span>
+          <span id="morphValue">1.00</span>
+          <span>Readable QR</span>
+        </div>
+      </div>
+
+      <div class="controls" aria-label="Buttons">
+        <button id="updateQR" type="button">Update QR</button>
+        <button id="togglePreview" type="button">Show depth map</button>
+        <button id="regenerate" type="button">New pattern</button>
+        <button id="playMorph" type="button">Play morph</button>
+      </div>
+    </section>
+
+    <section class="viewer" aria-label="QR stereogram experiment">
+      <canvas
+        id="stereogram"
+        width="1000"
+        height="650"
+        aria-label="Hidden QR autostereogram">
+      </canvas>
+
+      <p id="status" role="status">
+        Preparing the hidden QR code...
+      </p>
+    </section>
+
+    <section class="instructions">
+      <h2>How to see</h2>
+      <p>
+        Relax your eyes and look through the image as if focusing behind the screen.
+        A hidden QR structure may emerge in depth.
+      </p>
+    </section>
+
+    <footer>
+      <span>Optical Study 4.5</span>
+      <span>QR morph stereogram / 2026</span>
+    </footer>
+
+  </main>
+</body>
+</html>
