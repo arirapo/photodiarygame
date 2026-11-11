@@ -164,3 +164,48 @@ footer {
   background: rgba(255, 255, 255, 0.04);
   border-color: #4a4a50;
 }
+
+.panel {
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto 28px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.field-group label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field-group input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: #141417;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+}
+
+.field-group input[type="range"] {
+  width: 100%;
+}
+
+.range-readout {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
