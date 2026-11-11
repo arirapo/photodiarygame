@@ -138,3 +138,29 @@ footer {
     margin: 40px auto 56px;
   }
 }
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0 0;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--foreground);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.controls button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #4a4a50;
+}
