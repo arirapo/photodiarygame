@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
+<title>Optical Study 4.6 — Threshold of Legibility</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+  .experiment {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 32px;
+    padding: 24px;
+    border: 1px solid var(--line);
+  }
+
+  .field {
+    margin-bottom: 22px;
+  }
+
+  .field label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .field input[type="text"],
+  .field select {
+    width: 100%;
+    padding: 12px;
+    background: #151518;
+    border: 1px solid var(--line);
+    color: var(--foreground);
+    font: inherit;
+  }
+
+  .field input[type="range"] {
+    width: 100%;
+    accent-color: #aaa;
+  }
+
+  .morph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #morphValue {
+    font-size: 28px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .checkline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .checkline input {
+    accent-color: #aaa;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 11px 16px;
+    border: 1px solid #45454a;
+    background: #1a1a1d;
+    color: #e8e5df;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #303034;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #c9c9cb;
+    outline-offset: 3px;
+  }
+
+  .comparison {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 0 auto;
+  }
+
+  .qr-panel {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .qr-panel h2 {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+  }
+
+  .qr-panel canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: white;
+    image-rendering: pixelated;
+  }
+
+  .qr-panel p {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 28px 0;
+    text-align: center;
+  }
+
+  .metric {
+    border: 1px solid var(--line);
+    padding: 16px 8px;
+  }
+
+  .metric strong {
+    display: block;
+    font-size: 24px;
+    font-weight: 300;
+  }
+
+  .metric span {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .test-area {
+    margin: 28px 0;
+    padding: 24px;
+    border: 1px solid var(--line);
+    text-align: center;
+  }
+
+  .test-area h2 {
+    margin-top: 0;
+    font-size: 15px;
+    font-weight: 400;
+  }
+
+  .test-area p,
+  .test-area small {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .test-area .actions {
+    justify-content: center;
+    margin: 20px 0 12px;
+  }
+
+  .results {
+    margin-top: 30px;
+    width: 100%;
+  }
+
+  .results h2 {
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  .results table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .results th,
+  .results td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .results th {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  @media (max-width: 650px) {
+    .field-row,
+    .comparison {
+      grid-template-columns: 1fr;
+    }
+
+    .experiment {
+      padding: 16px;
+    }
+
+    .metrics {
+      gap: 6px;
+    }
+
+    .metric {
+      padding: 12px 4px;
+    }
+
+    .metric strong {
+      font-size: 19px;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="app6.js" defer></script>
+</head>
+
+<body>
+<main class="study">
+
+  <header class="study-header">
+    <p class="eyebrow">OPTICAL STUDIES / 04.6</p>
+
+    <h1>Threshold of Legibility</h1>
+
+    <p class="subtitle">
+      At what point does a machine stop
+      understanding an image?
+    </p>
+  </header>
+
+  <section class="experiment">
+
+    <div class="field">
+      <label for="qrText">QR content</label>
+      <input id="qrText"
+             type="text"
+             value="HEI"
+             spellcheck="false">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="errorLevel">
+          Error correction
+        </label>
+
+        <select id="errorLevel">
+          <option value="L">L — Low (7%)</option>
+          <option value="M" selected>
+            M — Medium (15%)
+          </option>
+          <option value="Q">Q — Quartile (25%)</option>
+          <option value="H">H — High (30%)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="seed">Pattern seed</label>
+        <input id="seed"
+               type="text"
+               value="2026"
+               readonly>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="morph-header">
+        <label for="morphAmount">
+          Morph amount
+        </label>
+        <output id="morphValue">1.00</output>
+      </div>
+
+      <input id="morphAmount"
+             type="range"
+             min="0"
+             max="1"
+             step="0.01"
+             value="1">
+
+      <div class="range-labels">
+        <span>Abstract</span>
+        <span>Intact QR</span>
+      </div>
+    </div>
+
+    <label class="checkline">
+      <input id="protectStructure"
+             type="checkbox" checked>
+      Preserve QR recognition structures
+    </label>
+
+    <div class="actions">
+      <button id="updateQR">Update QR</button>
+      <button id="newPattern">New pattern</button>
+      <button id="resetMorph">Reset morph</button>
+    </div>
+
+  </section>
+
+  <section class="comparison">
+
+    <div class="qr-panel">
+      <h2>Modified / Experimental</h2>
+      <canvas id="modifiedQR"
+              width="720"
+              height="720"></canvas>
+      <p>Scan this image to test readability.</p>
+    </div>
+
+    <div class="qr-panel">
+      <h2>Original / Reference</h2>
+      <canvas id="originalQR"
+              width="720"
+              height="720"></canvas>
+      <p>The unmodified QR code.</p>
+    </div>
+
+  </section>
+
+  <section class="metrics">
+    <div class="metric">
+      <strong id="changedPercent">0%</strong>
+      <span>Changed modules</span>
+    </div>
+
+    <div class="metric">
+      <strong id="moduleCount">—</strong>
+      <span>QR modules per side</span>
+    </div>
+
+    <div class="metric">
+      <strong id="morphMetric">1.00</strong>
+      <span>Morph value</span>
+    </div>
+  </section>
+
+  <section class="test-area">
+    <h2>Readability test</h2>
+
+    <p>
+      Try scanning the modified QR code
+      with your phone camera.
+      Record whether decoding succeeds.
+    </p>
+
+    <div class="actions">
+      <button id="recordSuccess">
+        ✓ Readable
+      </button>
+
+      <button id="recordFailure">
+        ✕ Unreadable
+      </button>
+    </div>
+
+    <small id="testStatus" role="status">
+      No test recorded yet.
+    </small>
+  </section>
+
+  <section class="results">
+    <h2>Experiment log</h2>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Morph</th>
+            <th>Changed</th>
+            <th>EC</th>
+            <th>Seed</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="actions" style="margin-top:20px">
+      <button id="exportCSV">
+        Export CSV
+      </button>
+
+      <button id="clearResults">
+        Clear results
+      </button>
+    </div>
+  </section>
+
+  <section class="instructions">
+    <h2>The threshold</h2>
+
+    <p>
+      The image remains recognizable as a QR code,
+      even when its information is no longer
+      machine-readable.
+      Where does recognition end,
+      and interpretation begin?
+    </p>
+  </section>
+
+  <footer>
+    <span>Optical Study 4.6</span>
+    <span>Threshold of Legibility / 2026</span>
+  </footer>
+
+</main>
+</body>
+</html>
