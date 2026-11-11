@@ -16,7 +16,7 @@ const W = canvas.width;
 const H = canvas.height;
 
 const SETTINGS = {
-  imagePath: "skull-photo.jpg",
+  imagePath: "IMG_0274.jpeg",
 
   patternWidth: 120,
   maxShift: 24,
