@@ -1,0 +1,21 @@
+{
+  "source": "User supplied the prior research topics and institutions in the current message. Current research focus and institution are based on the approved zine and earlier documentation.",
+  "stages": [
+    {
+      "year": "2013",
+      "institution": "Oulun yliopisto",
+      "topics": "Minäpystyvyys ja reflektio"
+    },
+    {
+      "year": "2021",
+      "institution": "Xamk",
+      "topics": "Yhteisöllisyys ja palvelumuotoilu"
+    },
+    {
+      "year": "2026",
+      "institution": "Turun ammattikorkeakoulu",
+      "topics": "Aika, muisti ja tekijyys"
+    }
+  ],
+  "note": "These are topic descriptions, not invented formal thesis titles."
+}

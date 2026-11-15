@@ -1,0 +1,10 @@
+{
+  "name": "Traces Between",
+  "short_name": "Traces Between",
+  "lang": "fi",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eeece5",
+  "theme_color": "#eeece5"
+}

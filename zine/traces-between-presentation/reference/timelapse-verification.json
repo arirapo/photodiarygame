@@ -1,0 +1,20 @@
+{
+  "file": "curated-panorama-2x1.mp4",
+  "sha256": "0f12a8fa43809bf5fc005766f143706f6a641c6010de29e8198de42382354a0e",
+  "bytes": 28088166,
+  "codec": "H.264",
+  "size": [
+    1920,
+    960
+  ],
+  "fps": 24,
+  "frames": 983,
+  "durationSeconds": 40.958333333333336,
+  "audio": false,
+  "images": 71,
+  "allCutsComparedToSource": true,
+  "maximumThumbnailRMSE": 5.714019876422215,
+  "averageThumbnailRMSE": 3.9250372076869535,
+  "minimumHoldSeconds": 0.125,
+  "maximumHoldSeconds": 2.0
+}

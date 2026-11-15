@@ -1,0 +1,364 @@
+{
+  "repository": "arirapo/photoartist",
+  "commit": "32d35d02c30e4534731d0b99da1dd63fd59c8dab",
+  "curation": "gallery/src/data/gallery.json",
+  "sourceBlob": "5cf2648993db5eaa952aec5d3ed4566c4ec11d97",
+  "selection": "Complete existing gallery list, original order",
+  "images": [
+    {
+      "file": "R0010140.jpeg",
+      "path": "gallery/images/R0010140.jpeg",
+      "gitBlob": "9010f202ce66cc381b49e1eba7665e113e060c49"
+    },
+    {
+      "file": "R0010284.jpeg",
+      "path": "gallery/images/R0010284.jpeg",
+      "gitBlob": "7c2429b167898e4ebe263c622f23f84e5e5e3093"
+    },
+    {
+      "file": "R0010412.jpeg",
+      "path": "gallery/images/R0010412.jpeg",
+      "gitBlob": "581bc7d461615df3a6203bcf38af4a3fb910ba57"
+    },
+    {
+      "file": "R0010421.jpeg",
+      "path": "gallery/images/R0010421.jpeg",
+      "gitBlob": "a8fbaa25a6b1c1fd853078a145e511173cacc7ae"
+    },
+    {
+      "file": "R0010587.jpeg",
+      "path": "gallery/images/R0010587.jpeg",
+      "gitBlob": "73835b0240c73c454c3de16b58213db3c5458b4e"
+    },
+    {
+      "file": "R0010594.jpeg",
+      "path": "gallery/images/R0010594.jpeg",
+      "gitBlob": "b54fde14d55bfacf4e309c0d58778fa733ef60c7"
+    },
+    {
+      "file": "R0010837.jpeg",
+      "path": "gallery/images/R0010837.jpeg",
+      "gitBlob": "2f0bd29b0e5faf0883523b6882e6eed253412ec3"
+    },
+    {
+      "file": "R0010883.jpeg",
+      "path": "gallery/images/R0010883.jpeg",
+      "gitBlob": "eeb8fd7475eba869395eaab6253d5cda50a6ddf7"
+    },
+    {
+      "file": "R0010979.jpeg",
+      "path": "gallery/images/R0010979.jpeg",
+      "gitBlob": "9d1d9a657b71b2b936bad6325d25d544d692a383"
+    },
+    {
+      "file": "R0011085.jpeg",
+      "path": "gallery/images/R0011085.jpeg",
+      "gitBlob": "f43f084486fd18b12dd84960b4feea0a6260c1fb"
+    },
+    {
+      "file": "R0011097.jpeg",
+      "path": "gallery/images/R0011097.jpeg",
+      "gitBlob": "8cbc100c236d96e2f89da6b05d0c43960c2aca12"
+    },
+    {
+      "file": "R0011162.jpeg",
+      "path": "gallery/images/R0011162.jpeg",
+      "gitBlob": "2efea16ed5c009741d9b64d7eac3d862cea24971"
+    },
+    {
+      "file": "R0011164.jpeg",
+      "path": "gallery/images/R0011164.jpeg",
+      "gitBlob": "0b16ca49ed645d55b0e41232e7ede40925f2b56e"
+    },
+    {
+      "file": "R0011165.jpeg",
+      "path": "gallery/images/R0011165.jpeg",
+      "gitBlob": "1642715f6f022ce5ba00b713addada6cd03575eb"
+    },
+    {
+      "file": "R0011166.jpeg",
+      "path": "gallery/images/R0011166.jpeg",
+      "gitBlob": "bf4527fc454f21a829d82eaacc993533f6d9c346"
+    },
+    {
+      "file": "R0011206.jpeg",
+      "path": "gallery/images/R0011206.jpeg",
+      "gitBlob": "de6e806c43377ace006031449136faef4fa08f41"
+    },
+    {
+      "file": "R0011220.jpeg",
+      "path": "gallery/images/R0011220.jpeg",
+      "gitBlob": "8b2a6580cd89c3cc76e41371dabb101ea3f666ac"
+    },
+    {
+      "file": "R0011345.jpeg",
+      "path": "gallery/images/R0011345.jpeg",
+      "gitBlob": "25639eaaadde94364c2c165479f0bac533517143"
+    },
+    {
+      "file": "R0011411.jpeg",
+      "path": "gallery/images/R0011411.jpeg",
+      "gitBlob": "f4d6aab09e830c5b94215217990661539e0e9e89"
+    },
+    {
+      "file": "R0011606.jpeg",
+      "path": "gallery/images/R0011606.jpeg",
+      "gitBlob": "fe8666417a97744426c33032df905fca8bcee36e"
+    },
+    {
+      "file": "R0011627.jpeg",
+      "path": "gallery/images/R0011627.jpeg",
+      "gitBlob": "8bb2d069ed23f9d911f96c5b438a189e1bf28e8d"
+    },
+    {
+      "file": "R0011661.jpeg",
+      "path": "gallery/images/R0011661.jpeg",
+      "gitBlob": "6c04a533b68d41f8df4a9565359326f508d39f66"
+    },
+    {
+      "file": "R0011702.jpeg",
+      "path": "gallery/images/R0011702.jpeg",
+      "gitBlob": "3b9a7c16c4c77e0128effd609c68425f3de4ac17"
+    },
+    {
+      "file": "R0011738.jpeg",
+      "path": "gallery/images/R0011738.jpeg",
+      "gitBlob": "863927d01444c9f24e2e0ba7731a966e5975941b"
+    },
+    {
+      "file": "R0011739.jpeg",
+      "path": "gallery/images/R0011739.jpeg",
+      "gitBlob": "6d0772e6360bdd7ba8c86627ceea0301acd9ce7d"
+    },
+    {
+      "file": "R0011833.jpeg",
+      "path": "gallery/images/R0011833.jpeg",
+      "gitBlob": "7d8f6f043185bace7d9068b9814d2245b664e8bc"
+    },
+    {
+      "file": "R0011911.jpeg",
+      "path": "gallery/images/R0011911.jpeg",
+      "gitBlob": "9d22a3701000bcf7bb9e28f73c84cde22bd57aeb"
+    },
+    {
+      "file": "R0011953.jpeg",
+      "path": "gallery/images/R0011953.jpeg",
+      "gitBlob": "86e1b3b3aadf832ee36dc5b67fdcdb375e0df79a"
+    },
+    {
+      "file": "R0012000.jpeg",
+      "path": "gallery/images/R0012000.jpeg",
+      "gitBlob": "eaeab3e518598e5d97a4505cfd6fceaa621099b8"
+    },
+    {
+      "file": "R0012003.jpeg",
+      "path": "gallery/images/R0012003.jpeg",
+      "gitBlob": "c1ff796b8a832da6261cf3bc8d294aa486a1b1bf"
+    },
+    {
+      "file": "R0012023.jpeg",
+      "path": "gallery/images/R0012023.jpeg",
+      "gitBlob": "989abe5f2ac62638ff9cf2f1c124439c721a64af"
+    },
+    {
+      "file": "R0012092.jpeg",
+      "path": "gallery/images/R0012092.jpeg",
+      "gitBlob": "fffe0bcf07cbb12d599fd2f0e4dae190c587e027"
+    },
+    {
+      "file": "R0012243.jpeg",
+      "path": "gallery/images/R0012243.jpeg",
+      "gitBlob": "6dbcd9236e53766f20a35936992ac9b43a04b953"
+    },
+    {
+      "file": "R0012250.jpeg",
+      "path": "gallery/images/R0012250.jpeg",
+      "gitBlob": "8a5ef45d0918f8cddb5b9740369ebdd4d7e49fd7"
+    },
+    {
+      "file": "R0012656.jpeg",
+      "path": "gallery/images/R0012656.jpeg",
+      "gitBlob": "4451da710a4e1b2ee9745f65b9f02e9218b8abc4"
+    },
+    {
+      "file": "R0013193.jpeg",
+      "path": "gallery/images/R0013193.jpeg",
+      "gitBlob": "ebe08b27f7e4241a118d434bd304d9527f21527a"
+    },
+    {
+      "file": "R0013254.jpeg",
+      "path": "gallery/images/R0013254.jpeg",
+      "gitBlob": "9322af77366c7d47c5f99f33a995ce2852bdc86c"
+    },
+    {
+      "file": "R0013472.jpeg",
+      "path": "gallery/images/R0013472.jpeg",
+      "gitBlob": "e2ae4de9477a8953ddee6ed5dcc735e30b02c4ba"
+    },
+    {
+      "file": "R0013659.jpeg",
+      "path": "gallery/images/R0013659.jpeg",
+      "gitBlob": "6ed7d3538f15948cb8c2c940783fc80e35d5b434"
+    },
+    {
+      "file": "R0013713.jpeg",
+      "path": "gallery/images/R0013713.jpeg",
+      "gitBlob": "c7afef6bc32adb2c4f940670140df195beb5ae44"
+    },
+    {
+      "file": "R0013738.jpeg",
+      "path": "gallery/images/R0013738.jpeg",
+      "gitBlob": "b5a9d002159e533d9b40b1c77c21461fd7383096"
+    },
+    {
+      "file": "R0013768.jpeg",
+      "path": "gallery/images/R0013768.jpeg",
+      "gitBlob": "00f85fcff93bb4407823b7a7cd6ea9ccb0bd81f8"
+    },
+    {
+      "file": "R0013909.jpeg",
+      "path": "gallery/images/R0013909.jpeg",
+      "gitBlob": "6372ff9dc80e3beba89db7f63348e89ea5746b42"
+    },
+    {
+      "file": "R0013962.jpeg",
+      "path": "gallery/images/R0013962.jpeg",
+      "gitBlob": "5c2ef34439c9bee7c519149b89af4fbf5beef33f"
+    },
+    {
+      "file": "R0014018.jpeg",
+      "path": "gallery/images/R0014018.jpeg",
+      "gitBlob": "c8f5ca38e769e61e4ddb09602cc860c1f91bb591"
+    },
+    {
+      "file": "R0014020.jpeg",
+      "path": "gallery/images/R0014020.jpeg",
+      "gitBlob": "eaffddb40e053d04bd85dc29be24dc5ea9745552"
+    },
+    {
+      "file": "R0014256.jpeg",
+      "path": "gallery/images/R0014256.jpeg",
+      "gitBlob": "bede45f77b6b71b068cad7e8fa3e5586c58b0aa9"
+    },
+    {
+      "file": "R0014355.jpeg",
+      "path": "gallery/images/R0014355.jpeg",
+      "gitBlob": "c4f7ca59c28b15fdb3756869ecec52c183084412"
+    },
+    {
+      "file": "R0014406.jpeg",
+      "path": "gallery/images/R0014406.jpeg",
+      "gitBlob": "11437c564090f12dd6d8da237e826b1f51af7a9d"
+    },
+    {
+      "file": "R0014486.jpeg",
+      "path": "gallery/images/R0014486.jpeg",
+      "gitBlob": "650e5c8e45958b98599f849538b7f3df9fdb0a76"
+    },
+    {
+      "file": "R0014517.jpeg",
+      "path": "gallery/images/R0014517.jpeg",
+      "gitBlob": "9188091f21e47b58e6694cb3c59f0725ba7c427c"
+    },
+    {
+      "file": "R0014848.jpeg",
+      "path": "gallery/images/R0014848.jpeg",
+      "gitBlob": "678d0da9f4c602291e6b83eff21075a81719afb9"
+    },
+    {
+      "file": "R0014855.jpeg",
+      "path": "gallery/images/R0014855.jpeg",
+      "gitBlob": "efae830b8be8dc34c6bc39e87eb6b0704ddaa80e"
+    },
+    {
+      "file": "R0014909.jpeg",
+      "path": "gallery/images/R0014909.jpeg",
+      "gitBlob": "c7bb596b1cd346bea4e901329c78ece992d20f2b"
+    },
+    {
+      "file": "R0014918.jpeg",
+      "path": "gallery/images/R0014918.jpeg",
+      "gitBlob": "2a5b6e271f8336352df542334863ddff7238a1e2"
+    },
+    {
+      "file": "R0014930.jpeg",
+      "path": "gallery/images/R0014930.jpeg",
+      "gitBlob": "bdab067cc7d0764f047b33a543fc2403bbaea4ee"
+    },
+    {
+      "file": "R0015006.jpeg",
+      "path": "gallery/images/R0015006.jpeg",
+      "gitBlob": "e573cdb063be5e52897071a2bf92bd66ce3dddf4"
+    },
+    {
+      "file": "R0015051.jpeg",
+      "path": "gallery/images/R0015051.jpeg",
+      "gitBlob": "feba7d23a091f1dcea9b5a9d5e671281644b92fb"
+    },
+    {
+      "file": "R0015140.jpeg",
+      "path": "gallery/images/R0015140.jpeg",
+      "gitBlob": "9b66317ac53aafcdd03b8e442634232b20f389fe"
+    },
+    {
+      "file": "R0015191.jpeg",
+      "path": "gallery/images/R0015191.jpeg",
+      "gitBlob": "8fb364a5ea63cc31e568a813fdcadf798b4b9455"
+    },
+    {
+      "file": "R0015199.jpeg",
+      "path": "gallery/images/R0015199.jpeg",
+      "gitBlob": "ac4b80c5f11f9a476204c1084249bd632a27c358"
+    },
+    {
+      "file": "R0015226.jpeg",
+      "path": "gallery/images/R0015226.jpeg",
+      "gitBlob": "4868a1ae8647036e0508072e7704ccacfc1bfe34"
+    },
+    {
+      "file": "R0015242.jpeg",
+      "path": "gallery/images/R0015242.jpeg",
+      "gitBlob": "8ee79fc9b54282fe86515ee3588d7f394d9d38e2"
+    },
+    {
+      "file": "R0015290.jpeg",
+      "path": "gallery/images/R0015290.jpeg",
+      "gitBlob": "1e59adc82ddf63fa06bf0f9e87f3a640aae72504"
+    },
+    {
+      "file": "R0015313.jpeg",
+      "path": "gallery/images/R0015313.jpeg",
+      "gitBlob": "84ca4c06fed14b6c69c214b726fe370c6c1ab741"
+    },
+    {
+      "file": "R0015328.jpeg",
+      "path": "gallery/images/R0015328.jpeg",
+      "gitBlob": "9bd74bd4a38a8ea6941222244ea0fc1b54923032"
+    },
+    {
+      "file": "R0015377.jpeg",
+      "path": "gallery/images/R0015377.jpeg",
+      "gitBlob": "d26ea795a72dd543dfc10d2acebfe31c80ea8f42"
+    },
+    {
+      "file": "R0015462.jpeg",
+      "path": "gallery/images/R0015462.jpeg",
+      "gitBlob": "4fe56164a07b6d98c78ed13380bc471be3d68b97"
+    },
+    {
+      "file": "R0015484.jpeg",
+      "path": "gallery/images/R0015484.jpeg",
+      "gitBlob": "013f391c010e37a74f20b03f8b2cb1403b180378"
+    },
+    {
+      "file": "R0015506.jpeg",
+      "path": "gallery/images/R0015506.jpeg",
+      "gitBlob": "d79163b10375523822bd477274dc6fae7694e5e9"
+    },
+    {
+      "file": "R0015627.jpeg",
+      "path": "gallery/images/R0015627.jpeg",
+      "gitBlob": "efb136cc29dd2cd36875cfed6397b5d59483368b"
+    }
+  ]
+}

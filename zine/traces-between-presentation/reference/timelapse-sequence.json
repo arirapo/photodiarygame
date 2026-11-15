@@ -1,0 +1,533 @@
+{
+  "width": 1920,
+  "height": 960,
+  "fps": 24,
+  "seed": 20261115,
+  "order": "Original gallery JSON order",
+  "timing": "Seeded random selection, 0.125 to 2 seconds per image",
+  "audio": false,
+  "rgbFlashes": false,
+  "totalFrames": 983,
+  "durationSeconds": 40.958333333333336,
+  "sequence": [
+    {
+      "file": "R0010140.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 0,
+      "sourceGitBlob": "9010f202ce66cc381b49e1eba7665e113e060c49"
+    },
+    {
+      "file": "R0010284.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 4,
+      "sourceGitBlob": "7c2429b167898e4ebe263c622f23f84e5e5e3093"
+    },
+    {
+      "file": "R0010412.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 12,
+      "sourceGitBlob": "581bc7d461615df3a6203bcf38af4a3fb910ba57"
+    },
+    {
+      "file": "R0010421.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 30,
+      "sourceGitBlob": "a8fbaa25a6b1c1fd853078a145e511173cacc7ae"
+    },
+    {
+      "file": "R0010587.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 42,
+      "sourceGitBlob": "73835b0240c73c454c3de16b58213db3c5458b4e"
+    },
+    {
+      "file": "R0010594.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 54,
+      "sourceGitBlob": "b54fde14d55bfacf4e309c0d58778fa733ef60c7"
+    },
+    {
+      "file": "R0010837.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 60,
+      "sourceGitBlob": "2f0bd29b0e5faf0883523b6882e6eed253412ec3"
+    },
+    {
+      "file": "R0010883.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 72,
+      "sourceGitBlob": "eeb8fd7475eba869395eaab6253d5cda50a6ddf7"
+    },
+    {
+      "file": "R0010979.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 90,
+      "sourceGitBlob": "9d1d9a657b71b2b936bad6325d25d544d692a383"
+    },
+    {
+      "file": "R0011085.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 96,
+      "sourceGitBlob": "f43f084486fd18b12dd84960b4feea0a6260c1fb"
+    },
+    {
+      "file": "R0011097.jpeg",
+      "frames": 48,
+      "seconds": 2.0,
+      "startFrame": 100,
+      "sourceGitBlob": "8cbc100c236d96e2f89da6b05d0c43960c2aca12"
+    },
+    {
+      "file": "R0011162.jpeg",
+      "frames": 48,
+      "seconds": 2.0,
+      "startFrame": 148,
+      "sourceGitBlob": "2efea16ed5c009741d9b64d7eac3d862cea24971"
+    },
+    {
+      "file": "R0011164.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 196,
+      "sourceGitBlob": "0b16ca49ed645d55b0e41232e7ede40925f2b56e"
+    },
+    {
+      "file": "R0011165.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 220,
+      "sourceGitBlob": "1642715f6f022ce5ba00b713addada6cd03575eb"
+    },
+    {
+      "file": "R0011166.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 224,
+      "sourceGitBlob": "bf4527fc454f21a829d82eaacc993533f6d9c346"
+    },
+    {
+      "file": "R0011206.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 236,
+      "sourceGitBlob": "de6e806c43377ace006031449136faef4fa08f41"
+    },
+    {
+      "file": "R0011220.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 239,
+      "sourceGitBlob": "8b2a6580cd89c3cc76e41371dabb101ea3f666ac"
+    },
+    {
+      "file": "R0011345.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 247,
+      "sourceGitBlob": "25639eaaadde94364c2c165479f0bac533517143"
+    },
+    {
+      "file": "R0011411.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 255,
+      "sourceGitBlob": "f4d6aab09e830c5b94215217990661539e0e9e89"
+    },
+    {
+      "file": "R0011606.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 279,
+      "sourceGitBlob": "fe8666417a97744426c33032df905fca8bcee36e"
+    },
+    {
+      "file": "R0011627.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 303,
+      "sourceGitBlob": "8bb2d069ed23f9d911f96c5b438a189e1bf28e8d"
+    },
+    {
+      "file": "R0011661.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 315,
+      "sourceGitBlob": "6c04a533b68d41f8df4a9565359326f508d39f66"
+    },
+    {
+      "file": "R0011702.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 321,
+      "sourceGitBlob": "3b9a7c16c4c77e0128effd609c68425f3de4ac17"
+    },
+    {
+      "file": "R0011738.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 345,
+      "sourceGitBlob": "863927d01444c9f24e2e0ba7731a966e5975941b"
+    },
+    {
+      "file": "R0011739.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 363,
+      "sourceGitBlob": "6d0772e6360bdd7ba8c86627ceea0301acd9ce7d"
+    },
+    {
+      "file": "R0011833.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 369,
+      "sourceGitBlob": "7d8f6f043185bace7d9068b9814d2245b664e8bc"
+    },
+    {
+      "file": "R0011911.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 375,
+      "sourceGitBlob": "9d22a3701000bcf7bb9e28f73c84cde22bd57aeb"
+    },
+    {
+      "file": "R0011953.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 387,
+      "sourceGitBlob": "86e1b3b3aadf832ee36dc5b67fdcdb375e0df79a"
+    },
+    {
+      "file": "R0012000.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 395,
+      "sourceGitBlob": "eaeab3e518598e5d97a4505cfd6fceaa621099b8"
+    },
+    {
+      "file": "R0012003.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 407,
+      "sourceGitBlob": "c1ff796b8a832da6261cf3bc8d294aa486a1b1bf"
+    },
+    {
+      "file": "R0012023.jpeg",
+      "frames": 36,
+      "seconds": 1.5,
+      "startFrame": 410,
+      "sourceGitBlob": "989abe5f2ac62638ff9cf2f1c124439c721a64af"
+    },
+    {
+      "file": "R0012092.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 446,
+      "sourceGitBlob": "fffe0bcf07cbb12d599fd2f0e4dae190c587e027"
+    },
+    {
+      "file": "R0012243.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 450,
+      "sourceGitBlob": "6dbcd9236e53766f20a35936992ac9b43a04b953"
+    },
+    {
+      "file": "R0012250.jpeg",
+      "frames": 36,
+      "seconds": 1.5,
+      "startFrame": 468,
+      "sourceGitBlob": "8a5ef45d0918f8cddb5b9740369ebdd4d7e49fd7"
+    },
+    {
+      "file": "R0012656.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 504,
+      "sourceGitBlob": "4451da710a4e1b2ee9745f65b9f02e9218b8abc4"
+    },
+    {
+      "file": "R0013193.jpeg",
+      "frames": 36,
+      "seconds": 1.5,
+      "startFrame": 510,
+      "sourceGitBlob": "ebe08b27f7e4241a118d434bd304d9527f21527a"
+    },
+    {
+      "file": "R0013254.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 546,
+      "sourceGitBlob": "9322af77366c7d47c5f99f33a995ce2852bdc86c"
+    },
+    {
+      "file": "R0013472.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 564,
+      "sourceGitBlob": "e2ae4de9477a8953ddee6ed5dcc735e30b02c4ba"
+    },
+    {
+      "file": "R0013659.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 567,
+      "sourceGitBlob": "6ed7d3538f15948cb8c2c940783fc80e35d5b434"
+    },
+    {
+      "file": "R0013713.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 571,
+      "sourceGitBlob": "c7afef6bc32adb2c4f940670140df195beb5ae44"
+    },
+    {
+      "file": "R0013738.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 589,
+      "sourceGitBlob": "b5a9d002159e533d9b40b1c77c21461fd7383096"
+    },
+    {
+      "file": "R0013768.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 592,
+      "sourceGitBlob": "00f85fcff93bb4407823b7a7cd6ea9ccb0bd81f8"
+    },
+    {
+      "file": "R0013909.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 604,
+      "sourceGitBlob": "6372ff9dc80e3beba89db7f63348e89ea5746b42"
+    },
+    {
+      "file": "R0013962.jpeg",
+      "frames": 48,
+      "seconds": 2.0,
+      "startFrame": 610,
+      "sourceGitBlob": "5c2ef34439c9bee7c519149b89af4fbf5beef33f"
+    },
+    {
+      "file": "R0014018.jpeg",
+      "frames": 48,
+      "seconds": 2.0,
+      "startFrame": 658,
+      "sourceGitBlob": "c8f5ca38e769e61e4ddb09602cc860c1f91bb591"
+    },
+    {
+      "file": "R0014020.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 706,
+      "sourceGitBlob": "eaffddb40e053d04bd85dc29be24dc5ea9745552"
+    },
+    {
+      "file": "R0014256.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 724,
+      "sourceGitBlob": "bede45f77b6b71b068cad7e8fa3e5586c58b0aa9"
+    },
+    {
+      "file": "R0014355.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 748,
+      "sourceGitBlob": "c4f7ca59c28b15fdb3756869ecec52c183084412"
+    },
+    {
+      "file": "R0014406.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 752,
+      "sourceGitBlob": "11437c564090f12dd6d8da237e826b1f51af7a9d"
+    },
+    {
+      "file": "R0014486.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 755,
+      "sourceGitBlob": "650e5c8e45958b98599f849538b7f3df9fdb0a76"
+    },
+    {
+      "file": "R0014517.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 759,
+      "sourceGitBlob": "9188091f21e47b58e6694cb3c59f0725ba7c427c"
+    },
+    {
+      "file": "R0014848.jpeg",
+      "frames": 18,
+      "seconds": 0.75,
+      "startFrame": 771,
+      "sourceGitBlob": "678d0da9f4c602291e6b83eff21075a81719afb9"
+    },
+    {
+      "file": "R0014855.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 789,
+      "sourceGitBlob": "efae830b8be8dc34c6bc39e87eb6b0704ddaa80e"
+    },
+    {
+      "file": "R0014909.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 795,
+      "sourceGitBlob": "c7bb596b1cd346bea4e901329c78ece992d20f2b"
+    },
+    {
+      "file": "R0014918.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 798,
+      "sourceGitBlob": "2a5b6e271f8336352df542334863ddff7238a1e2"
+    },
+    {
+      "file": "R0014930.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 802,
+      "sourceGitBlob": "bdab067cc7d0764f047b33a543fc2403bbaea4ee"
+    },
+    {
+      "file": "R0015006.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 806,
+      "sourceGitBlob": "e573cdb063be5e52897071a2bf92bd66ce3dddf4"
+    },
+    {
+      "file": "R0015051.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 818,
+      "sourceGitBlob": "feba7d23a091f1dcea9b5a9d5e671281644b92fb"
+    },
+    {
+      "file": "R0015140.jpeg",
+      "frames": 36,
+      "seconds": 1.5,
+      "startFrame": 842,
+      "sourceGitBlob": "9b66317ac53aafcdd03b8e442634232b20f389fe"
+    },
+    {
+      "file": "R0015191.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 878,
+      "sourceGitBlob": "8fb364a5ea63cc31e568a813fdcadf798b4b9455"
+    },
+    {
+      "file": "R0015199.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 886,
+      "sourceGitBlob": "ac4b80c5f11f9a476204c1084249bd632a27c358"
+    },
+    {
+      "file": "R0015226.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 898,
+      "sourceGitBlob": "4868a1ae8647036e0508072e7704ccacfc1bfe34"
+    },
+    {
+      "file": "R0015242.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 902,
+      "sourceGitBlob": "8ee79fc9b54282fe86515ee3588d7f394d9d38e2"
+    },
+    {
+      "file": "R0015290.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 914,
+      "sourceGitBlob": "1e59adc82ddf63fa06bf0f9e87f3a640aae72504"
+    },
+    {
+      "file": "R0015313.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 922,
+      "sourceGitBlob": "84ca4c06fed14b6c69c214b726fe370c6c1ab741"
+    },
+    {
+      "file": "R0015328.jpeg",
+      "frames": 8,
+      "seconds": 0.3333333333333333,
+      "startFrame": 926,
+      "sourceGitBlob": "9bd74bd4a38a8ea6941222244ea0fc1b54923032"
+    },
+    {
+      "file": "R0015377.jpeg",
+      "frames": 3,
+      "seconds": 0.125,
+      "startFrame": 934,
+      "sourceGitBlob": "d26ea795a72dd543dfc10d2acebfe31c80ea8f42"
+    },
+    {
+      "file": "R0015462.jpeg",
+      "frames": 24,
+      "seconds": 1.0,
+      "startFrame": 937,
+      "sourceGitBlob": "4fe56164a07b6d98c78ed13380bc471be3d68b97"
+    },
+    {
+      "file": "R0015484.jpeg",
+      "frames": 6,
+      "seconds": 0.25,
+      "startFrame": 961,
+      "sourceGitBlob": "013f391c010e37a74f20b03f8b2cb1403b180378"
+    },
+    {
+      "file": "R0015506.jpeg",
+      "frames": 12,
+      "seconds": 0.5,
+      "startFrame": 967,
+      "sourceGitBlob": "d79163b10375523822bd477274dc6fae7694e5e9"
+    },
+    {
+      "file": "R0015627.jpeg",
+      "frames": 4,
+      "seconds": 0.16666666666666666,
+      "startFrame": 979,
+      "sourceGitBlob": "efb136cc29dd2cd36875cfed6397b5d59483368b"
+    }
+  ],
+  "frameDurationChoices": [
+    3,
+    4,
+    6,
+    8,
+    12,
+    18,
+    24,
+    36,
+    48
+  ],
+  "durationWeights": [
+    15,
+    15,
+    15,
+    12,
+    12,
+    8,
+    8,
+    5,
+    5
+  ]
+}

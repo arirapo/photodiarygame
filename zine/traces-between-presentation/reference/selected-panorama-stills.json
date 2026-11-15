@@ -1,0 +1,62 @@
+[
+  {
+    "section": "jalki",
+    "image": "assets/panoramas/R0015006.jpeg",
+    "replaces": "assets/images/page-2.jpg",
+    "sourceRepository": "arirapo/photoartist",
+    "sourceCommit": "32d35d02c30e4534731d0b99da1dd63fd59c8dab",
+    "sourcePath": "gallery/images/R0015006.jpeg",
+    "sourceGitBlob": "e573cdb063be5e52897071a2bf92bd66ce3dddf4",
+    "displaySize": [
+      1920,
+      960
+    ],
+    "displaySha256": "fc80563b2424eae47bf9664c6572d5e8de6d117fd227ae7ec9280edf9cf11946",
+    "processing": "Existing 1920x960 presentation copy from the curated panorama series, copied byte-for-byte. No new crop, mask, colour change or image generation."
+  },
+  {
+    "section": "muisti",
+    "image": "assets/panoramas/R0013909.jpeg",
+    "replaces": "assets/images/page-5.jpg",
+    "sourceRepository": "arirapo/photoartist",
+    "sourceCommit": "32d35d02c30e4534731d0b99da1dd63fd59c8dab",
+    "sourcePath": "gallery/images/R0013909.jpeg",
+    "sourceGitBlob": "6372ff9dc80e3beba89db7f63348e89ea5746b42",
+    "displaySize": [
+      1920,
+      960
+    ],
+    "displaySha256": "5801374a75c6d176e2deffd18f591e15abb4097fb4102fb1be78e9490ab70e10",
+    "processing": "Existing 1920x960 presentation copy from the curated panorama series, copied byte-for-byte. No new crop, mask, colour change or image generation."
+  },
+  {
+    "section": "tekijyys",
+    "image": "assets/panoramas/R0013713.jpeg",
+    "replaces": "assets/panoramas/R0015290.jpeg",
+    "sourceRepository": "arirapo/photoartist",
+    "sourceCommit": "32d35d02c30e4534731d0b99da1dd63fd59c8dab",
+    "sourcePath": "gallery/images/R0013713.jpeg",
+    "sourceGitBlob": "c7afef6bc32adb2c4f940670140df195beb5ae44",
+    "displaySize": [
+      1920,
+      960
+    ],
+    "displaySha256": "f97cc76ad92b43cc9af46e88154cf2f7f938827d923f5549743dd8a70dcaa615",
+    "processing": "Existing 1920x960 panorama presentation copy, copied byte-for-byte; selected for a clearer cameo figure. No crop or colour change."
+  },
+  {
+    "section": "tutkimus",
+    "image": "assets/panoramas/R0015191.jpeg",
+    "replaces": "assets/images/page-9.jpg",
+    "sourceRepository": "arirapo/photoartist",
+    "sourceCommit": "32d35d02c30e4534731d0b99da1dd63fd59c8dab",
+    "sourcePath": "gallery/images/R0015191.jpeg",
+    "sourceGitBlob": "8fb364a5ea63cc31e568a813fdcadf798b4b9455",
+    "displaySize": [
+      1920,
+      960
+    ],
+    "displaySha256": "c10a32f4a652f47eb754a0ead8e71caacf2d469f5e978e3609ce85ac903c580e",
+    "processing": "Existing 1920x960 presentation copy from the curated panorama series, copied byte-for-byte. No new crop, mask, colour change or image generation."
+  }
+]

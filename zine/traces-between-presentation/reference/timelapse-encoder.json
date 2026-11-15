@@ -1,0 +1,9 @@
+{
+  "package": "imageio-ffmpeg",
+  "packageVersion": "0.8.1",
+  "source": "https://pypi.org/project/imageio-ffmpeg/0.8.1/#files",
+  "wheel": "imageio_ffmpeg-0.8.1-py3-none-macosx_12_0_arm64.whl",
+  "wheelSha256": "5636d691e36e5274b13fe38182b1f627b2e35dcecc63944012c2470f9484fc45",
+  "binarySha256": "591260c945d0eef150e3bf82b0ef988bd36a9cecc18ff05d6679617159f0a95e",
+  "version": "ffmpeg version 9.0 Copyright (c) 2000-2026 the FFmpeg developers"
+}

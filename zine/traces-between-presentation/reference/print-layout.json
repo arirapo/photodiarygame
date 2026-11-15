@@ -1,0 +1,2794 @@
+{
+  "pageSizeMM": [
+    297,
+    210
+  ],
+  "edition": "2026",
+  "sourceContentSha256": "5e7fd1d7da224befa0704441f690808f2622b4e0914d9f794972606704666dcc",
+  "pages": [
+    {
+      "id": "kansi",
+      "background": "#eeece5",
+      "objects": [
+        {
+          "type": "text",
+          "text": "Traces",
+          "x": 18,
+          "baseline": 54.88413628472222,
+          "width": 114.65553385416665,
+          "font": "serif",
+          "size": 112,
+          "color": "#232620",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Between",
+          "x": 131.7465277777778,
+          "baseline": 109.88413628472222,
+          "width": 151.2534722222222,
+          "font": "italic",
+          "size": 112,
+          "color": "#232620",
+          "role": "title"
+        },
+        {
+          "type": "rule",
+          "x": 20,
+          "y": 146,
+          "width": 257,
+          "color": "#c9c9bd"
+        },
+        {
+          "type": "text",
+          "text": "JÄLKI · TOISTO · AIKA · MUISTI · VÄLISSÄ",
+          "x": 20,
+          "baseline": 153.10602132161458,
+          "width": 57.22276041666665,
+          "font": "sans",
+          "size": 8.2,
+          "color": "#232620",
+          "role": "subtitle"
+        },
+        {
+          "type": "text",
+          "text": "Ari Rapo",
+          "x": 20,
+          "baseline": 177.33645290798611,
+          "width": 27.733018663194443,
+          "font": "serif",
+          "size": 20,
+          "color": "#232620",
+          "role": "author"
+        },
+        {
+          "type": "text",
+          "text": "2026",
+          "x": 20,
+          "baseline": 188.8251505533854,
+          "width": 8.632720269097222,
+          "font": "sans",
+          "size": 11,
+          "color": "#232620",
+          "role": "year"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "01 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "title",
+          "text": "Traces",
+          "x": 18,
+          "y": 24.999999999999996,
+          "width": 114.65553385416665,
+          "height": 38.450021701388884
+        },
+        {
+          "role": "title",
+          "text": "Between",
+          "x": 131.7465277777778,
+          "y": 80.0,
+          "width": 151.2534722222222,
+          "height": 38.450021701388884
+        },
+        {
+          "role": "subtitle",
+          "text": "JÄLKI · TOISTO · AIKA · MUISTI · VÄLISSÄ",
+          "x": 20,
+          "y": 151.0,
+          "width": 57.22276041666665,
+          "height": 2.714804144965277
+        },
+        {
+          "role": "author",
+          "text": "Ari Rapo",
+          "x": 20,
+          "y": 172.0,
+          "width": 27.733018663194443,
+          "height": 6.866075303819444
+        },
+        {
+          "role": "year",
+          "text": "2026",
+          "x": 20,
+          "y": 186.0,
+          "width": 8.632720269097222,
+          "height": 3.641810438368055
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "01 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "jalki",
+      "background": "#eeece5",
+      "objects": [
+        {
+          "type": "text",
+          "text": "01 / JÄLKI",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 11.556211073133678,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#6f7268",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "jälki",
+          "x": 14,
+          "baseline": 22.805615234374997,
+          "width": 24.265185546875003,
+          "font": "serif",
+          "size": 36,
+          "color": "#232620",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Valokuvapäiväkirja – elettyä ja tallennettua aikaa",
+          "x": 14,
+          "baseline": 29.931704508463543,
+          "width": 63.156213921440965,
+          "font": "sans",
+          "size": 8.3,
+          "color": "#232620",
+          "role": "subtitle"
+        },
+        {
+          "type": "image",
+          "file": "assets/print/R0015006.jpeg",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0,
+          "pixelSize": [
+            3000,
+            1500
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Pitkään jatkunut valokuvaustyöskentelyni sai uuden rytmin",
+          "x": 14.0,
+          "baseline": 167.42808607313367,
+          "width": 84.25254896375867,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "vuonna 2010, kun aloitin päivittäisen valokuvapäiväkirjan.",
+          "x": 14.0,
+          "baseline": 171.30864162868923,
+          "width": 83.12080064561631,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Siitä on kasvanut itse kehittämäni Photodiary-menetelmä ja",
+          "x": 106.0,
+          "baseline": 167.42808607313367,
+          "width": 84.95479722764756,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "oma taiteellinen praktiikkani: kuvaamista, kuviin",
+          "x": 106.0,
+          "baseline": 171.30864162868923,
+          "width": 69.72792304144966,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "palaamista ja niiden uudelleentulkintaa.",
+          "x": 106.0,
+          "baseline": 175.1891971842448,
+          "width": 56.99967325846353,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Yksittäisistä hetkistä kertyy vuosien mittainen kuvallinen",
+          "x": 198.0,
+          "baseline": 167.42808607313367,
+          "width": 81.00308322482638,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "jatkumo.",
+          "x": 198.0,
+          "baseline": 171.30864162868923,
+          "width": 12.653008897569443,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Mitä jää jäljelle, kun muistot muuttuvat?",
+          "x": 14,
+          "baseline": 186.46869439019096,
+          "width": 84.1712619357639,
+          "font": "italic",
+          "size": 13,
+          "color": "#232620",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "02 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "01 / JÄLKI",
+          "x": 14,
+          "y": 8.0,
+          "width": 11.556211073133678,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "jälki",
+          "x": 14,
+          "y": 13.2,
+          "width": 24.265185546875003,
+          "height": 12.358935546874996
+        },
+        {
+          "role": "subtitle",
+          "text": "Valokuvapäiväkirja – elettyä ja tallennettua aikaa",
+          "x": 14,
+          "y": 27.8,
+          "width": 63.156213921440965,
+          "height": 2.747911512586805
+        },
+        {
+          "role": "image",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0
+        },
+        {
+          "role": "body",
+          "text": "Pitkään jatkunut valokuvaustyöskentelyni sai uuden rytmin",
+          "x": 14.0,
+          "y": 165.0,
+          "width": 84.25254896375867,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "vuonna 2010, kun aloitin päivittäisen valokuvapäiväkirjan.",
+          "x": 14.0,
+          "y": 168.88055555555556,
+          "width": 83.12080064561631,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Siitä on kasvanut itse kehittämäni Photodiary-menetelmä ja",
+          "x": 106.0,
+          "y": 165.0,
+          "width": 84.95479722764756,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "oma taiteellinen praktiikkani: kuvaamista, kuviin",
+          "x": 106.0,
+          "y": 168.88055555555556,
+          "width": 69.72792304144966,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "palaamista ja niiden uudelleentulkintaa.",
+          "x": 106.0,
+          "y": 172.76111111111112,
+          "width": 56.99967325846353,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Yksittäisistä hetkistä kertyy vuosien mittainen kuvallinen",
+          "x": 198.0,
+          "y": 165.0,
+          "width": 81.00308322482638,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "jatkumo.",
+          "x": 198.0,
+          "y": 168.88055555555556,
+          "width": 12.653008897569443,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "closing",
+          "text": "Mitä jää jäljelle, kun muistot muuttuvat?",
+          "x": 14,
+          "y": 183.0,
+          "width": 84.1712619357639,
+          "height": 4.462948947482638
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "02 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "toisto",
+      "background": "#080908",
+      "objects": [
+        {
+          "type": "text",
+          "text": "02 / TOISTO",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 14.196687282986108,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#a7a99e",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "toisto",
+          "x": 14,
+          "baseline": 30.34113226996528,
+          "width": 44.04554578993055,
+          "font": "italic",
+          "size": 50,
+          "color": "#eeece5",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Photodiary – havaitsemisen ja palaamisen praktiikka",
+          "x": 110,
+          "baseline": 16.131704508463542,
+          "width": 68.0315407986111,
+          "font": "sans",
+          "size": 8.3,
+          "color": "#a7a99e",
+          "role": "subtitle"
+        },
+        {
+          "type": "text",
+          "text": "Kuvaan arjessani itselleni merkityksellisiä asioita.",
+          "x": 110,
+          "baseline": 30.45476833767361,
+          "width": 71.170849609375,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Päivittäinen kuvaaminen on sekä rutiini että",
+          "x": 110,
+          "baseline": 34.40587944878472,
+          "width": 63.519705946180544,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "mahdollisuus yllättyä.",
+          "x": 110,
+          "baseline": 38.356990559895834,
+          "width": 31.56492947048611,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Kuvaamisen rinnalla kulkee palaaminen: mitä huomaan",
+          "x": 110,
+          "baseline": 44.51538519965278,
+          "width": 80.30531358506943,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "kuvassa myöhemmin, mitä muistan ja mitä olen jo",
+          "x": 110,
+          "baseline": 48.466496310763894,
+          "width": 72.2262890625,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "unohtanut?",
+          "x": 110,
+          "baseline": 52.417607421875005,
+          "width": 16.63664171006944,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Kontemplatiivinen kuvaaminen, 360°-kuvaaminen ja",
+          "x": 200,
+          "baseline": 30.45476833767361,
+          "width": 76.28006401909721,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "kuviin jäävä oma hahmoni avaavat erilaisia suhteita",
+          "x": 200,
+          "baseline": 34.40587944878472,
+          "width": 74.12639702690971,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "läsnäoloon.",
+          "x": 200,
+          "baseline": 38.356990559895834,
+          "width": 16.48926052517361,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Toisto ei tuota samanlaisuutta. Jokainen päivä muuttaa",
+          "x": 200,
+          "baseline": 44.51538519965278,
+          "width": 79.49233995225694,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "katsetta.",
+          "x": 200,
+          "baseline": 48.466496310763894,
+          "width": 12.216790907118055,
+          "font": "serif",
+          "size": 9.2,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "image",
+          "file": "assets/print/IMG_1418.jpeg",
+          "x": 14.0,
+          "y": 90.4541015625,
+          "width": 62.0,
+          "height": 61.091796875,
+          "pixelSize": [
+            2048,
+            2018
+          ]
+        },
+        {
+          "type": "image",
+          "file": "assets/print/IMG_2924.jpeg",
+          "x": 86.0,
+          "y": 80.74072265625,
+          "width": 82.0,
+          "height": 80.5185546875,
+          "pixelSize": [
+            2048,
+            2011
+          ]
+        },
+        {
+          "type": "image",
+          "file": "assets/print/IMG_2835.jpeg",
+          "x": 178.0,
+          "y": 72.0009765625,
+          "width": 100.0,
+          "height": 97.998046875,
+          "pixelSize": [
+            2048,
+            2007
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Kuvaan jää jälki.",
+          "x": 92,
+          "baseline": 185.5359849717882,
+          "width": 46.211994086371526,
+          "font": "italic",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "Muisto jatkaa matkaansa.",
+          "x": 92,
+          "baseline": 192.94431830512153,
+          "width": 70.87439914279514,
+          "font": "italic",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "03 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "02 / TOISTO",
+          "x": 14,
+          "y": 8.0,
+          "width": 14.196687282986108,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "toisto",
+          "x": 14,
+          "y": 17.0,
+          "width": 44.04554578993055,
+          "height": 17.16518825954861
+        },
+        {
+          "role": "subtitle",
+          "text": "Photodiary – havaitsemisen ja palaamisen praktiikka",
+          "x": 110,
+          "y": 14.0,
+          "width": 68.0315407986111,
+          "height": 2.747911512586805
+        },
+        {
+          "role": "body",
+          "text": "Kuvaan arjessani itselleni merkityksellisiä asioita.",
+          "x": 110,
+          "y": 28.0,
+          "width": 71.170849609375,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "Päivittäinen kuvaaminen on sekä rutiini että",
+          "x": 110,
+          "y": 31.951111111111107,
+          "width": 63.519705946180544,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "mahdollisuus yllättyä.",
+          "x": 110,
+          "y": 35.90222222222222,
+          "width": 31.56492947048611,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "Kuvaamisen rinnalla kulkee palaaminen: mitä huomaan",
+          "x": 110,
+          "y": 42.06061686197917,
+          "width": 80.30531358506943,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "kuvassa myöhemmin, mitä muistan ja mitä olen jo",
+          "x": 110,
+          "y": 46.01172797309028,
+          "width": 72.2262890625,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "unohtanut?",
+          "x": 110,
+          "y": 49.96283908420139,
+          "width": 16.63664171006944,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "Kontemplatiivinen kuvaaminen, 360°-kuvaaminen ja",
+          "x": 200,
+          "y": 28.0,
+          "width": 76.28006401909721,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "kuviin jäävä oma hahmoni avaavat erilaisia suhteita",
+          "x": 200,
+          "y": 31.951111111111107,
+          "width": 74.12639702690971,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "läsnäoloon.",
+          "x": 200,
+          "y": 35.90222222222222,
+          "width": 16.48926052517361,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "Toisto ei tuota samanlaisuutta. Jokainen päivä muuttaa",
+          "x": 200,
+          "y": 42.06061686197917,
+          "width": 79.49233995225694,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "body",
+          "text": "katsetta.",
+          "x": 200,
+          "y": 46.01172797309028,
+          "width": 12.216790907118055,
+          "height": 3.158394639756944
+        },
+        {
+          "role": "image",
+          "x": 14.0,
+          "y": 90.4541015625,
+          "width": 62.0,
+          "height": 61.091796875
+        },
+        {
+          "role": "image",
+          "x": 86.0,
+          "y": 80.74072265625,
+          "width": 82.0,
+          "height": 80.5185546875
+        },
+        {
+          "role": "image",
+          "x": 178.0,
+          "y": 72.0009765625,
+          "width": 100.0,
+          "height": 97.998046875
+        },
+        {
+          "role": "closing",
+          "text": "Kuvaan jää jälki.",
+          "x": 92,
+          "y": 181.0,
+          "width": 46.211994086371526,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "closing",
+          "text": "Muisto jatkaa matkaansa.",
+          "x": 92,
+          "y": 188.40833333333333,
+          "width": 70.87439914279514,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "03 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "aika",
+      "background": "#10120f",
+      "objects": [
+        {
+          "type": "text",
+          "text": "03 / AIKA",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 10.581472981770832,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#a7a99e",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "aika",
+          "x": 14,
+          "baseline": 22.805615234374997,
+          "width": 23.322607421875002,
+          "font": "serif",
+          "size": 36,
+          "color": "#eeece5",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Traces Between – nopeuden ja hitauden välissä",
+          "x": 14,
+          "baseline": 29.931704508463543,
+          "width": 62.34413601345485,
+          "font": "sans",
+          "size": 8.3,
+          "color": "#eeece5",
+          "role": "subtitle"
+        },
+        {
+          "type": "image",
+          "file": "assets/print/R0010140.jpeg",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0,
+          "pixelSize": [
+            3000,
+            1500
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Vuosien kuvavirta tiivistyy hetkiksi.",
+          "x": 14.0,
+          "baseline": 167.42808607313367,
+          "width": 50.450581190321174,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Yksittäinen kuva kutsuu pysähtymään.",
+          "x": 106.0,
+          "baseline": 167.42808607313367,
+          "width": 54.79887736002604,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Sattuman hyväksyminen ja hyödyntäminen avaavat uusia",
+          "x": 198.0,
+          "baseline": 167.42808607313367,
+          "width": 81.45609605577256,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "kohtaamisia kuvien kanssa.",
+          "x": 198.0,
+          "baseline": 171.30864162868923,
+          "width": 38.965373535156246,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Sama aineisto, erilainen aika, erilainen kokemus.",
+          "x": 14,
+          "baseline": 186.46869439019096,
+          "width": 101.53712700737846,
+          "font": "italic",
+          "size": 13,
+          "color": "#eeece5",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "04 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "03 / AIKA",
+          "x": 14,
+          "y": 8.0,
+          "width": 10.581472981770832,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "aika",
+          "x": 14,
+          "y": 13.2,
+          "width": 23.322607421875002,
+          "height": 12.358935546874996
+        },
+        {
+          "role": "subtitle",
+          "text": "Traces Between – nopeuden ja hitauden välissä",
+          "x": 14,
+          "y": 27.8,
+          "width": 62.34413601345485,
+          "height": 2.747911512586805
+        },
+        {
+          "role": "image",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0
+        },
+        {
+          "role": "body",
+          "text": "Vuosien kuvavirta tiivistyy hetkiksi.",
+          "x": 14.0,
+          "y": 165.0,
+          "width": 50.450581190321174,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Yksittäinen kuva kutsuu pysähtymään.",
+          "x": 106.0,
+          "y": 165.0,
+          "width": 54.79887736002604,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Sattuman hyväksyminen ja hyödyntäminen avaavat uusia",
+          "x": 198.0,
+          "y": 165.0,
+          "width": 81.45609605577256,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "kohtaamisia kuvien kanssa.",
+          "x": 198.0,
+          "y": 168.88055555555556,
+          "width": 38.965373535156246,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "closing",
+          "text": "Sama aineisto, erilainen aika, erilainen kokemus.",
+          "x": 14,
+          "y": 183.0,
+          "width": 101.53712700737846,
+          "height": 4.462948947482638
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "04 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "muisti",
+      "background": "#eeece5",
+      "objects": [
+        {
+          "type": "text",
+          "text": "04 / MUISTI",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 13.361372205946179,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#6f7268",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "muisti",
+          "x": 14,
+          "baseline": 22.805615234374997,
+          "width": 35.80556640625,
+          "font": "serif",
+          "size": 36,
+          "color": "#232620",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Valokuva muistamisen mahdollisuutena",
+          "x": 14,
+          "baseline": 29.931704508463543,
+          "width": 51.43112426757812,
+          "font": "sans",
+          "size": 8.3,
+          "color": "#232620",
+          "role": "subtitle"
+        },
+        {
+          "type": "image",
+          "file": "assets/print/R0013909.jpeg",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0,
+          "pixelSize": [
+            3000,
+            1500
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Jotkut kuvat palauttavat mieleen kokonaisen kokemuksen.",
+          "x": 14.0,
+          "baseline": 167.42808607313367,
+          "width": 83.16782619900172,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Toisista tiedän vain, että olen ollut siellä.",
+          "x": 106.0,
+          "baseline": 167.42808607313367,
+          "width": 57.82262044270833,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Muistaminen on kehollista, muuttuvaa ja ennakoimatonta.",
+          "x": 198.0,
+          "baseline": 167.42808607313367,
+          "width": 83.21014919704861,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Kuva ei vain kerro menneestä. Se synnyttää uusia kokemuksia nykyhetkessä.",
+          "x": 14,
+          "baseline": 186.46869439019096,
+          "width": 158.66645643446182,
+          "font": "italic",
+          "size": 13,
+          "color": "#232620",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "05 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "04 / MUISTI",
+          "x": 14,
+          "y": 8.0,
+          "width": 13.361372205946179,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "muisti",
+          "x": 14,
+          "y": 13.2,
+          "width": 35.80556640625,
+          "height": 12.358935546874996
+        },
+        {
+          "role": "subtitle",
+          "text": "Valokuva muistamisen mahdollisuutena",
+          "x": 14,
+          "y": 27.8,
+          "width": 51.43112426757812,
+          "height": 2.747911512586805
+        },
+        {
+          "role": "image",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0
+        },
+        {
+          "role": "body",
+          "text": "Jotkut kuvat palauttavat mieleen kokonaisen kokemuksen.",
+          "x": 14.0,
+          "y": 165.0,
+          "width": 83.16782619900172,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Toisista tiedän vain, että olen ollut siellä.",
+          "x": 106.0,
+          "y": 165.0,
+          "width": 57.82262044270833,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Muistaminen on kehollista, muuttuvaa ja ennakoimatonta.",
+          "x": 198.0,
+          "y": 165.0,
+          "width": 83.21014919704861,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "closing",
+          "text": "Kuva ei vain kerro menneestä. Se synnyttää uusia kokemuksia nykyhetkessä.",
+          "x": 14,
+          "y": 183.0,
+          "width": 158.66645643446182,
+          "height": 4.462948947482638
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "05 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "valissa",
+      "background": "#080908",
+      "objects": [
+        {
+          "type": "text",
+          "text": "05 / VÄLISSÄ",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 15.315740424262149,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#a7a99e",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "välissä",
+          "x": 14,
+          "baseline": 26.406083170572916,
+          "width": 40.55618082682291,
+          "font": "serif",
+          "size": 39,
+          "color": "#eeece5",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Taiteellinen tutkimus ei pääty",
+          "x": 14,
+          "baseline": 44.535984971788196,
+          "width": 78.90388319227431,
+          "font": "serif",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "subtitle"
+        },
+        {
+          "type": "text",
+          "text": "valmiiseen teokseen",
+          "x": 14,
+          "baseline": 51.59154052734375,
+          "width": 53.23998887803819,
+          "font": "serif",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "subtitle"
+        },
+        {
+          "type": "text",
+          "text": "Dokumentoinnista on tullut tietoista taiteellista tutkimista.",
+          "x": 14,
+          "baseline": 62.55994601779514,
+          "width": 91.84796820746527,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Kuvien kuratointi, sattuma ja katsojan osallistuminen",
+          "x": 14,
+          "baseline": 68.99298366970486,
+          "width": 83.5952419704861,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "synnyttävät uusia merkityksiä.",
+          "x": 14,
+          "baseline": 73.40270589192707,
+          "width": 47.53370496961805,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Traces Between jatkaa muotoutumistaan installaatioina,",
+          "x": 14,
+          "baseline": 79.8357435438368,
+          "width": 87.60533311631943,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "verkkoteoksina ja uusina kokeiluina.",
+          "x": 14,
+          "baseline": 84.24546576605903,
+          "width": 56.861300998263886,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "image",
+          "file": "assets/images/page-6.jpg",
+          "x": 124.06201171875,
+          "y": 34.0,
+          "width": 157.8759765625,
+          "height": 155.0,
+          "pixelSize": [
+            2086,
+            2048
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Jälki jää. Sen merkitys ei pysähdy.",
+          "x": 14,
+          "baseline": 155.5359849717882,
+          "width": 93.48697238498264,
+          "font": "italic",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "06 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "05 / VÄLISSÄ",
+          "x": 14,
+          "y": 8.0,
+          "width": 15.315740424262149,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "välissä",
+          "x": 14,
+          "y": 16.0,
+          "width": 40.55618082682291,
+          "height": 13.388846842447915
+        },
+        {
+          "role": "subtitle",
+          "text": "Taiteellinen tutkimus ei pääty",
+          "x": 14,
+          "y": 40.0,
+          "width": 78.90388319227431,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "subtitle",
+          "text": "valmiiseen teokseen",
+          "x": 14,
+          "y": 47.05555555555556,
+          "width": 53.23998887803819,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "body",
+          "text": "Dokumentoinnista on tullut tietoista taiteellista tutkimista.",
+          "x": 14,
+          "y": 59.891719563802084,
+          "width": 91.84796820746527,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "body",
+          "text": "Kuvien kuratointi, sattuma ja katsojan osallistuminen",
+          "x": 14,
+          "y": 66.3247572157118,
+          "width": 83.5952419704861,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "body",
+          "text": "synnyttävät uusia merkityksiä.",
+          "x": 14,
+          "y": 70.73447943793401,
+          "width": 47.53370496961805,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "body",
+          "text": "Traces Between jatkaa muotoutumistaan installaatioina,",
+          "x": 14,
+          "y": 77.16751708984374,
+          "width": 87.60533311631943,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "body",
+          "text": "verkkoteoksina ja uusina kokeiluina.",
+          "x": 14,
+          "y": 81.57723931206597,
+          "width": 56.861300998263886,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "image",
+          "x": 124.06201171875,
+          "y": 34.0,
+          "width": 157.8759765625,
+          "height": 155.0
+        },
+        {
+          "role": "closing",
+          "text": "Jälki jää. Sen merkitys ei pysähdy.",
+          "x": 14,
+          "y": 151.0,
+          "width": 93.48697238498264,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "06 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "tekijyys",
+      "background": "#eeece5",
+      "objects": [
+        {
+          "type": "text",
+          "text": "06 / TEKIJYYDEN JÄLJET",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 29.787604709201382,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#6f7268",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "tekijyyden jäljet",
+          "x": 14,
+          "baseline": 22.271969943576387,
+          "width": 84.27151421440972,
+          "font": "serif",
+          "size": 34,
+          "color": "#232620",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Valokuvan, liikkuvan kuvan ja teknologian välillä",
+          "x": 14,
+          "baseline": 29.931704508463543,
+          "width": 62.17685940212673,
+          "font": "sans",
+          "size": 8.3,
+          "color": "#232620",
+          "role": "subtitle"
+        },
+        {
+          "type": "image",
+          "file": "assets/print/R0013713.jpeg",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0,
+          "pixelSize": [
+            3000,
+            1500
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Aloitin säännöllisen valokuvaamisen",
+          "x": 14.0,
+          "baseline": 167.3480392795139,
+          "width": 50.14860134548611,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "teini-ikäisenä. Vuonna 1977 hankkimani",
+          "x": 14.0,
+          "baseline": 171.08748372395834,
+          "width": 55.211513671875,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "järjestelmäkamera oli yksi alku pitkälle",
+          "x": 14.0,
+          "baseline": 174.8269281684028,
+          "width": 53.61836371527778,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "suhteelle kuvaan. Vuonna 1984 perustin",
+          "x": 14.0,
+          "baseline": 178.56637261284723,
+          "width": 55.014454210069445,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "oman yrityksen.",
+          "x": 14.0,
+          "baseline": 182.30581705729168,
+          "width": 22.040342881944444,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Työskentelyni laajeni liikkuvaan kuvaan,",
+          "x": 83.0,
+          "baseline": 167.3480392795139,
+          "width": 55.720836588541665,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "digitaaliseen julkaisemiseen ja",
+          "x": 83.0,
+          "baseline": 171.08748372395834,
+          "width": 41.70687717013889,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "kuvankäsittelyyn. Välineiden muuttuessa",
+          "x": 83.0,
+          "baseline": 174.8269281684028,
+          "width": 56.39993381076389,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "avautui uusia tapoja rakentaa, yhdistää ja",
+          "x": 83.0,
+          "baseline": 178.56637261284723,
+          "width": 56.81830620659722,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "esittää kuvia.",
+          "x": 83.0,
+          "baseline": 182.30581705729168,
+          "width": 18.07338433159722,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Vuonna 2010 päivittäinen",
+          "x": 152.0,
+          "baseline": 167.3480392795139,
+          "width": 35.622287326388886,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "valokuvapäiväkirja ja pedagogiset kokeilut",
+          "x": 152.0,
+          "baseline": 171.08748372395834,
+          "width": 58.04310655381945,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "avasivat uuden suunnan. Niistä kasvoi",
+          "x": 152.0,
+          "baseline": 174.8269281684028,
+          "width": 52.47087131076388,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Photodiary-praktiikkani. Vuodesta 2016",
+          "x": 152.0,
+          "baseline": 178.56637261284723,
+          "width": 54.987169053819436,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "lähtien 360-panoraamat ovat laajentaneet",
+          "x": 152.0,
+          "baseline": 182.30581705729168,
+          "width": 57.627765842013886,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "tätä kuvallista jatkumoa.",
+          "x": 152.0,
+          "baseline": 186.04526150173612,
+          "width": 33.78811848958333,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Traces Betweenissä nämä polut kohtaavat:",
+          "x": 221.0,
+          "baseline": 167.3480392795139,
+          "width": 58.26896701388888,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "pitkä valokuvaushistoria, liikkuva kuva,",
+          "x": 221.0,
+          "baseline": 171.08748372395834,
+          "width": 54.279270833333335,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "tekniset kokeilut ja oman tekemisen",
+          "x": 221.0,
+          "baseline": 174.8269281684028,
+          "width": 49.37703776041666,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "tutkiminen.",
+          "x": 221.0,
+          "baseline": 178.56637261284723,
+          "width": 16.15129665798611,
+          "font": "serif",
+          "size": 8.8,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "rule",
+          "x": 14,
+          "y": 190,
+          "width": 269,
+          "color": "#c9c9bd"
+        },
+        {
+          "type": "text",
+          "text": "1977",
+          "x": 30.947276136610245,
+          "baseline": 197.13575100368922,
+          "width": 10.938781060112847,
+          "font": "serif",
+          "size": 15.5,
+          "color": "#232620",
+          "role": "chronology"
+        },
+        {
+          "type": "text",
+          "text": "1984",
+          "x": 75.3534176296658,
+          "baseline": 197.13575100368922,
+          "width": 11.793164740668402,
+          "font": "serif",
+          "size": 15.5,
+          "color": "#232620",
+          "role": "chronology"
+        },
+        {
+          "type": "text",
+          "text": "1991",
+          "x": 120.63930731879341,
+          "baseline": 197.13575100368922,
+          "width": 10.88805202907986,
+          "font": "serif",
+          "size": 15.5,
+          "color": "#232620",
+          "role": "chronology"
+        },
+        {
+          "type": "text",
+          "text": "2010",
+          "x": 164.85855238172743,
+          "baseline": 197.13575100368922,
+          "width": 12.116228569878471,
+          "font": "serif",
+          "size": 15.5,
+          "color": "#232620",
+          "role": "chronology"
+        },
+        {
+          "type": "text",
+          "text": "2016",
+          "x": 209.82271321614584,
+          "baseline": 197.13575100368922,
+          "width": 11.854573567708332,
+          "font": "serif",
+          "size": 15.5,
+          "color": "#232620",
+          "role": "chronology"
+        },
+        {
+          "type": "text",
+          "text": "2026",
+          "x": 254.30361328125,
+          "baseline": 197.13575100368922,
+          "width": 12.559440104166665,
+          "font": "serif",
+          "size": 15.5,
+          "color": "#232620",
+          "role": "chronology"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "07 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "06 / TEKIJYYDEN JÄLJET",
+          "x": 14,
+          "y": 8.0,
+          "width": 29.787604709201382,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "tekijyyden jäljet",
+          "x": 14,
+          "y": 13.199999999999998,
+          "width": 84.27151421440972,
+          "height": 11.672328016493056
+        },
+        {
+          "role": "subtitle",
+          "text": "Valokuvan, liikkuvan kuvan ja teknologian välillä",
+          "x": 14,
+          "y": 27.8,
+          "width": 62.17685940212673,
+          "height": 2.747911512586805
+        },
+        {
+          "role": "image",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0
+        },
+        {
+          "role": "body",
+          "text": "Aloitin säännöllisen valokuvaamisen",
+          "x": 14.0,
+          "y": 165.0,
+          "width": 50.14860134548611,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "teini-ikäisenä. Vuonna 1977 hankkimani",
+          "x": 14.0,
+          "y": 168.73944444444444,
+          "width": 55.211513671875,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "järjestelmäkamera oli yksi alku pitkälle",
+          "x": 14.0,
+          "y": 172.4788888888889,
+          "width": 53.61836371527778,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "suhteelle kuvaan. Vuonna 1984 perustin",
+          "x": 14.0,
+          "y": 176.21833333333333,
+          "width": 55.014454210069445,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "oman yrityksen.",
+          "x": 14.0,
+          "y": 179.95777777777778,
+          "width": 22.040342881944444,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "Työskentelyni laajeni liikkuvaan kuvaan,",
+          "x": 83.0,
+          "y": 165.0,
+          "width": 55.720836588541665,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "digitaaliseen julkaisemiseen ja",
+          "x": 83.0,
+          "y": 168.73944444444444,
+          "width": 41.70687717013889,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "kuvankäsittelyyn. Välineiden muuttuessa",
+          "x": 83.0,
+          "y": 172.4788888888889,
+          "width": 56.39993381076389,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "avautui uusia tapoja rakentaa, yhdistää ja",
+          "x": 83.0,
+          "y": 176.21833333333333,
+          "width": 56.81830620659722,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "esittää kuvia.",
+          "x": 83.0,
+          "y": 179.95777777777778,
+          "width": 18.07338433159722,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "Vuonna 2010 päivittäinen",
+          "x": 152.0,
+          "y": 165.0,
+          "width": 35.622287326388886,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "valokuvapäiväkirja ja pedagogiset kokeilut",
+          "x": 152.0,
+          "y": 168.73944444444444,
+          "width": 58.04310655381945,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "avasivat uuden suunnan. Niistä kasvoi",
+          "x": 152.0,
+          "y": 172.4788888888889,
+          "width": 52.47087131076388,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "Photodiary-praktiikkani. Vuodesta 2016",
+          "x": 152.0,
+          "y": 176.21833333333333,
+          "width": 54.987169053819436,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "lähtien 360-panoraamat ovat laajentaneet",
+          "x": 152.0,
+          "y": 179.95777777777778,
+          "width": 57.627765842013886,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "tätä kuvallista jatkumoa.",
+          "x": 152.0,
+          "y": 183.69722222222222,
+          "width": 33.78811848958333,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "Traces Betweenissä nämä polut kohtaavat:",
+          "x": 221.0,
+          "y": 165.0,
+          "width": 58.26896701388888,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "pitkä valokuvaushistoria, liikkuva kuva,",
+          "x": 221.0,
+          "y": 168.73944444444444,
+          "width": 54.279270833333335,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "tekniset kokeilut ja oman tekemisen",
+          "x": 221.0,
+          "y": 172.4788888888889,
+          "width": 49.37703776041666,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "body",
+          "text": "tutkiminen.",
+          "x": 221.0,
+          "y": 176.21833333333333,
+          "width": 16.15129665798611,
+          "height": 3.0210731336805554
+        },
+        {
+          "role": "chronology",
+          "text": "1977",
+          "x": 30.947276136610245,
+          "y": 193.0,
+          "width": 10.938781060112847,
+          "height": 5.321208360460069
+        },
+        {
+          "role": "chronology",
+          "text": "1984",
+          "x": 75.3534176296658,
+          "y": 193.0,
+          "width": 11.793164740668402,
+          "height": 5.321208360460069
+        },
+        {
+          "role": "chronology",
+          "text": "1991",
+          "x": 120.63930731879341,
+          "y": 193.0,
+          "width": 10.88805202907986,
+          "height": 5.321208360460069
+        },
+        {
+          "role": "chronology",
+          "text": "2010",
+          "x": 164.85855238172743,
+          "y": 193.0,
+          "width": 12.116228569878471,
+          "height": 5.321208360460069
+        },
+        {
+          "role": "chronology",
+          "text": "2016",
+          "x": 209.82271321614584,
+          "y": 193.0,
+          "width": 11.854573567708332,
+          "height": 5.321208360460069
+        },
+        {
+          "role": "chronology",
+          "text": "2026",
+          "x": 254.30361328125,
+          "y": 193.0,
+          "width": 12.559440104166665,
+          "height": 5.321208360460069
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "07 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "teosperhe",
+      "background": "#151811",
+      "objects": [
+        {
+          "type": "text",
+          "text": "07 / TEOSPERHE",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 20.322738850911456,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#a7a99e",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "teosperhe",
+          "x": 14,
+          "baseline": 26.406083170572916,
+          "width": 59.608247884114576,
+          "font": "italic",
+          "size": 39,
+          "color": "#eeece5",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Yksi aineisto, monta kohtaamisen",
+          "x": 14,
+          "baseline": 44.535984971788196,
+          "width": 89.35509711371527,
+          "font": "serif",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "subtitle"
+        },
+        {
+          "type": "text",
+          "text": "tapaa.",
+          "x": 14,
+          "baseline": 51.59154052734375,
+          "width": 16.179029676649304,
+          "font": "serif",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "subtitle"
+        },
+        {
+          "type": "text",
+          "text": "Fyysinen installaatio, liikkuva kuva, satunnaiset kuvalliset",
+          "x": 14,
+          "baseline": 62.55994601779514,
+          "width": 90.32695855034721,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "jäljet, osallistava verkkoympäristö ja jatkokehitys.",
+          "x": 14,
+          "baseline": 66.96966824001737,
+          "width": 77.50948079427083,
+          "font": "serif",
+          "size": 10,
+          "color": "#eeece5",
+          "role": "body"
+        },
+        {
+          "type": "image",
+          "file": "assets/images/teosperhe-katseluaukko.png",
+          "x": 125.5,
+          "y": 34.0,
+          "width": 155.0,
+          "height": 155.0,
+          "pixelSize": [
+            1254,
+            1254
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Teos ei ole yksi pysyvä muoto vaan",
+          "x": 14,
+          "baseline": 155.5359849717882,
+          "width": 94.59680989583332,
+          "font": "italic",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "muuntuva kokonaisuus.",
+          "x": 14,
+          "baseline": 162.94431830512153,
+          "width": 64.5667738172743,
+          "font": "italic",
+          "size": 17,
+          "color": "#eeece5",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "08 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#a7a99e",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "07 / TEOSPERHE",
+          "x": 14,
+          "y": 8.0,
+          "width": 20.322738850911456,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "teosperhe",
+          "x": 14,
+          "y": 16.0,
+          "width": 59.608247884114576,
+          "height": 13.388846842447915
+        },
+        {
+          "role": "subtitle",
+          "text": "Yksi aineisto, monta kohtaamisen",
+          "x": 14,
+          "y": 40.0,
+          "width": 89.35509711371527,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "subtitle",
+          "text": "tapaa.",
+          "x": 14,
+          "y": 47.05555555555556,
+          "width": 16.179029676649304,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "body",
+          "text": "Fyysinen installaatio, liikkuva kuva, satunnaiset kuvalliset",
+          "x": 14,
+          "y": 59.891719563802084,
+          "width": 90.32695855034721,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "body",
+          "text": "jäljet, osallistava verkkoympäristö ja jatkokehitys.",
+          "x": 14,
+          "y": 64.30144178602431,
+          "width": 77.50948079427083,
+          "height": 3.433037651909722
+        },
+        {
+          "role": "image",
+          "x": 125.5,
+          "y": 34.0,
+          "width": 155.0,
+          "height": 155.0
+        },
+        {
+          "role": "closing",
+          "text": "Teos ei ole yksi pysyvä muoto vaan",
+          "x": 14,
+          "y": 151.0,
+          "width": 94.59680989583332,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "closing",
+          "text": "muuntuva kokonaisuus.",
+          "x": 14,
+          "y": 158.40833333333333,
+          "width": 64.5667738172743,
+          "height": 5.836164008246528
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "08 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    },
+    {
+      "id": "tutkimus",
+      "background": "#eeece5",
+      "objects": [
+        {
+          "type": "text",
+          "text": "08 / TAITEELLINEN TUTKIMUS",
+          "x": 14,
+          "baseline": 9.823506266276041,
+          "width": 35.90876424153645,
+          "font": "sans",
+          "size": 7.1,
+          "color": "#6f7268",
+          "role": "marker"
+        },
+        {
+          "type": "text",
+          "text": "taiteellinen tutkimus",
+          "x": 14,
+          "baseline": 22.271969943576387,
+          "width": 110.44493815104165,
+          "font": "serif",
+          "size": 34,
+          "color": "#232620",
+          "role": "title"
+        },
+        {
+          "type": "text",
+          "text": "Muisti, aika, päiväkirjamaisuus ja oma tekijyys.",
+          "x": 14,
+          "baseline": 29.931704508463543,
+          "width": 60.37112982855902,
+          "font": "sans",
+          "size": 8.3,
+          "color": "#232620",
+          "role": "subtitle"
+        },
+        {
+          "type": "image",
+          "file": "assets/print/R0015191.jpeg",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0,
+          "pixelSize": [
+            3000,
+            1500
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Tutkin, miten pitkäkestoinen valokuvapäiväkirja muovaa",
+          "x": 14.0,
+          "baseline": 167.42808607313367,
+          "width": 80.79617078993056,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "kokemustani ajasta, muistamisesta ja omasta",
+          "x": 14.0,
+          "baseline": 171.30864162868923,
+          "width": 63.987670491536456,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "tekijyydestäni.",
+          "x": 14.0,
+          "baseline": 175.1891971842448,
+          "width": 20.62854275173611,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Tutkiminen tapahtuu kuvaamalla, palaamalla aineistoon ja",
+          "x": 106.0,
+          "baseline": 167.42808607313367,
+          "width": 83.45624959309896,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "muuntamalla sitä teoksiksi. Oma kokemus, taiteelliset",
+          "x": 106.0,
+          "baseline": 171.30864162868923,
+          "width": 76.50587280273437,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "kokeilut ja teoria käyvät vuoropuhelua.",
+          "x": 106.0,
+          "baseline": 175.1891971842448,
+          "width": 55.25502522786458,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Keskeiseksi nousee kuvien muuttuva merkitys: niihin",
+          "x": 198.0,
+          "baseline": 167.42808607313367,
+          "width": 75.46504055447049,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "palaaminen rakentaa uusia suhteita menneen kokemuksen",
+          "x": 198.0,
+          "baseline": 171.30864162868923,
+          "width": 83.22739189995659,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "ja nykyhetken välille.",
+          "x": 198.0,
+          "baseline": 175.1891971842448,
+          "width": 29.901981879340276,
+          "font": "serif",
+          "size": 9.1,
+          "color": "#232620",
+          "role": "body"
+        },
+        {
+          "type": "text",
+          "text": "Samalla tulen tietoisemmaksi omasta tavastani katsoa.",
+          "x": 14,
+          "baseline": 186.46869439019096,
+          "width": 114.01233452690971,
+          "font": "italic",
+          "size": 13,
+          "color": "#232620",
+          "role": "closing"
+        },
+        {
+          "type": "text",
+          "text": "VALOKUVAPÄIVÄKIRJAN TUTKIMUSJATKUMO",
+          "x": 14,
+          "baseline": 191.74645670572917,
+          "width": 52.918458116319435,
+          "font": "sans",
+          "size": 6.8,
+          "color": "#6f7268",
+          "role": "research-label"
+        },
+        {
+          "type": "text",
+          "text": "2013 · Oulun yliopisto",
+          "x": 14.0,
+          "baseline": 195.849189453125,
+          "width": 24.567802734375,
+          "font": "sans",
+          "size": 7.2,
+          "color": "#6f7268",
+          "role": "research-year"
+        },
+        {
+          "type": "text",
+          "text": "Minäpystyvyys ja reflektio",
+          "x": 14.0,
+          "baseline": 199.9612634277344,
+          "width": 32.97566162109374,
+          "font": "serif",
+          "size": 8.1,
+          "color": "#232620",
+          "role": "research-topic"
+        },
+        {
+          "type": "text",
+          "text": "2021 · Xamk",
+          "x": 103.66666666666667,
+          "baseline": 195.849189453125,
+          "width": 14.400361328125001,
+          "font": "sans",
+          "size": 7.2,
+          "color": "#6f7268",
+          "role": "research-year"
+        },
+        {
+          "type": "text",
+          "text": "Yhteisöllisyys ja palvelumuotoilu",
+          "x": 103.66666666666667,
+          "baseline": 199.9612634277344,
+          "width": 41.48677001953124,
+          "font": "serif",
+          "size": 8.1,
+          "color": "#232620",
+          "role": "research-topic"
+        },
+        {
+          "type": "text",
+          "text": "2026 · Turun ammattikorkeakoulu",
+          "x": 193.33333333333334,
+          "baseline": 195.849189453125,
+          "width": 37.977216796875,
+          "font": "sans",
+          "size": 7.2,
+          "color": "#6f7268",
+          "role": "research-year"
+        },
+        {
+          "type": "text",
+          "text": "Aika, muisti ja tekijyys",
+          "x": 193.33333333333334,
+          "baseline": 199.9612634277344,
+          "width": 28.510817871093746,
+          "font": "serif",
+          "size": 8.1,
+          "color": "#232620",
+          "role": "research-topic"
+        },
+        {
+          "type": "text",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "baseline": 203.11804077148437,
+          "width": 40.13739501953124,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        },
+        {
+          "type": "text",
+          "text": "09 / 09",
+          "x": 276.20336059570315,
+          "baseline": 203.11804077148437,
+          "width": 6.796639404296875,
+          "font": "sans",
+          "size": 6.3,
+          "color": "#6f7268",
+          "role": "footer"
+        }
+      ],
+      "bounds": [
+        {
+          "role": "marker",
+          "text": "08 / TAITEELLINEN TUTKIMUS",
+          "x": 14,
+          "y": 8.0,
+          "width": 35.90876424153645,
+          "height": 2.350623101128472
+        },
+        {
+          "role": "title",
+          "text": "taiteellinen tutkimus",
+          "x": 14,
+          "y": 13.199999999999998,
+          "width": 110.44493815104165,
+          "height": 11.672328016493056
+        },
+        {
+          "role": "subtitle",
+          "text": "Muisti, aika, päiväkirjamaisuus ja oma tekijyys.",
+          "x": 14,
+          "y": 27.8,
+          "width": 60.37112982855902,
+          "height": 2.747911512586805
+        },
+        {
+          "role": "image",
+          "x": 23.5,
+          "y": 34.0,
+          "width": 250.0,
+          "height": 125.0
+        },
+        {
+          "role": "body",
+          "text": "Tutkin, miten pitkäkestoinen valokuvapäiväkirja muovaa",
+          "x": 14.0,
+          "y": 165.0,
+          "width": 80.79617078993056,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "kokemustani ajasta, muistamisesta ja omasta",
+          "x": 14.0,
+          "y": 168.88055555555556,
+          "width": 63.987670491536456,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "tekijyydestäni.",
+          "x": 14.0,
+          "y": 172.76111111111112,
+          "width": 20.62854275173611,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Tutkiminen tapahtuu kuvaamalla, palaamalla aineistoon ja",
+          "x": 106.0,
+          "y": 165.0,
+          "width": 83.45624959309896,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "muuntamalla sitä teoksiksi. Oma kokemus, taiteelliset",
+          "x": 106.0,
+          "y": 168.88055555555556,
+          "width": 76.50587280273437,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "kokeilut ja teoria käyvät vuoropuhelua.",
+          "x": 106.0,
+          "y": 172.76111111111112,
+          "width": 55.25502522786458,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "Keskeiseksi nousee kuvien muuttuva merkitys: niihin",
+          "x": 198.0,
+          "y": 165.0,
+          "width": 75.46504055447049,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "palaaminen rakentaa uusia suhteita menneen kokemuksen",
+          "x": 198.0,
+          "y": 168.88055555555556,
+          "width": 83.22739189995659,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "body",
+          "text": "ja nykyhetken välille.",
+          "x": 198.0,
+          "y": 172.76111111111112,
+          "width": 29.901981879340276,
+          "height": 3.1240642632378472
+        },
+        {
+          "role": "closing",
+          "text": "Samalla tulen tietoisemmaksi omasta tavastani katsoa.",
+          "x": 14,
+          "y": 183.0,
+          "width": 114.01233452690971,
+          "height": 4.462948947482638
+        },
+        {
+          "role": "research-label",
+          "text": "VALOKUVAPÄIVÄKIRJAN TUTKIMUSJATKUMO",
+          "x": 14,
+          "y": 190.0,
+          "width": 52.918458116319435,
+          "height": 2.2513009982638885
+        },
+        {
+          "role": "research-year",
+          "text": "2013 · Oulun yliopisto",
+          "x": 14.0,
+          "y": 194.0,
+          "width": 24.567802734375,
+          "height": 2.383730468749999
+        },
+        {
+          "role": "research-topic",
+          "text": "Minäpystyvyys ja reflektio",
+          "x": 14.0,
+          "y": 197.8,
+          "width": 32.97566162109374,
+          "height": 2.7807604980468748
+        },
+        {
+          "role": "research-year",
+          "text": "2021 · Xamk",
+          "x": 103.66666666666667,
+          "y": 194.0,
+          "width": 14.400361328125001,
+          "height": 2.383730468749999
+        },
+        {
+          "role": "research-topic",
+          "text": "Yhteisöllisyys ja palvelumuotoilu",
+          "x": 103.66666666666667,
+          "y": 197.8,
+          "width": 41.48677001953124,
+          "height": 2.7807604980468748
+        },
+        {
+          "role": "research-year",
+          "text": "2026 · Turun ammattikorkeakoulu",
+          "x": 193.33333333333334,
+          "y": 194.0,
+          "width": 37.977216796875,
+          "height": 2.383730468749999
+        },
+        {
+          "role": "research-topic",
+          "text": "Aika, muisti ja tekijyys",
+          "x": 193.33333333333334,
+          "y": 197.8,
+          "width": 28.510817871093746,
+          "height": 2.7807604980468748
+        },
+        {
+          "role": "footer",
+          "text": "ARI RAPO · TRACES BETWEEN · 2026",
+          "x": 14,
+          "y": 201.5,
+          "width": 40.13739501953124,
+          "height": 2.0857641601562493
+        },
+        {
+          "role": "footer",
+          "text": "09 / 09",
+          "x": 276.20336059570315,
+          "y": 201.5,
+          "width": 6.796639404296875,
+          "height": 2.0857641601562493
+        }
+      ]
+    }
+  ]
+}
