@@ -1,0 +1,1091 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPE 0.2 — Living Memory</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0c1119;
+  --card: #161f2a;
+  --edge: #30404c;
+  --ink: #eee7dc;
+  --muted: #a3b4be;
+  --a: #dbb58b;
+  --b: #8fbac5;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.5 system-ui, sans-serif;
+}
+button, textarea, input { font: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+.wrap { max-width: 1280px; margin: auto; padding: 24px 18px 48px; }
+header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.kicker { letter-spacing: .18em; color: #a6c9c6; font-size: 11px; }
+.chip {
+  font: 11px monospace;
+  border: 1px solid #527178;
+  border-radius: 99px;
+  padding: 6px 10px;
+  color: #a9d2d2;
+}
+h1 {
+  font: normal clamp(32px,5vw,58px) Georgia,serif;
+  margin: 20px 0 9px;
+}
+.lead { font: italic 17px Georgia,serif; color: var(--a); }
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0,1.65fr) minmax(310px,.9fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+.panel {
+  border: 1px solid var(--edge);
+  background: var(--card);
+  border-radius: 16px;
+  padding: 17px;
+  min-width: 0;
+}
+.panel h2 { font: normal 24px Georgia,serif; margin: 0 0 12px; }
+.nav, .actions, .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav { margin-bottom: 10px; }
+.btn {
+  padding: 9px 12px;
+  border: 1px solid #526371;
+  border-radius: 9px;
+  background: #22313c;
+  color: var(--ink);
+}
+.btn:hover { background: #304754; }
+.btn.primary {
+  background: #e0be96;
+  color: #17212a;
+  border-color: #e0be96;
+  font-weight: 650;
+}
+.btn.selected { border-color: #9bced0; background: #34515a; }
+.btn.small { font-size: 12px; padding: 7px 9px; }
+.stage {
+  height: clamp(310px,43vw,500px);
+  border: 1px solid #35434e;
+  background: #0b1520;
+  border-radius: 11px;
+  overflow: hidden;
+  position: relative;
+}
+canvas { display: block; width: 100%; height: 100%; }
+#ascii {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  white-space: pre;
+  margin: 0;
+  padding: 10px;
+  font: 10px/1.16 monospace;
+  color: #bfd2c9;
+  background: #0b1520;
+}
+#poem {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 19px;
+  padding: 16px;
+  background: radial-gradient(ellipse,#28343d,#0a131b);
+  font: italic clamp(20px,2.7vw,36px)/1.3 Georgia,serif;
+  color: #eedfcf;
+}
+#poem .symbol { font-size: 64px; color: var(--b); font-style: normal; }
+.stats {
+  margin: 13px 0 0;
+  border-top: 1px solid var(--edge);
+  padding-top: 12px;
+  gap: 18px;
+}
+.stat strong {
+  display: block;
+  font: normal 26px Georgia,serif;
+  color: var(--a);
+}
+.stat span { color: var(--muted); font-size: 11px; }
+.note {
+  background: #1a2a32;
+  border-left: 2px solid #a4c4bd;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #d2dadd;
+  margin-top: 13px;
+}
+.block {
+  border-bottom: 1px solid var(--edge);
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+}
+.block:last-child { border: 0; margin: 0; padding: 0; }
+.block h3 { margin: 0 0 8px; font-size: 14px; }
+textarea {
+  width: 100%;
+  min-height: 78px;
+  background: #0c1721;
+  color: var(--ink);
+  padding: 10px;
+  border: 1px solid #52616b;
+  border-radius: 8px;
+  resize: vertical;
+}
+.muted { color: var(--muted); font-size: 12px; }
+.actions { margin-top: 10px; }
+.meter {
+  display: grid;
+  grid-template-columns: 92px 1fr 35px;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 11px;
+}
+.track {
+  background: #34424a;
+  height: 6px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bar { height: 100%; background: linear-gradient(90deg,#7db8bc,#dab18a); }
+.readout {
+  margin-top: 10px;
+  font: 12px/1.5 monospace;
+  color: #a7b7c0;
+}
+footer { margin-top: 20px; color: var(--muted); font-size: 12px; }
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  background: #020509d9;
+  padding: 14px;
+}
+.overlay.visible { display: flex; }
+.receipt {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  border-radius: 12px;
+  padding: 16px;
+  background: #ece3d5;
+  color: #25313a;
+}
+.receipt svg { max-height: 48vh; width: auto; max-width: 100%; }
+.receipt h2 { font: normal 27px Georgia,serif; }
+.receipt .muted { color: #495961; }
+.receipt .actions { justify-content: center; }
+.receipt .btn { background: #273b49; }
+label.control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 13px;
+  color: #b8c9d0;
+  font-size: 12px;
+}
+@media(max-width:850px) {
+  .layout { grid-template-columns: 1fr; }
+  .wrap { padding: 15px 11px 36px; }
+  .stage { height: 380px; }
+  .panel { padding: 13px; }
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+<header>
+  <span class="kicker">TRACES BETWEEN / A MEMORY WITHOUT AN OWNER</span>
+  <span class="chip">MPE 0.2 · LIVING MEMORY</span>
+</header>
+
+<h1>The memory does not sleep.</h1>
+<p class="lead">
+  Remembering · Resonance · Assimilation · Forgetting · Emergence
+</p>
+
+<div class="layout">
+<section class="panel">
+  <div class="nav">
+    <button class="btn selected" data-view="constellation">Constellation</button>
+    <button class="btn" data-view="ascii">Living ASCII</button>
+    <button class="btn" data-view="poem">Visual Haiku</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="art"></canvas>
+    <pre id="ascii" hidden></pre>
+    <div id="poem" hidden></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong id="count">0</strong><span>Offerings</span></div>
+    <div class="stat"><strong id="living">0</strong><span>Living forms</span></div>
+    <div class="stat"><strong id="anchored">0</strong><span>Anchors</span></div>
+    <div class="stat"><strong id="merged">0</strong><span>Assimilations</span></div>
+    <div class="stat"><strong id="forgotten">0</strong><span>Forgotten</span></div>
+  </div>
+
+  <div class="note" id="news">
+    Memory continues to evolve even when no new trace is submitted.
+    When this page is reopened, the engine catches up with elapsed time.
+  </div>
+</section>
+
+<aside class="panel">
+  <h2>Memory Processing Engine</h2>
+
+  <div class="block">
+    <h3>01 / Leave a Trace</h3>
+    <p class="muted">
+      Write a short fragment, or leave nothing.
+      Raw text is transformed locally and never stored.
+    </p>
+    <textarea id="entry" maxlength="200"
+      placeholder="A word, a thought, or a silence..."></textarea>
+    <div class="actions">
+      <button class="btn primary" id="send">Transform & offer</button>
+      <button class="btn" id="blank">Offer silence ∅</button>
+    </div>
+    <div class="readout" id="status">
+      The Moment appears only once. Save it if you want to keep it.
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>02 / Observe & Experiment</h3>
+    <div class="actions">
+      <button class="btn" id="add10">+10 simulated</button>
+      <button class="btn" id="add100">+100 simulated</button>
+      <button class="btn" id="advance">+1 year</button>
+      <button class="btn" id="addAnchor">Add anchor</button>
+    </div>
+    <label class="control">
+      <input type="checkbox" id="flow" checked>
+      Time passes while this page is open
+    </label>
+    <label class="control">
+      <input type="checkbox" id="motion" checked>
+      Animate the visual presentation
+    </label>
+    <div class="actions">
+      <button class="btn small" id="export">Export memory JSON</button>
+      <button class="btn small" id="reset">Start new memory</button>
+    </div>
+    <p class="muted">
+      One real minute equals one simulated day.
+      Reopening catches up elapsed time.
+    </p>
+  </div>
+
+  <div class="block">
+    <h3>03 / Collective State</h3>
+    <div id="meters"></div>
+    <div class="readout" id="clock"></div>
+  </div>
+</aside>
+</div>
+
+<footer>
+  Independent local demo. No external libraries.
+  Memory is stored in this browser using localStorage.
+  Shared multi-user memory will require a server in a later version.
+</footer>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="receipt">
+    <h2>The Moment</h2>
+    <div id="receiptArt"></div>
+    <p id="receiptText" class="muted"></p>
+    <p style="font:italic 17px Georgia,serif">
+      Your trace has been accepted.<br>
+      Its moment is yet to come.
+    </p>
+    <p class="muted">
+      This moment is not stored. Save it now if you wish to keep it.
+    </p>
+    <div class="actions">
+      <button class="btn" id="saveReceipt">Save SVG</button>
+      <button class="btn" id="dismiss">Let it go</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const $ = id => document.getElementById(id);
+const STORAGE = "MPE-living-memory-v02";
+const clamp = (x,a=0,b=1) => Math.max(a,Math.min(b,x));
+const INITIAL = [.32,.46,.26,.52,.38,.35,.49,.62];
+const keys = [
+  "Energy","Density","Rhythm","Contrast",
+  "Affinity","Drift","Complexity","Silence"
+];
+
+function seed() {
+  const a = new Uint32Array(1);
+  crypto.getRandomValues(a);
+  return a[0] || 1;
+}
+
+function rng(s) {
+  s.rng = (s.rng + 0x6D2B79F5) >>> 0;
+  let t = s.rng;
+  t = Math.imul(t ^ (t>>>15),t|1);
+  t ^= t + Math.imul(t ^ (t>>>7),t|61);
+  return ((t ^ (t>>>14))>>>0)/4294967296;
+}
+
+function initialMemory() {
+  const m = {
+    version:2,
+    rng:seed(),
+    lastReal:Date.now(),
+    days:0,
+    total:0,
+    merged:0,
+    forgotten:0,
+    field:INITIAL.slice(),
+    residue:Array(8).fill(0),
+    nodes:[]
+  };
+
+  for(let i=0;i<3;i++) {
+    m.nodes.push({
+      x:.25+i*.25,
+      y:[.43,.27,.73][i],
+      h:30+i*107,
+      strength:1,
+      persistence:1,
+      resonance:0,
+      anchor:true,
+      age:0,
+      delay:0,
+      phase:i*2
+    });
+  }
+  return m;
+}
+
+let memory;
+try {
+  memory=JSON.parse(localStorage.getItem(STORAGE));
+  if(!memory || memory.version!==2 || !Array.isArray(memory.nodes))
+    throw Error("Invalid state");
+} catch {
+  memory=initialMemory();
+}
+
+let view="constellation";
+let receipt=null;
+let frame=0;
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE,JSON.stringify(memory));
+  } catch(e) {
+    $("status").textContent="Local storage is unavailable.";
+  }
+}
+
+// INPUT TRANSFORMATION
+
+function vector(raw) {
+  let n=0, spaces=0, punctuation=0, variation=0, previous=0;
+
+  for(const char of raw) {
+    const cp=char.codePointAt(0);
+    n++;
+    if(/\s/u.test(char)) spaces++;
+    if(/[.,!?;:]/u.test(char)) punctuation++;
+    variation += Math.min(1,Math.abs(cp-previous)/90);
+    previous=cp;
+  }
+
+  const f=memory.field;
+
+  const values=[
+    n?clamp(n/90):rng(memory),
+    n?clamp(spaces/n*5):rng(memory),
+    n?clamp(punctuation/n*9):rng(memory),
+    n?clamp(variation/n):rng(memory),
+    rng(memory),rng(memory),rng(memory),rng(memory)
+  ];
+
+  return values.map((v,i)=>
+    clamp(.48*v+.26*f[(i+3)%8]+.26*rng(memory))
+  );
+}
+
+// TRACE GENERATION
+
+function addTrace(raw="",showReceipt=false) {
+  const f=vector(raw);
+  const node={
+    x:.06+.88*(.7*f[5]+.3*rng(memory)),
+    y:.06+.88*(.65*f[6]+.35*rng(memory)),
+    h:Math.floor(360*(.4*f[0]+.6*rng(memory))),
+    strength:.48+.4*rng(memory),
+    persistence:.1+.45*rng(memory),
+    resonance:0,
+    anchor:false,
+    age:0,
+    delay:.08+rng(memory)*1.5,
+    phase:rng(memory)*Math.PI*2
+  };
+
+  memory.nodes.push(node);
+  memory.total++;
+
+  for(let i=0;i<8;i++) {
+    memory.field[i]=clamp(memory.field[i]*.988+f[i]*.012);
+  }
+
+  // Nearby memories resonate.
+  for(const other of memory.nodes) {
+    if(other===node) continue;
+
+    const d=Math.hypot(node.x-other.x,node.y-other.y);
+    if(d<.23) {
+      const amount=.025*(1-d/.23);
+      other.resonance=clamp(other.resonance+amount);
+      other.strength=clamp(other.strength+amount*.7);
+      node.persistence=clamp(node.persistence+amount*.4);
+    }
+  }
+
+  if(memory.nodes.length>320) compact();
+
+  save();
+  refresh();
+  if(showReceipt) makeReceipt(new Date());
+}
+
+// RESIDUAL MEMORY
+
+function deposit(n) {
+  const i=Math.floor(n.h/45)%8;
+  memory.residue[i]=clamp(memory.residue[i]+n.strength*.004);
+  memory.field[(i+2)%8]=clamp(
+    memory.field[(i+2)%8]*.999+memory.residue[i]*.001
+  );
+}
+
+// MEMORY COMPRESSION
+
+function compact() {
+  const anchors=memory.nodes.filter(n=>n.anchor);
+  const others=memory.nodes.filter(n=>!n.anchor)
+    .sort((a,b)=>
+      (b.strength+b.persistence*.3)-
+      (a.strength+a.persistence*.3)
+    );
+
+  const removed=others.splice(290);
+  for(const n of removed) deposit(n);
+
+  memory.forgotten+=removed.length;
+  memory.nodes=anchors.concat(others);
+}
+
+// ASSIMILATION
+
+function mergeMemories(days) {
+  const nodes=memory.nodes;
+  const attempts=Math.min(16,Math.ceil(nodes.length/7));
+
+  for(let k=0;k<attempts;k++) {
+    const a=nodes[Math.floor(rng(memory)*nodes.length)];
+    const b=nodes[Math.floor(rng(memory)*nodes.length)];
+
+    if(!a || !b || a===b || a.anchor || b.anchor) continue;
+    if(a.delay>0 || b.delay>0) continue;
+
+    const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(d>.085) continue;
+
+    const probability=clamp(
+      (.08+memory.field[4]*.22)*days*8
+    );
+    if(rng(memory)>probability) continue;
+
+    const total=a.strength+b.strength || 1;
+
+    const child={
+      x:(a.x*a.strength+b.x*b.strength)/total,
+      y:(a.y*a.strength+b.y*b.strength)/total,
+      h:(a.h*a.strength+b.h*b.strength)/total,
+      strength:clamp(total*.78),
+      persistence:clamp(
+        (a.persistence+b.persistence)/2+.06
+      ),
+      resonance:clamp(
+        (a.resonance+b.resonance)/2+.06
+      ),
+      anchor:false,
+      age:Math.max(a.age,b.age)*.5,
+      delay:0,
+      phase:(a.phase+b.phase)/2
+    };
+
+    const ia=nodes.indexOf(a);
+    const ib=nodes.indexOf(b);
+
+    if(ia<0 || ib<0) continue;
+
+    nodes.splice(Math.max(ia,ib),1);
+    nodes.splice(Math.min(ia,ib),1);
+    nodes.push(child);
+
+    memory.merged++;
+    deposit({h:child.h,strength:.03});
+  }
+}
+
+// TIME ENGINE & FORGETTING
+
+function evolve(days) {
+  if(days<=0) return;
+
+  memory.days+=days;
+  const survivors=[];
+
+  for(const n of memory.nodes) {
+    if(n.anchor) {
+      n.age+=days;
+      survivors.push(n);
+      continue;
+    }
+
+    if(n.delay>0) {
+      n.delay=Math.max(0,n.delay-days);
+      survivors.push(n);
+      continue;
+    }
+
+    n.age+=days;
+
+    const decay=.0035*
+      (1-.66*n.persistence)*
+      (1-.4*n.resonance);
+
+    n.strength*=Math.exp(-decay*days);
+    n.resonance*=Math.exp(-.009*days);
+
+    const drift=memory.field[5];
+
+    n.x=clamp(
+      n.x+Math.sin(n.phase+memory.days*.017)*
+      drift*days*.00009,.025,.975
+    );
+    n.y=clamp(
+      n.y+Math.cos(n.phase+memory.days*.012)*
+      drift*days*.00009,.025,.975
+    );
+
+    if(n.strength<.035) {
+      deposit(n);
+      memory.forgotten++;
+    } else {
+      survivors.push(n);
+    }
+  }
+
+  memory.nodes=survivors;
+
+  // Long-term memory retains aftereffects.
+  for(let i=0;i<8;i++) {
+    const tug=(memory.residue[i]-.35)*.0008*days;
+
+    memory.field[i]=clamp(
+      memory.field[i]+tug+
+      (INITIAL[i]-memory.field[i])*.00016*days
+    );
+
+    memory.residue[i]=clamp(
+      memory.residue[i]*Math.exp(-.0004*days)
+    );
+  }
+
+  mergeMemories(days);
+
+  // Old memories can awaken spontaneously.
+  if(memory.nodes.length>4 &&
+     rng(memory)<Math.min(.35,days*.08)) {
+
+    const active=memory.nodes.filter(n=>
+      !n.anchor && n.delay<=0
+    );
+
+    if(active.length) {
+      const n=active[Math.floor(rng(memory)*active.length)];
+      n.strength=clamp(n.strength+.04);
+      n.resonance=clamp(n.resonance+.06);
+    }
+  }
+
+  if(memory.nodes.length>320) compact();
+}
+
+// CATCH UP AFTER CLOSING THE PAGE
+
+function catchUp() {
+  const current=Date.now();
+  const elapsed=Math.max(0,current-memory.lastReal);
+  memory.lastReal=current;
+
+  // One real minute = one simulated day.
+  const days=Math.min(3650,elapsed/60000);
+
+  if(days>.01) {
+    const steps=Math.min(80,Math.max(1,Math.ceil(days/10)));
+
+    for(let i=0;i<steps;i++) evolve(days/steps);
+
+    $("news").textContent=
+      `The memory evolved through ${days.toFixed(1)} `+
+      `simulated days during your absence.`;
+  }
+
+  save();
+}
+
+function advance(days) {
+  const steps=Math.min(80,Math.max(1,Math.ceil(days/8)));
+  for(let i=0;i<steps;i++) evolve(days/steps);
+  memory.lastReal=Date.now();
+  save();
+  refresh();
+}
+
+function addAnchor() {
+  memory.nodes.push({
+    x:.06+.88*rng(memory),
+    y:.06+.88*rng(memory),
+    h:Math.floor(rng(memory)*360),
+    strength:1,
+    persistence:1,
+    resonance:0,
+    anchor:true,
+    age:0,
+    delay:0,
+    phase:rng(memory)*Math.PI*2
+  });
+  save();
+  refresh();
+}
+
+// INTERFACE
+
+function refresh() {
+  const visible=memory.nodes.filter(n=>n.anchor||n.delay<=0);
+
+  $("count").textContent=memory.total;
+  $("living").textContent=visible.length;
+  $("anchored").textContent=memory.nodes.filter(n=>n.anchor).length;
+  $("merged").textContent=memory.merged;
+  $("forgotten").textContent=memory.forgotten;
+
+  $("meters").innerHTML=keys.map((name,i)=>`
+    <div class="meter">
+      <span>${name}</span>
+      <div class="track">
+        <div class="bar" style="width:${memory.field[i]*100}%"></div>
+      </div>
+      <span>${memory.field[i].toFixed(2)}</span>
+    </div>
+  `).join("");
+
+  $("clock").textContent=
+    `Memory age: ${memory.days.toFixed(2)} simulated days`;
+
+  if(view==="ascii") renderASCII();
+  if(view==="poem") renderPoem();
+}
+
+function setView(v) {
+  view=v;
+  document.querySelectorAll("[data-view]").forEach(b=>
+    b.classList.toggle("selected",b.dataset.view===v)
+  );
+  $("art").hidden=v!=="constellation";
+  $("ascii").hidden=v!=="ascii";
+  $("poem").hidden=v!=="poem";
+  refresh();
+}
+
+// ASCII MEMORY
+
+function renderASCII() {
+  const box=$("ascii");
+  const w=Math.min(76,Math.max(24,
+    Math.floor((box.clientWidth-20)/7.1)
+  ));
+  const h=Math.min(34,Math.max(14,
+    Math.floor((box.clientHeight-22)/11.6)
+  ));
+  const chars="  .,:;+*#%@";
+  const visible=memory.nodes.filter(n=>
+    n.anchor||n.delay<=0
+  ).slice(-260);
+
+  let out="";
+
+  for(let y=0;y<h;y++) {
+    for(let x=0;x<w;x++) {
+      const xx=x/w, yy=y/h;
+
+      let v=.09+
+        .09*Math.sin(xx*16+memory.days*.03)*
+        Math.cos(yy*12-memory.days*.02);
+
+      for(const n of visible) {
+        const d2=(xx-n.x)**2+(yy-n.y)**2;
+        v+=.55*n.strength*Math.exp(
+          -d2*(n.anchor?80:150)
+        );
+      }
+
+      v+=memory.residue[
+        Math.min(7,Math.floor(xx*8))
+      ]*.25;
+
+      v=clamp(v*(.75+memory.field[1]));
+
+      out+=chars[Math.min(
+        chars.length-1,
+        Math.floor(v*chars.length)
+      )];
+    }
+    out+="\n";
+  }
+
+  box.textContent=out;
+}
+
+// GENERATIVE POETRY
+
+function renderPoem() {
+  const adjectives=[
+    "unwritten","distant","quiet","silver",
+    "patient","restless","fading","hidden",
+    "weightless","tender"
+  ];
+  const nouns=[
+    "morning","horizon","absence","threshold",
+    "echo","garden","silence","distance",
+    "afterglow","river"
+  ];
+  const verbs=[
+    "returns","dissolves","waits",
+    "remains","wanders","unfolds"
+  ];
+
+  let s=(
+    Math.floor(memory.days/2)+
+    Math.floor(memory.field.reduce(
+      (sum,v,i)=>sum+v*(i+7)*10000,0
+    ))+
+    memory.merged*43+
+    memory.forgotten*17
+  )>>>0;
+
+  const pick=arr=>{
+    s=(Math.imul(s,1664525)+1013904223)>>>0;
+    return arr[s%arr.length];
+  };
+
+  const root=$("poem");
+  root.replaceChildren();
+
+  const symbol=document.createElement("div");
+  symbol.className="symbol";
+  symbol.textContent=pick(["∴","∿","◌","⌁","⋯"]);
+  root.append(symbol);
+
+  const lines=[
+    `a ${pick(adjectives)} ${pick(nouns)}`,
+    `between ${pick(nouns)} and ${pick(nouns)}`,
+    `something ${pick(verbs)}`
+  ];
+
+  for(const line of lines) {
+    const el=document.createElement("div");
+    el.textContent=line;
+    root.append(el);
+  }
+}
+
+// CONSTELLATION RENDERER
+
+function draw() {
+  requestAnimationFrame(draw);
+  if(view!=="constellation") return;
+
+  const canvas=$("art");
+  const ctx=canvas.getContext("2d");
+  const rect=canvas.getBoundingClientRect();
+  const dpr=Math.min(devicePixelRatio||1,2);
+  const W=Math.max(1,rect.width);
+  const H=Math.max(1,rect.height);
+
+  if(canvas.width!==Math.round(W*dpr) ||
+     canvas.height!==Math.round(H*dpr)) {
+    canvas.width=Math.round(W*dpr);
+    canvas.height=Math.round(H*dpr);
+  }
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle="#0b1520";
+  ctx.fillRect(0,0,W,H);
+
+  const motion=$("motion").checked;
+  const t=motion ? frame++*.018 : 0;
+
+  const nodes=memory.nodes.filter(n=>
+    n.anchor||n.delay<=0
+  );
+
+  const points=nodes.map(n=>({
+    n,
+    x:(n.x+Math.sin(t*.33+n.phase)*
+      memory.field[5]*.012)*W,
+    y:(n.y+Math.cos(t*.21+n.phase)*
+      memory.field[5]*.012)*H
+  }));
+
+  for(let i=0;i<points.length;i++) {
+    const p=points[i], n=p.n;
+
+    for(let j=Math.max(0,i-22);j<i;j++) {
+      const q=points[j];
+      const d=Math.hypot(p.x-q.x,p.y-q.y);
+
+      if(d<Math.min(W,H)*(.1+memory.field[4]*.2)) {
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+        ctx.lineTo(q.x,q.y);
+        ctx.strokeStyle=
+          `rgba(144,194,195,${.15*(1-d/Math.max(W,H))*n.strength})`;
+        ctx.lineWidth=.6;
+        ctx.stroke();
+      }
+    }
+
+    const radius=(n.anchor?4:1.4+memory.field[0]*1.7)*
+      Math.max(.35,n.strength);
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,radius,0,Math.PI*2);
+    ctx.fillStyle=n.anchor
+      ? "#edc19a"
+      : `hsla(${160+n.h*.25},48%,74%,${clamp(n.strength)})`;
+    ctx.fill();
+
+    if(n.anchor) {
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,8+Math.sin(t+n.phase)*2,0,Math.PI*2);
+      ctx.strokeStyle="rgba(237,193,154,.30)";
+      ctx.stroke();
+    }
+  }
+
+  // The visual residue of forgotten memories.
+  for(let i=0;i<8;i++) {
+    const r=memory.residue[i];
+    if(r<.002) continue;
+
+    ctx.fillStyle=`rgba(194,166,137,${Math.min(.16,r*.2)})`;
+    ctx.beginPath();
+    ctx.ellipse(
+      W*((i+.5)/8),
+      H*(.5+Math.sin(i*2.2+t*.07)*.2),
+      10+r*W*.22,
+      12+r*H*.25,
+      0,0,Math.PI*2
+    );
+    ctx.fill();
+  }
+}
+
+// THE MOMENT RECEIPT
+
+function createReceipt(date) {
+  const h=seed()%360;
+  const time=date.toISOString();
+  const local={rng:seed()};
+
+  let shapes=`
+    <rect width="560" height="650"
+      fill="hsl(${h},35%,16%)"/>
+    <text x="280" y="45" text-anchor="middle"
+      fill="#e2dacd" font-family="monospace"
+      font-size="14" letter-spacing="3">
+      A MEMORY WITHOUT AN OWNER
+    </text>
+  `;
+
+  for(let i=0;i<35;i++) {
+    const angle=i*2.399;
+    const rad=12+i*5.3;
+    const cx=280+Math.cos(angle)*rad;
+    const cy=295+Math.sin(angle)*rad;
+
+    shapes+=`
+      <ellipse cx="${cx}" cy="${cy}"
+        rx="${18+rng(local)*46}"
+        ry="${15+rng(local)*48}"
+        transform="rotate(${Math.round(rng(local)*360)} ${cx} ${cy})"
+        stroke="hsl(${(h+i*13)%360},70%,74%)"
+        fill="none" stroke-opacity=".55" stroke-width="1"/>
+    `;
+  }
+
+  shapes+=`
+    <text x="280" y="527" text-anchor="middle"
+      font-family="Georgia,serif" font-size="34"
+      fill="#f6e7d3">You were here.</text>
+    <text x="280" y="565" text-anchor="middle"
+      font-family="monospace" font-size="14"
+      fill="#c8dad8">${time}</text>
+    <text x="280" y="619" text-anchor="middle"
+      font-family="monospace" font-size="12"
+      fill="#b3c2c0">THE MOMENT EXISTS ONLY ONCE</text>
+  `;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 560 650">${shapes}</svg>`;
+}
+
+function makeReceipt(date) {
+  receipt=createReceipt(date);
+  $("receiptArt").innerHTML=receipt;
+  $("receiptText").textContent=date.toISOString();
+  $("overlay").classList.add("visible");
+}
+
+function closeReceipt() {
+  receipt=null;
+  $("receiptArt").replaceChildren();
+  $("overlay").classList.remove("visible");
+}
+
+function download(text,name,type) {
+  const url=URL.createObjectURL(new Blob([text],{type}));
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=name;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+// CONTROLS
+
+$("send").onclick=()=>{
+  const raw=$("entry").value;
+  if(!raw.trim()) {
+    $("status").textContent="Enter text or choose Offer silence.";
+    return;
+  }
+  addTrace(raw,true);
+  $("entry").value="";
+  $("status").textContent="Transformed locally.";
+};
+
+$("blank").onclick=()=>addTrace("",true);
+
+$("add10").onclick=()=>{
+  for(let i=0;i<10;i++) addTrace();
+};
+
+$("add100").onclick=()=>{
+  for(let i=0;i<100;i++) addTrace();
+};
+
+$("advance").onclick=()=>advance(365);
+$("addAnchor").onclick=addAnchor;
+
+$("reset").onclick=()=>{
+  if(!confirm("Start a new local memory?")) return;
+  memory=initialMemory();
+  save();
+  refresh();
+};
+
+$("export").onclick=()=>download(
+  JSON.stringify(memory,null,2),
+  "mpe_memory_v02.json",
+  "application/json"
+);
+
+$("saveReceipt").onclick=()=>{
+  if(receipt) download(
+    receipt,
+    "The_Moment_"+Date.now()+".svg",
+    "image/svg+xml"
+  );
+};
+
+$("dismiss").onclick=closeReceipt;
+
+document.querySelectorAll("[data-view]").forEach(b=>{
+  b.onclick=()=>setView(b.dataset.view);
+});
+
+// START ENGINE
+
+catchUp();
+refresh();
+requestAnimationFrame(draw);
+
+let lastTick=Date.now();
+
+setInterval(()=>{
+  const t=Date.now();
+  const elapsed=t-lastTick;
+  lastTick=t;
+
+  if($("flow").checked &&
+     !$("overlay").classList.contains("visible")) {
+    evolve(Math.min(1,elapsed/60000));
+    memory.lastReal=t;
+    save();
+    refresh();
+  } else {
+    memory.lastReal=t;
+    save();
+  }
+
+  if(view==="ascii") renderASCII();
+},1300);
+
+window.addEventListener("pagehide",()=>{
+  memory.lastReal=Date.now();
+  save();
+});
+
+})();
+</script>
+</body>
+</html>
