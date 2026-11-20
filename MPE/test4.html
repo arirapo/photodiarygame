@@ -1,0 +1,1556 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPE 0.4 — Divergent Memory</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#0b1119;
+  --panel:#17222e;
+  --line:#344653;
+  --text:#eee9e1;
+  --muted:#9db0bc;
+  --gold:#e6bc91;
+  --blue:#98c8cb;
+}
+* { box-sizing:border-box }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.5 system-ui,sans-serif;
+}
+button,textarea { font:inherit }
+button { cursor:pointer }
+.wrap {
+  max-width:1300px;
+  margin:auto;
+  padding:22px 18px 48px;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.eyebrow {
+  font:11px monospace;
+  letter-spacing:.19em;
+  color:#a4c9cc;
+}
+.chip {
+  font:11px monospace;
+  border:1px solid #506a78;
+  border-radius:50px;
+  padding:5px 12px;
+  color:#b4d3d5;
+}
+h1 {
+  font:normal clamp(34px,5vw,60px) Georgia,serif;
+  margin:17px 0 3px;
+}
+.lead {
+  font:italic 17px Georgia,serif;
+  color:var(--gold);
+  margin:0 0 21px;
+}
+.layout {
+  display:grid;
+  grid-template-columns:minmax(0,1.7fr) minmax(310px,.9fr);
+  gap:18px;
+}
+.panel {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:17px;
+  min-width:0;
+}
+h2 {
+  font:normal 25px Georgia,serif;
+  margin:0 0 13px;
+}
+h3 {
+  font-size:14px;
+  margin:0 0 9px;
+}
+.tabs,.actions,.stats {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.tabs { margin-bottom:12px }
+button {
+  border:1px solid #4e6573;
+  background:#263744;
+  color:var(--text);
+  border-radius:9px;
+  padding:9px 12px;
+}
+button:hover { background:#35515d }
+button.active {
+  background:#3a6068;
+  border-color:#9ac6c6;
+}
+button.primary {
+  background:var(--gold);
+  border-color:var(--gold);
+  color:#1a242d;
+  font-weight:650;
+}
+.stage {
+  position:relative;
+  height:clamp(320px,44vw,515px);
+  background:#091721;
+  border:1px solid #304653;
+  border-radius:12px;
+  overflow:hidden;
+}
+canvas {
+  width:100%;
+  height:100%;
+  display:block;
+}
+#ascii,#poem {
+  position:absolute;
+  inset:0;
+  margin:0;
+}
+#ascii {
+  white-space:pre;
+  overflow:hidden;
+  font:10px/1.13 monospace;
+  color:#b6ccd0;
+  padding:10px;
+}
+#poem {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:20px;
+  text-align:center;
+  background:radial-gradient(ellipse,#263842,#091721);
+  font:italic clamp(22px,3vw,36px) Georgia,serif;
+}
+.symbol {
+  font:normal 55px Georgia,serif;
+  color:var(--blue);
+}
+[hidden] { display:none!important }
+.stats {
+  margin-top:14px;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  gap:18px;
+}
+.stat b {
+  display:block;
+  font:26px Georgia,serif;
+  color:var(--gold);
+}
+.stat small { color:var(--muted) }
+.note {
+  background:#1b3038;
+  padding:10px 13px;
+  border-left:2px solid #a8c4b8;
+  margin-top:12px;
+  font-size:12px;
+}
+.weather {
+  border:1px solid #426875;
+  background:#203642;
+  border-radius:11px;
+  padding:12px 13px;
+  margin-bottom:18px;
+}
+.weather strong { font-size:16px }
+.muted {
+  color:var(--muted);
+  font-size:12px;
+}
+.block {
+  padding:0 0 17px;
+  margin:0 0 17px;
+  border-bottom:1px solid var(--line);
+}
+textarea {
+  width:100%;
+  min-height:80px;
+  resize:vertical;
+  border:1px solid #506a78;
+  background:#0c1923;
+  color:var(--text);
+  border-radius:9px;
+  padding:10px;
+}
+.actions { margin-top:10px }
+.actions button { font-size:13px }
+label {
+  font-size:12px;
+  display:block;
+  color:var(--muted);
+  margin-top:12px;
+}
+.meter {
+  display:grid;
+  grid-template-columns:84px 1fr 34px;
+  align-items:center;
+  gap:8px;
+  margin:7px 0;
+  font-size:11px;
+}
+.track {
+  background:#344550;
+  height:6px;
+  border-radius:5px;
+  overflow:hidden;
+}
+.fill {
+  background:linear-gradient(90deg,#84babc,#dfb48d);
+  height:100%;
+}
+.futures { margin-top:18px }
+.futures-head {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:12px;
+}
+.future-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.future {
+  border:1px solid var(--line);
+  background:#13222c;
+  border-radius:11px;
+  padding:10px;
+}
+.future canvas {
+  height:110px;
+  background:#081620;
+  border-radius:6px;
+}
+.future strong { font-size:13px }
+.future p {
+  font-size:11px;
+  color:var(--muted);
+  margin:6px 0 0;
+}
+.fine {
+  font-size:12px;
+  color:var(--muted);
+  margin-top:15px;
+}
+.overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#03080de0;
+  z-index:5;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+.overlay.open { display:flex }
+.receipt {
+  max-width:380px;
+  width:100%;
+  background:#eee6d9;
+  color:#26323a;
+  border-radius:13px;
+  text-align:center;
+  padding:18px;
+}
+.receipt svg {
+  width:min(100%,285px);
+  height:auto;
+}
+.receipt button { background:#263e4a }
+.receipt .actions { justify-content:center }
+@media(max-width:850px) {
+  .layout { grid-template-columns:1fr }
+  .wrap { padding:14px 11px }
+  .stage { height:380px }
+  .future canvas { height:85px }
+}
+@media(max-width:500px) {
+  .future-grid { grid-template-columns:1fr }
+  .future canvas { height:100px }
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<header>
+  <span class="eyebrow">
+    TRACES BETWEEN / A MEMORY WITHOUT AN OWNER
+  </span>
+  <span class="chip">MPE 0.4 · DIVERGENT MEMORY</span>
+</header>
+
+<h1>Memory has many futures.</h1>
+<p class="lead">
+  Weather · Organisms · Metamorphosis · Divergence · Forgetting
+</p>
+
+<div class="layout">
+<section class="panel">
+
+  <div class="tabs">
+    <button class="active" data-view="living">Living Memory</button>
+    <button data-view="constellation">Constellation</button>
+    <button data-view="ascii">Living ASCII</button>
+    <button data-view="poem">Visual Haiku</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="art"></canvas>
+    <pre id="ascii" hidden></pre>
+    <div id="poem" hidden></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="offerings">0</b><small>Offerings</small></div>
+    <div class="stat"><b id="living">0</b><small>Living forms</small></div>
+    <div class="stat"><b id="anchors">0</b><small>Anchors</small></div>
+    <div class="stat"><b id="organisms">0</b><small>Organisms</small></div>
+    <div class="stat"><b id="merged">0</b><small>Assimilations</small></div>
+    <div class="stat"><b id="forgotten">0</b><small>Forgotten</small></div>
+  </div>
+
+  <div class="note" id="message">
+    Even without new offerings, the memory continues to develop.
+  </div>
+
+  <section class="futures">
+    <div class="futures-head">
+      <div>
+        <h2 style="margin:0">Three possible futures</h2>
+        <div class="muted">
+          Three independent 5-year simulations from the same present.
+        </div>
+      </div>
+      <button id="futures">Imagine three futures</button>
+    </div>
+
+    <div class="future-grid" id="futureGrid">
+      <div class="future">
+        <strong>Growth</strong>
+        <p>Run the preview to discover a possible future.</p>
+      </div>
+      <div class="future">
+        <strong>Drift</strong>
+        <p>Nothing here is preordained.</p>
+      </div>
+      <div class="future">
+        <strong>Stillness</strong>
+        <p>No preview changes the actual memory.</p>
+      </div>
+    </div>
+  </section>
+</section>
+
+<aside class="panel">
+  <h2>Memory Processing Engine</h2>
+
+  <div class="weather">
+    <strong id="weather">Stillness</strong>
+    <span class="chip" id="epoch">EPOCH 1</span>
+    <div class="muted" id="weatherText">
+      The memory gathers itself.
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>01 / Leave a Trace</h3>
+    <p class="muted">
+      Text is transformed in your browser.
+      The original is never stored.
+    </p>
+    <textarea id="entry" maxlength="200"
+      placeholder="A word, a thought, or a silence..."></textarea>
+    <div class="actions">
+      <button id="send" class="primary">Transform &amp; offer</button>
+      <button id="silence">Offer silence ∅</button>
+    </div>
+    <p class="muted" id="status">The Moment appears only once.</p>
+  </div>
+
+  <div class="block">
+    <h3>02 / Observe &amp; Experiment</h3>
+    <div class="actions">
+      <button id="add10">+10 simulated</button>
+      <button id="add100">+100 simulated</button>
+      <button id="year">+1 year</button>
+      <button id="anchor">Add anchor</button>
+    </div>
+
+    <label>
+      <input type="checkbox" id="time" checked>
+      Time passes while this page is open
+    </label>
+    <label>
+      <input type="checkbox" id="motion" checked>
+      Animate visual presentation
+    </label>
+
+    <div class="actions">
+      <button id="export">Export memory JSON</button>
+      <button id="reset">Start new memory</button>
+    </div>
+    <p class="muted">
+      1 real minute = 1 simulated day.
+      On reopening, elapsed time is processed (up to 10 years).
+    </p>
+  </div>
+
+  <div>
+    <h3>03 / Collective State</h3>
+    <div id="meters"></div>
+    <p class="muted" id="clock"></p>
+  </div>
+</aside>
+</div>
+
+<p class="fine">
+  Independent experimental version. No external libraries,
+  accounts or AI service. Memory stays in this browser
+  (localStorage). Future previews are hypothetical and
+  do not overwrite it.
+</p>
+</main>
+
+<div class="overlay" id="overlay" role="dialog"
+     aria-modal="true" aria-label="The Moment">
+  <div class="receipt">
+    <h2 style="font:normal 28px Georgia,serif">The Moment</h2>
+    <div id="receiptArt"></div>
+    <p style="font:italic 17px Georgia,serif">
+      Your trace has been accepted.<br>
+      Its moment is yet to come.
+    </p>
+    <p class="muted" style="color:#52636b">
+      This receipt is not stored. Save it now or let it go.
+    </p>
+    <div class="actions">
+      <button id="saveReceipt">Save SVG</button>
+      <button id="dismiss">Let it go</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const clamp = (x,a=0,b=1) => Math.max(a,Math.min(b,x));
+const KEY = 'mpe-v04-divergent';
+
+const labels = [
+  'Energy','Density','Rhythm','Contrast',
+  'Affinity','Drift','Complexity','Silence'
+];
+
+const weatherNames = [
+  'Stillness','Bloom','Turbulence','Dissolve','Dream'
+];
+
+const weatherText = [
+  'The memory gathers itself.',
+  'Connections grow into forms.',
+  'Patterns become restless.',
+  'Old forms surrender their edges.',
+  'The memory wanders through itself.'
+];
+
+// --------------------------------------------------
+// MEMORY STATE
+// --------------------------------------------------
+
+function newSeed() {
+  const a = new Uint32Array(1);
+  crypto.getRandomValues(a);
+  return a[0] || 12345;
+}
+
+function rand(s) {
+  s.rng = (s.rng + 0x6D2B79F5) >>> 0;
+  let x = s.rng;
+  x = Math.imul(x ^ (x>>>15),x|1);
+  x ^= x + Math.imul(x ^ (x>>>7),x|61);
+  return ((x ^ (x>>>14))>>>0)/4294967296;
+}
+
+function fresh() {
+  const s = {
+    version:4,
+    rng:newSeed(),
+    last:Date.now(),
+    days:0,
+    offers:0,
+    merged:0,
+    forgotten:0,
+    field:[.31,.44,.39,.6,.4,.5,.35,.65],
+    residue:Array(8).fill(0),
+    weather:0,
+    epoch:1,
+    weatherAge:0,
+    history:[.24,.68,.39],
+    nodes:[]
+  };
+
+  for(let i=0;i<3;i++) {
+    s.nodes.push({
+      x:[.18,.7,.5][i],
+      y:[.34,.27,.75][i],
+      vx:0,vy:0,
+      str:1,per:1,
+      age:0,delay:0,
+      hue:[32,183,275][i],
+      phase:i*2.3,
+      anchor:true
+    });
+  }
+  return s;
+}
+
+let mem;
+
+try {
+  mem = JSON.parse(localStorage.getItem(KEY));
+  if(!mem || mem.version!==4 ||
+     !Array.isArray(mem.nodes) ||
+     !Array.isArray(mem.field)) throw Error();
+} catch {
+  mem = fresh();
+}
+
+let view = 'living';
+let frame = 0;
+let receipt = null;
+let preview = [];
+
+function save() {
+  try {
+    localStorage.setItem(KEY,JSON.stringify(mem));
+  } catch {
+    $('status').textContent =
+      'Storage unavailable: export JSON regularly.';
+  }
+}
+
+function clone(s) {
+  return JSON.parse(JSON.stringify(s));
+}
+
+// --------------------------------------------------
+// INPUT TRANSFORMER
+// --------------------------------------------------
+
+function feature(s,text) {
+  let count=0, spaces=0, marks=0;
+  let variation=0, last=0;
+
+  for(const ch of text) {
+    const c=ch.codePointAt(0);
+    count++;
+    if(/\s/u.test(ch)) spaces++;
+    if(/[.,!?;:]/u.test(ch)) marks++;
+    variation+=Math.min(1,Math.abs(c-last)/100);
+    last=c;
+  }
+
+  return [
+    count?clamp(count/95):rand(s),
+    count?clamp(spaces/count*5):rand(s),
+    count?clamp(marks/count*9):rand(s),
+    count?clamp(variation/count):rand(s),
+    rand(s),rand(s),rand(s),rand(s)
+  ];
+}
+
+// --------------------------------------------------
+// TRACE GENERATOR
+// --------------------------------------------------
+
+function add(s,text='') {
+  const f=feature(s,text);
+  const c=s.nodes.filter(n=>n.anchor);
+  const near=c[Math.floor(rand(s)*c.length)];
+  const roaming=rand(s)<.48;
+
+  let x=roaming
+    ? .05+.9*rand(s)
+    : clamp(near.x+(rand(s)-.5)*.27,.04,.96);
+
+  let y=roaming
+    ? .05+.9*rand(s)
+    : clamp(near.y+(rand(s)-.5)*.27,.04,.96);
+
+  const n={
+    x,y,
+    vx:(rand(s)-.5)*.001,
+    vy:(rand(s)-.5)*.001,
+    str:.5+.4*rand(s),
+    per:.1+.5*rand(s),
+    age:0,
+    delay:.2+rand(s)*3,
+    hue:(f[0]*170+rand(s)*190)%360,
+    phase:rand(s)*6.28,
+    anchor:false
+  };
+
+  s.nodes.push(n);
+  s.offers++;
+
+  for(let k=0;k<8;k++) {
+    const neighbor=s.field[(k+1)%8];
+    s.field[k]=clamp(
+      s.field[k]+(f[k]-.5)*.018+(neighbor-.5)*.002
+    );
+  }
+
+  // Nearby memories resonate.
+  for(const other of s.nodes) {
+    if(other===n) continue;
+    const d=Math.hypot(n.x-other.x,n.y-other.y);
+
+    if(d<.18) {
+      other.str=clamp(other.str+.015*(1-d/.18));
+      n.per=clamp(n.per+.01);
+    }
+  }
+
+  if(s.nodes.length>550) compact(s);
+}
+
+// --------------------------------------------------
+// RESIDUAL MEMORY
+// --------------------------------------------------
+
+function deposit(s,n) {
+  const k=Math.floor(
+    ((n.hue%360)+360)%360/45
+  )%8;
+
+  s.residue[k]=clamp(s.residue[k]+n.str*.008);
+  s.history[k%3]=clamp(
+    s.history[k%3]+.003*(n.per-.3)
+  );
+}
+
+function compact(s) {
+  const fixed=s.nodes.filter(n=>n.anchor);
+  const others=s.nodes.filter(n=>!n.anchor)
+    .sort((a,b)=>
+      (b.str+b.per*.2)-(a.str+a.per*.2)
+    );
+
+  const gone=others.splice(465);
+
+  for(const n of gone) deposit(s,n);
+
+  s.forgotten+=gone.length;
+  s.nodes=fixed.concat(others);
+}
+
+// --------------------------------------------------
+// MEMORY WEATHER
+// --------------------------------------------------
+
+function weatherUpdate(s,dt) {
+  s.weatherAge+=dt;
+
+  const f=s.field;
+
+  const cycle=
+    Math.sin(s.days*.012+s.history[0]*6)+
+    Math.sin(s.days*.0047+s.history[1]*4)*.7;
+
+  const activity=
+    f[0]*.6+f[6]*.4+cycle*.12;
+
+  let proposed=
+    activity>.75 ? 2 :
+    activity>.57 ? 1 :
+    f[7]>.71 ? 0 :
+    cycle<-.62 ? 3 : 4;
+
+  if(s.weatherAge>12 &&
+    (proposed!==s.weather || s.weatherAge>85)) {
+
+    if(rand(s)<Math.min(1,dt*.12)) {
+      s.weather=proposed;
+      s.weatherAge=0;
+      s.epoch++;
+    }
+  }
+
+  // Coupled feedback: no forced convergence to 0.5.
+  const old=s.field.slice();
+
+  for(let i=0;i<8;i++) {
+    const neighbor=old[(i+1)%8];
+    const opposite=old[(i+4)%8];
+
+    const beat=Math.sin(
+      s.days*(.0028+i*.00067)+s.history[i%3]*8
+    );
+
+    const coupling=(neighbor-opposite)*.00015*dt;
+    const forcing=beat*.00022*dt;
+
+    const effects=(
+      s.weather===1 ? .0002 :
+      s.weather===3 ? -.0002 : 0
+    )*dt*(i%2?1:-1);
+
+    s.field[i]=clamp(
+      old[i]+coupling+forcing+effects,.08,.94
+    );
+  }
+}
+
+// --------------------------------------------------
+// MEMORY PROCESSOR
+// --------------------------------------------------
+
+function evolve(s,dt) {
+  if(dt<=0) return;
+
+  s.days+=dt;
+  weatherUpdate(s,dt);
+
+  const next=[];
+  const speed=[.55,1.25,2.2,.8,.95][s.weather];
+  const decay=[.65,.9,1.25,1.7,.8][s.weather];
+
+  for(const n of s.nodes) {
+    n.age+=dt;
+
+    if(n.anchor) {
+      next.push(n);
+      continue;
+    }
+
+    if(n.delay>0) {
+      n.delay=Math.max(0,n.delay-dt);
+      next.push(n);
+      continue;
+    }
+
+    const drift=dt*.0014*speed*(.3+s.field[5]);
+
+    n.phase+=dt*.018*(.5+s.field[2]);
+
+    n.vx=clamp(
+      n.vx*.96+Math.sin(n.phase+n.y*9)*drift,
+      -.012,.012
+    );
+
+    n.vy=clamp(
+      n.vy*.96+Math.cos(n.phase+n.x*9)*drift,
+      -.012,.012
+    );
+
+    n.x=clamp(n.x+n.vx,.025,.975);
+    n.y=clamp(n.y+n.vy,.025,.975);
+
+    // Resonance near anchors.
+    for(const a of s.nodes) {
+      if(!a.anchor) continue;
+
+      const d=Math.hypot(n.x-a.x,n.y-a.y);
+
+      if(d<.15) {
+        n.str=clamp(
+          n.str+.00055*dt*(1-d/.15)
+        );
+        n.per=clamp(n.per+.00012*dt);
+      }
+    }
+
+    n.str*=Math.exp(
+      -dt*.0036*decay*(1-.65*n.per)
+    );
+
+    if(n.str<.036) {
+      deposit(s,n);
+      s.forgotten++;
+    } else {
+      next.push(n);
+    }
+  }
+
+  s.nodes=next;
+
+  // Assimilation between nearby memories.
+  const attempts=Math.min(
+    16,Math.floor(s.nodes.length/9)
+  );
+
+  for(let k=0;k<attempts;k++) {
+    if(s.nodes.length<5) break;
+
+    const i=Math.floor(rand(s)*s.nodes.length);
+    const j=Math.floor(rand(s)*s.nodes.length);
+
+    const a=s.nodes[i];
+    const b=s.nodes[j];
+
+    if(!a || !b || a===b ||
+       a.anchor || b.anchor ||
+       a.delay || b.delay) continue;
+
+    const d=Math.hypot(a.x-b.x,a.y-b.y);
+
+    if(d>.047 || rand(s)>.06*dt*speed) continue;
+
+    const total=a.str+b.str;
+
+    const child={
+      x:(a.x*a.str+b.x*b.str)/total,
+      y:(a.y*a.str+b.y*b.str)/total,
+      vx:(a.vx+b.vx)/2,
+      vy:(a.vy+b.vy)/2,
+      str:clamp(total*.76),
+      per:clamp((a.per+b.per)/2+.08),
+      age:Math.max(a.age,b.age),
+      delay:0,
+      hue:(a.hue+b.hue)/2,
+      phase:(a.phase+b.phase)/2,
+      anchor:false
+    };
+
+    s.nodes.splice(Math.max(i,j),1);
+    s.nodes.splice(Math.min(i,j),1);
+    s.nodes.push(child);
+
+    s.merged++;
+
+    deposit(s,{
+      hue:child.hue,
+      str:.05,
+      per:child.per
+    });
+  }
+
+  // Autonomous recurrence:
+  // forgotten residue may produce a new form.
+  const chance=Math.min(
+    .12,
+    dt*.004*(.5+s.residue.reduce((a,b)=>a+b,0))
+  );
+
+  if(rand(s)<chance && s.nodes.length<500) {
+    const k=Math.floor(rand(s)*8);
+
+    s.nodes.push({
+      x:.1+.8*rand(s),
+      y:.1+.8*rand(s),
+      vx:0,vy:0,
+      str:.18+.22*s.residue[k],
+      per:.2,
+      age:0,
+      delay:0,
+      hue:k*45,
+      phase:rand(s)*6.28,
+      anchor:false
+    });
+  }
+
+  for(let k=0;k<8;k++) {
+    s.residue[k]*=Math.exp(-dt*.00012);
+  }
+
+  if(s.nodes.length>550) compact(s);
+}
+
+// --------------------------------------------------
+// TIME ENGINE
+// --------------------------------------------------
+
+function advance(s,days) {
+  const steps=Math.min(
+    150,Math.max(1,Math.ceil(days/7))
+  );
+
+  for(let k=0;k<steps;k++) {
+    evolve(s,days/steps);
+  }
+}
+
+function catchUp() {
+  const now=Date.now();
+  const elapsed=Math.max(0,now-(mem.last||now));
+
+  mem.last=now;
+
+  const days=Math.min(3650,elapsed/60000);
+
+  if(days>.01) {
+    advance(mem,days);
+
+    $('message').textContent=
+      `Memory continued through ${days.toFixed(1)} `+
+      `simulated days while you were away.`;
+  }
+
+  save();
+}
+
+// --------------------------------------------------
+// ANCHORED MEMORY
+// --------------------------------------------------
+
+function anchor() {
+  mem.nodes.push({
+    x:.05+.9*rand(mem),
+    y:.05+.9*rand(mem),
+    vx:0,vy:0,
+    str:1,per:1,
+    age:0,delay:0,
+    hue:Math.floor(rand(mem)*360),
+    phase:rand(mem)*6.28,
+    anchor:true
+  });
+
+  save();
+  refresh();
+}
+
+// --------------------------------------------------
+// MEMORY ORGANISMS
+// --------------------------------------------------
+
+function organisms(s) {
+  const groups=new Map();
+
+  for(const n of s.nodes) {
+    if(n.delay>0 || n.anchor) continue;
+
+    const ix=Math.min(4,Math.floor(n.x*5));
+    const iy=Math.min(3,Math.floor(n.y*4));
+    const key=`${ix}-${iy}`;
+
+    if(!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(n);
+  }
+
+  return [...groups.values()]
+    .filter(g=>g.length>=5)
+    .map(g=>({
+      x:g.reduce((a,n)=>a+n.x,0)/g.length,
+      y:g.reduce((a,n)=>a+n.y,0)/g.length,
+      r:Math.min(.19,.035+g.length*.0017),
+      weight:g.reduce((a,n)=>a+n.str,0)/g.length,
+      count:g.length
+    }));
+}
+
+function visible(s) {
+  return s.nodes.filter(n=>n.anchor || n.delay<=0);
+}
+
+// --------------------------------------------------
+// INTERFACE
+// --------------------------------------------------
+
+function refresh() {
+  const nodes=visible(mem);
+  const org=organisms(mem);
+
+  $('offerings').textContent=mem.offers;
+  $('living').textContent=nodes.length;
+  $('anchors').textContent=
+    mem.nodes.filter(n=>n.anchor).length;
+  $('organisms').textContent=org.length;
+  $('merged').textContent=mem.merged;
+  $('forgotten').textContent=mem.forgotten;
+
+  $('weather').textContent=weatherNames[mem.weather];
+  $('weatherText').textContent=weatherText[mem.weather];
+  $('epoch').textContent=`EPOCH ${mem.epoch}`;
+
+  $('clock').textContent=
+    `Age: ${mem.days.toFixed(1)} simulated days · `+
+    `Memory is local to this browser.`;
+
+  $('meters').innerHTML=labels.map((l,i)=>`
+    <div class="meter">
+      <span>${l}</span>
+      <div class="track">
+        <div class="fill"
+          style="width:${(mem.field[i]*100).toFixed(1)}%">
+        </div>
+      </div>
+      <span>${mem.field[i].toFixed(2)}</span>
+    </div>
+  `).join('');
+
+  if(view==='ascii') ascii();
+  if(view==='poem') poem();
+}
+
+function setView(v) {
+  view=v;
+
+  document.querySelectorAll('[data-view]').forEach(b=>
+    b.classList.toggle('active',b.dataset.view===v)
+  );
+
+  $('art').hidden=v==='ascii'||v==='poem';
+  $('ascii').hidden=v!=='ascii';
+  $('poem').hidden=v!=='poem';
+
+  refresh();
+}
+
+// --------------------------------------------------
+// VISUAL MEMORY RENDERER
+// --------------------------------------------------
+
+function renderScene(canvas,s,mode='living',simple=false) {
+  const box=canvas.getBoundingClientRect();
+  const W=box.width||300;
+  const H=box.height||150;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  const ctx=canvas.getContext('2d');
+
+  if(canvas.width!==Math.round(W*dpr) ||
+     canvas.height!==Math.round(H*dpr)) {
+    canvas.width=Math.round(W*dpr);
+    canvas.height=Math.round(H*dpr);
+  }
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#091721';
+  ctx.fillRect(0,0,W,H);
+
+  const t=$('motion').checked ? frame*.018 : 0;
+  const org=organisms(s);
+  const nodes=visible(s);
+
+  // Weather-dependent organic contours.
+  for(let j=0;j<org.length;j++) {
+    const o=org[j];
+    const cx=o.x*W;
+    const cy=o.y*H;
+    const r=o.r*Math.min(W,H)*2.3;
+
+    ctx.beginPath();
+
+    for(let k=0;k<=32;k++) {
+      const theta=k*Math.PI*2/32;
+
+      const variation=
+        1+
+        .12*Math.sin(theta*5+j*4+t*.09)+
+        .07*Math.cos(theta*3+s.days*.02);
+
+      const x=cx+Math.cos(theta)*r*variation;
+      const y=cy+Math.sin(theta)*r*.78*variation;
+
+      if(k===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    }
+
+    ctx.closePath();
+
+    ctx.fillStyle=
+      `rgba(${s.weather===2?'184,126,131':'134,171,170'},`+
+      `${.022+o.weight*.055})`;
+
+    ctx.fill();
+
+    if(!simple && mode==='living') {
+      ctx.strokeStyle='rgba(157,192,188,.13)';
+      ctx.stroke();
+    }
+  }
+
+  const pts=nodes.map(n=>({
+    n,
+    x:(n.x+Math.sin(t*.4+n.phase)*.005*s.field[5])*W,
+    y:(n.y+Math.cos(t*.3+n.phase)*.005*s.field[5])*H
+  }));
+
+  // Relations.
+  for(let i=0;i<pts.length;i++) {
+    const a=pts[i];
+
+    for(let j=Math.max(0,i-(simple?8:16));j<i;j++) {
+      const b=pts[j];
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+
+      const cutoff=Math.min(W,H)*(
+        .1+.16*s.field[4]
+      );
+
+      if(d<cutoff) {
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+
+        ctx.strokeStyle=
+          `rgba(138,190,197,`+
+          `${(.05+.06*s.field[4])*(1-d/cutoff)*a.n.str})`;
+
+        ctx.lineWidth=.65;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Nodes and typographic traces.
+  for(let i=0;i<pts.length;i++) {
+    const p=pts[i];
+    const n=p.n;
+
+    ctx.beginPath();
+    ctx.arc(
+      p.x,p.y,
+      n.anchor
+        ? (simple?2.6:3.7)
+        : (simple?.8:1.1+n.str*1.15),
+      0,Math.PI*2
+    );
+
+    ctx.fillStyle=n.anchor
+      ? '#e8b892'
+      : `hsla(${160+n.hue*.24},50%,77%,${clamp(n.str)})`;
+
+    ctx.fill();
+
+    if(n.anchor&&!simple) {
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,7,0,6.283);
+      ctx.strokeStyle='rgba(232,184,146,.32)';
+      ctx.stroke();
+    }
+
+    if(mode==='living' && !simple &&
+       !n.anchor && i%7===0) {
+
+      const marks=['∴','~','⌁','·','+','◌'];
+
+      ctx.fillStyle=
+        `rgba(193,211,207,${.2+n.str*.4})`;
+
+      ctx.font=`${10+Math.round(n.str*5)}px Georgia`;
+
+      ctx.fillText(
+        marks[(i+Math.floor(s.days/17))%marks.length],
+        p.x+6,p.y-4
+      );
+    }
+  }
+}
+
+// --------------------------------------------------
+// ASCII MEMORY
+// --------------------------------------------------
+
+function ascii() {
+  const box=$('ascii');
+
+  const W=Math.min(
+    90,Math.max(26,Math.floor((box.clientWidth-16)/7.5))
+  );
+
+  const H=Math.min(
+    40,Math.max(16,Math.floor((box.clientHeight-16)/11.5))
+  );
+
+  const chars='  .,:;+=*#%@';
+  const org=organisms(mem);
+  const nodes=visible(mem).slice(-400);
+
+  let output='';
+
+  for(let y=0;y<H;y++) {
+    for(let x=0;x<W;x++) {
+      const xx=x/W;
+      const yy=y/H;
+
+      let value=.07+
+        .09*Math.sin(xx*18+mem.days*.02)*
+        Math.cos(yy*14-mem.days*.013);
+
+      for(const n of nodes) {
+        const d=(xx-n.x)**2+(yy-n.y)**2;
+        value+=n.str*.46*Math.exp(-d*130);
+      }
+
+      for(const o of org) {
+        const d=(xx-o.x)**2+(yy-o.y)**2;
+        value+=.14*Math.exp(-d/(o.r*o.r));
+      }
+
+      value+=mem.residue[
+        Math.min(7,Math.floor(xx*8))
+      ]*.3;
+
+      output+=chars[Math.min(
+        chars.length-1,
+        Math.floor(clamp(value)*chars.length)
+      )];
+    }
+    output+='\n';
+  }
+
+  box.textContent=output;
+}
+
+// --------------------------------------------------
+// VISUAL HAIKU
+// --------------------------------------------------
+
+function poem() {
+  let seed=(
+    Math.floor(mem.days/4)+
+    mem.offers*17+
+    mem.merged*71+
+    mem.forgotten*23+
+    Math.floor(mem.field.reduce(
+      (a,v,i)=>a+v*(i+1)*10000,0
+    ))
+  )>>>0;
+
+  const next=()=>{
+    seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+    return seed/4294967296;
+  };
+
+  const pick=a=>a[Math.floor(next()*a.length)];
+
+  const adjectives=[
+    'tender','unwritten','distant','patient',
+    'restless','silver','quiet','forgotten',
+    'hollow','weightless'
+  ];
+
+  const nouns=[
+    'silence','river','threshold','echo',
+    'afternoon','horizon','garden','shadow',
+    'distance','rain'
+  ];
+
+  const verbs=[
+    'unfolds','drifts','remains','awakens',
+    'dissolves','returns','wanders'
+  ];
+
+  $('poem').replaceChildren();
+
+  const lines=[
+    pick(['∴','⌁','◌','∿','⋯']),
+    `a ${pick(adjectives)} ${pick(nouns)}`,
+    `between ${pick(nouns)} and ${pick(nouns)}`,
+    `something ${pick(verbs)}`
+  ];
+
+  for(const line of lines) {
+    const el=document.createElement('div');
+    el.textContent=line;
+
+    if(line.length<3) el.className='symbol';
+
+    $('poem').append(el);
+  }
+}
+
+// --------------------------------------------------
+// ANIMATION
+// --------------------------------------------------
+
+function draw() {
+  requestAnimationFrame(draw);
+  frame++;
+
+  if(view==='living'||view==='constellation') {
+    renderScene($('art'),mem,view);
+  }
+}
+
+// --------------------------------------------------
+// THREE POSSIBLE FUTURES
+// --------------------------------------------------
+
+function futures() {
+  const labels=['Growth','Drift','Stillness'];
+  const grid=$('futureGrid');
+
+  grid.replaceChildren();
+  preview=[];
+
+  for(let k=0;k<3;k++) {
+    const s=clone(mem);
+
+    // Same starting memory, different future conditions.
+    s.rng=(s.rng+(k+1)*0x9E3779B9)>>>0;
+
+    s.history[k%3]=clamp(s.history[k%3]+.3);
+    s.field[0]=clamp(s.field[0]+[.2,0,-.2][k]);
+    s.field[5]=clamp(s.field[5]+[0,.24,-.14][k]);
+    s.weather=[1,4,0][k];
+
+    advance(s,365*5);
+    preview.push(s);
+
+    const card=document.createElement('div');
+    card.className='future';
+
+    const title=document.createElement('strong');
+    title.textContent=labels[k];
+
+    const canvas=document.createElement('canvas');
+    canvas.style.display='block';
+
+    const p=document.createElement('p');
+    p.textContent=
+      `${visible(s).length} forms · `+
+      `${organisms(s).length} organisms · `+
+      `${s.forgotten} forgotten`;
+
+    card.append(title,canvas,p);
+    grid.append(card);
+
+    requestAnimationFrame(()=>
+      renderScene(canvas,s,'constellation',true)
+    );
+  }
+}
+
+// --------------------------------------------------
+// THE MOMENT — EPHEMERAL RECEIPT
+// --------------------------------------------------
+
+function receiptArt(date) {
+  const stamp=date.toISOString();
+  const r={rng:newSeed()};
+  const h=Math.floor(rand(r)*360);
+
+  let content=`
+    <rect width="520" height="610"
+      fill="hsl(${h},32%,15%)"/>
+    <text x="260" y="43"
+      font-family="monospace"
+      font-size="13"
+      text-anchor="middle"
+      letter-spacing="2"
+      fill="#eee4d4">
+      A MEMORY WITHOUT AN OWNER
+    </text>
+  `;
+
+  for(let i=0;i<38;i++) {
+    const angle=i*2.399;
+    const radius=10+i*4.8;
+
+    const cx=260+Math.cos(angle)*radius;
+    const cy=290+Math.sin(angle)*radius;
+
+    content+=`
+      <ellipse
+        cx="${cx}" cy="${cy}"
+        rx="${10+rand(r)*38}"
+        ry="${13+rand(r)*27}"
+        fill="none"
+        stroke="hsl(${(h+i*17)%360},70%,75%)"
+        stroke-width="1.2"
+        opacity=".6"
+        transform="rotate(${Math.round(rand(r)*360)} ${cx} ${cy})"
+      />
+    `;
+  }
+
+  content+=`
+    <text x="260" y="501"
+      font-family="Georgia,serif"
+      font-size="32"
+      text-anchor="middle"
+      fill="#f2e1d0">You were here.</text>
+
+    <text x="260" y="542"
+      font-family="monospace"
+      font-size="14"
+      text-anchor="middle"
+      fill="#b4d0d0">${stamp}</text>
+
+    <text x="260" y="579"
+      font-family="monospace"
+      font-size="11"
+      text-anchor="middle"
+      fill="#b4c6c4">
+      THE MOMENT EXISTS ONLY ONCE
+    </text>
+  `;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 520 610">${content}</svg>`;
+}
+
+function showReceipt() {
+  receipt=receiptArt(new Date());
+  $('receiptArt').innerHTML=receipt;
+  $('overlay').classList.add('open');
+}
+
+function hideReceipt() {
+  receipt=null;
+  $('receiptArt').replaceChildren();
+  $('overlay').classList.remove('open');
+}
+
+function download(data,name,type) {
+  const blob=new Blob([data],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+
+  a.href=url;
+  a.download=name;
+  a.click();
+
+  setTimeout(()=>URL.revokeObjectURL(url),1800);
+}
+
+// --------------------------------------------------
+// CONTROLS
+// --------------------------------------------------
+
+$('send').onclick=()=>{
+  const text=$('entry').value;
+
+  if(!text.trim()) {
+    $('status').textContent=
+      'Enter something, or choose Offer silence.';
+    return;
+  }
+
+  add(mem,text);
+  $('entry').value='';
+  mem.last=Date.now();
+
+  save();
+  refresh();
+  showReceipt();
+
+  $('status').textContent='Transformed locally.';
+};
+
+$('silence').onclick=()=>{
+  add(mem,'');
+  mem.last=Date.now();
+  save();
+  refresh();
+  showReceipt();
+};
+
+$('add10').onclick=()=>{
+  for(let i=0;i<10;i++) add(mem,'');
+  save();
+  refresh();
+};
+
+$('add100').onclick=()=>{
+  for(let i=0;i<100;i++) add(mem,'');
+  save();
+  refresh();
+};
+
+$('year').onclick=()=>{
+  advance(mem,365);
+  mem.last=Date.now();
+  save();
+  refresh();
+};
+
+$('anchor').onclick=anchor;
+
+$('reset').onclick=()=>{
+  if(!confirm(
+    'Start a new local memory? '+
+    'The existing test4 memory will be replaced.'
+  )) return;
+
+  mem=fresh();
+  save();
+  refresh();
+
+  $('futureGrid').innerHTML=
+    '<p class="muted">Run the preview to explore three futures.</p>';
+};
+
+$('export').onclick=()=>download(
+  JSON.stringify(mem,null,2),
+  'mpe_memory_test4.json',
+  'application/json'
+);
+
+$('futures').onclick=futures;
+
+$('saveReceipt').onclick=()=>{
+  if(receipt) download(
+    receipt,
+    'The_Moment_'+Date.now()+'.svg',
+    'image/svg+xml'
+  );
+};
+
+$('dismiss').onclick=hideReceipt;
+
+document.querySelectorAll('[data-view]').forEach(b=>{
+  b.onclick=()=>setView(b.dataset.view);
+});
+
+// --------------------------------------------------
+// START MEMORY PROCESSING ENGINE
+// --------------------------------------------------
+
+catchUp();
+refresh();
+requestAnimationFrame(draw);
+
+let lastTick=Date.now();
+
+setInterval(()=>{
+  const now=Date.now();
+  const elapsed=Math.max(0,now-lastTick);
+  lastTick=now;
+
+  if($('time').checked) {
+    advance(mem,Math.min(.1,elapsed/60000));
+    mem.last=now;
+    save();
+    refresh();
+  } else {
+    mem.last=now;
+    save();
+  }
+
+  if(view==='ascii') ascii();
+
+},1200);
+
+window.addEventListener('pagehide',()=>{
+  mem.last=Date.now();
+  save();
+});
+
+})();
+</script>
+</body>
+</html>
