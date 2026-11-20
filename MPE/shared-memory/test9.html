@@ -1,0 +1,482 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+ content="width=device-width,initial-scale=1">
+
+<title>MPE 0.9 — Shared Memory</title>
+
+<style>
+:root {color-scheme:dark}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:#0b1119;
+  color:#eee8df;
+  font:15px/1.6 system-ui,sans-serif;
+}
+.wrap {
+  max-width:1100px;
+  margin:auto;
+  padding:28px 18px;
+}
+h1 {
+  font:normal clamp(32px,5vw,56px)
+    Georgia,serif;
+  margin:12px 0 2px;
+}
+.sub {
+  font:italic 17px Georgia,serif;
+  color:#e6be94;
+}
+.panel {
+  background:#17222e;
+  border:1px solid #344754;
+  border-radius:14px;
+  padding:18px;
+  margin:17px 0;
+}
+.stage {
+  width:100%;
+  aspect-ratio:2/1;
+  display:block;
+  border-radius:12px;
+  background:#091721;
+  border:1px solid #344754;
+}
+.grid {
+  display:grid;
+  grid-template-columns:1.7fr 1fr;
+  gap:18px;
+}
+button {
+  background:#2b434f;
+  border:1px solid #66848d;
+  border-radius:8px;
+  color:#eee8df;
+  padding:11px 14px;
+  font:inherit;
+  cursor:pointer;
+}
+button.primary {
+  background:#e6be94;
+  color:#17222e;
+  font-weight:bold;
+}
+textarea {
+  width:100%;
+  min-height:90px;
+  background:#0b1923;
+  border:1px solid #66848d;
+  color:white;
+  border-radius:8px;
+  padding:10px;
+  font:inherit;
+}
+.row {
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin:12px 0;
+}
+.note {
+  color:#aec1c7;
+  font-size:13px;
+}
+.number {
+  font:25px Georgia,serif;
+  color:#e6be94;
+}
+#moment {
+  padding:15px;
+  border:1px solid #66848d;
+  border-radius:8px;
+  color:#e6be94;
+}
+#moment[hidden] {display:none}
+a {color:#a6d0d3}
+
+@media(max-width:700px) {
+  .grid {grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<small>
+A MEMORY WITHOUT AN OWNER /
+SHARED MEMORY EXPERIMENT
+</small>
+
+<h1>The memory belongs to no one.</h1>
+
+<p class="sub">
+MPE 0.9 · Shared memory, changing perception.
+</p>
+
+<div class="grid">
+
+<section class="panel">
+  <canvas id="art" class="stage"></canvas>
+
+  <div class="row">
+    <span class="number" id="offers">–</span>
+    offerings ·
+
+    <span class="number" id="visible">–</span>
+    visible ·
+
+    <span class="number" id="waiting">–</span>
+    waiting
+  </div>
+
+  <p class="note" id="photo"></p>
+</section>
+
+<section class="panel">
+  <h2>Leave a trace</h2>
+
+  <p class="note">
+    Your original text is transformed in this browser.
+    Only eight coarse numeric properties are sent
+    to the server.
+  </p>
+
+  <textarea id="text" maxlength="180"
+    placeholder="A word, a thought, or a silence...">
+  </textarea>
+
+  <div class="row">
+    <button class="primary" id="offer">
+      Transform &amp; offer
+    </button>
+
+    <button id="silence">
+      Offer silence ∅
+    </button>
+  </div>
+
+  <div id="moment" hidden></div>
+
+  <p class="note" id="status">
+    Connecting to the collective memory…
+  </p>
+
+  <p class="note">
+    No account. No original text on the server.
+    An accepted trace may remain invisible for a while.
+    The receipt exists only on this screen.
+  </p>
+
+  <button id="photoBtn">
+    Change Ghost Image
+  </button>
+</section>
+
+</div>
+</main>
+
+<script>
+(()=>{
+'use strict';
+
+const $=id=>document.getElementById(id);
+const clamp=(n,a=0,b=1)=>
+  Math.max(a,Math.min(b,n));
+
+const photos=[
+  'IMG_6484.jpeg',
+  'R0011164.jpeg',
+  'R0011165.jpeg',
+  'R0012243.jpeg',
+  'R0012371.jpeg',
+  'R0015191.jpeg',
+  'R0015290.jpeg'
+];
+
+let state=null;
+let ghost=null;
+let photoName='';
+let frame=0;
+
+function selectPhoto() {
+  const candidates=photos.filter(
+    n=>n!==photoName
+  );
+
+  photoName=candidates[
+    Math.floor(Math.random()*candidates.length)
+  ];
+
+  const img=new Image();
+
+  img.onload=()=>{
+    ghost=img;
+  };
+
+  img.onerror=()=>{
+    ghost=null;
+  };
+
+  img.src=photoName;
+
+  $('photo').textContent=
+    'Ghost: '+photoName;
+}
+
+// Browser-side input abstraction.
+
+function features(text) {
+  let n=0,spaces=0,marks=0,diff=0,last=0;
+
+  for(const ch of text) {
+    const c=ch.codePointAt(0);
+    n++;
+
+    if(/\s/u.test(ch)) spaces++;
+    if(/[.,!?;:]/u.test(ch)) marks++;
+
+    diff+=Math.min(
+      1,Math.abs(c-last)/100
+    );
+
+    last=c;
+  }
+
+  const raw=[
+    n?clamp(n/95):Math.random(),
+    n?clamp(spaces/n*5):Math.random(),
+    n?clamp(marks/n*9):Math.random(),
+    n?clamp(diff/n):Math.random(),
+    Math.random(),
+    Math.random(),
+    Math.random(),
+    Math.random()
+  ];
+
+  return raw.map(x=>
+    Math.round(
+      (.35*x+.65*Math.random())*20
+    )/20
+  );
+}
+
+async function refresh() {
+  try {
+    const r=await fetch('/api/state',{
+      cache:'no-store'
+    });
+
+    if(!r.ok) {
+      throw Error('HTTP '+r.status);
+    }
+
+    state=await r.json();
+
+    $('offers').textContent=state.offers;
+    $('visible').textContent=state.nodes.length;
+    $('waiting').textContent=state.waiting;
+
+    $('status').textContent=
+      'Connected · collective memory age: '+
+      state.days.toFixed(1)+
+      ' simulated days';
+
+  } catch(e) {
+    $('status').textContent=
+      'Server unavailable: '+e.message;
+  }
+}
+
+async function offer(text) {
+  const v=features(text);
+
+  $('text').value='';
+  $('moment').hidden=true;
+
+  try {
+    const r=await fetch('/api/trace',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({features:v})
+    });
+
+    if(!r.ok) {
+      throw Error('HTTP '+r.status);
+    }
+
+    const moment=new Date().toISOString();
+
+    $('moment').textContent=
+      'You were here. '+moment+
+      ' · Your trace has been accepted. '+
+      'Its moment is yet to come. '+
+      'Save a screenshot if you wish to '+
+      'keep this moment.';
+
+    $('moment').hidden=false;
+
+    await refresh();
+
+  } catch(e) {
+    $('status').textContent=
+      'Not accepted: '+e.message;
+  }
+}
+
+$('offer').onclick=()=>{
+  const t=$('text').value;
+
+  if(!t.trim()) {
+    $('status').textContent=
+      'Write something, or offer silence.';
+    return;
+  }
+
+  offer(t);
+};
+
+$('silence').onclick=()=>offer('');
+
+$('photoBtn').onclick=selectPhoto;
+
+// First shared-memory visualization.
+
+function paint() {
+  requestAnimationFrame(paint);
+
+  const c=$('art');
+  const box=c.getBoundingClientRect();
+
+  const W=box.width;
+  const H=box.height;
+
+  const dpr=Math.min(
+    2,devicePixelRatio||1
+  );
+
+  if(
+    c.width!==Math.round(W*dpr) ||
+    c.height!==Math.round(H*dpr)
+  ) {
+    c.width=Math.round(W*dpr);
+    c.height=Math.round(H*dpr);
+  }
+
+  const g=c.getContext('2d');
+
+  g.setTransform(dpr,0,0,dpr,0,0);
+
+  g.fillStyle='#091721';
+  g.fillRect(0,0,W,H);
+
+  if(ghost) {
+    const temp=document.createElement('canvas');
+
+    temp.width=Math.max(
+      24,Math.round(W/20)
+    );
+
+    temp.height=Math.max(
+      12,Math.round(H/20)
+    );
+
+    const tg=temp.getContext('2d');
+
+    const scale=Math.max(
+      temp.width/ghost.width,
+      temp.height/ghost.height
+    );
+
+    tg.drawImage(
+      ghost,
+      (temp.width-ghost.width*scale)/2,
+      (temp.height-ghost.height*scale)/2,
+      ghost.width*scale,
+      ghost.height*scale
+    );
+
+    g.globalAlpha=.055;
+    g.imageSmoothingEnabled=false;
+
+    g.drawImage(temp,0,0,W,H);
+
+    g.globalAlpha=1;
+  }
+
+  if(!state) return;
+
+  const ns=state.nodes;
+  const t=frame++*.013;
+
+  const points=ns.map(n=>({
+    n,
+    x:(
+      n.x+Math.sin(t+n.h)*.003
+    )*W,
+    y:(
+      n.y+Math.cos(t*.8+n.h)*.003
+    )*H
+  }));
+
+  for(let i=0;i<points.length;i++) {
+    const a=points[i];
+
+    for(
+      let j=Math.max(0,i-15);
+      j<i;
+      j++
+    ) {
+      const b=points[j];
+
+      const d=Math.hypot(
+        a.x-b.x,a.y-b.y
+      );
+
+      const lim=Math.min(W,H)*.23;
+
+      if(d<lim) {
+        g.strokeStyle=
+          `rgba(155,203,205,`+
+          `${.13*(1-d/lim)})`;
+
+        g.beginPath();
+        g.moveTo(a.x,a.y);
+        g.lineTo(b.x,b.y);
+        g.stroke();
+      }
+    }
+
+    g.fillStyle=a.n.anchor
+      ?'#e6be94'
+      :`rgba(170,211,213,${.25+.7*a.n.s})`;
+
+    g.beginPath();
+
+    g.arc(
+      a.x,a.y,
+      a.n.anchor?3.5:1.2+a.n.s,
+      0,Math.PI*2
+    );
+
+    g.fill();
+  }
+}
+
+selectPhoto();
+refresh();
+
+setInterval(refresh,3000);
+paint();
+
+})();
+</script>
+</body>
+</html>
