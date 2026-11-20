@@ -1,0 +1,1031 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPE 0.8 — Changing Ghosts</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1119;--card:#17222e;--line:#344754;--ink:#eee8df;--muted:#a5b6bf;--gold:#e6be94}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif}
+button,textarea{font:inherit}
+button{cursor:pointer;padding:9px 12px;color:var(--ink);background:#293b47;border:1px solid #516876;border-radius:9px}
+button:hover{background:#38535e}
+button.active{background:#3b6268;border-color:#9ac9c9}
+button.primary{background:var(--gold);color:#18262e;border-color:var(--gold);font-weight:700}
+button:focus-visible,textarea:focus-visible{outline:2px solid #a2ccd0;outline-offset:2px}
+.wrap{max-width:1370px;margin:auto;padding:22px 17px 45px}
+header,.tabs,.actions,.stats,.future-head{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+header,.future-head{justify-content:space-between}
+.eyebrow{font:11px monospace;letter-spacing:.17em;color:#a4c8ca}
+.pill{padding:5px 11px;border:1px solid #56707b;border-radius:30px;font:11px monospace;color:#b1d0d2}
+h1{font:normal clamp(32px,5vw,59px) Georgia,serif;margin:18px 0 1px}
+h2{font:normal 25px Georgia,serif;margin:0 0 12px}
+h3{font-size:14px;margin:0 0 8px}
+.lead{font:italic 17px Georgia,serif;color:var(--gold);margin:0 0 22px}
+.layout{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(300px,.92fr);gap:18px}
+.panel{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}
+.tabs{margin-bottom:12px}
+.stage{aspect-ratio:2/1;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#091721}
+canvas{display:block;width:100%;height:100%}
+#ascii,#poem{position:absolute;inset:0;margin:0}
+[hidden]{display:none!important}
+#ascii{padding:12px;white-space:pre;overflow:hidden;font:9px/1.05 monospace;color:#b9d0d2}
+#poem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:15px;text-align:center;background:radial-gradient(ellipse,#283b45,#091721);font:italic clamp(17px,2.5vw,33px) Georgia,serif}
+.symbol{font:normal 45px Georgia,serif;color:#a0cad0}
+.stats{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;gap:17px}
+.stat b{display:block;font:26px Georgia,serif;color:var(--gold)}
+.stat small,.muted{font-size:12px;color:var(--muted)}
+.note{padding:11px 12px;margin-top:12px;background:#1b3038;border-left:2px solid #a9c6bf;font-size:12px}
+.weather{padding:12px;background:#203744;border:1px solid #476f7b;border-radius:10px;margin-bottom:18px}
+.block{padding-bottom:17px;margin-bottom:17px;border-bottom:1px solid var(--line)}
+textarea{width:100%;min-height:77px;padding:10px;resize:vertical;border:1px solid #546a77;border-radius:9px;background:#0d1924;color:var(--ink)}
+.actions{margin-top:10px}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0}
+.meter{display:grid;grid-template-columns:85px 1fr 35px;gap:8px;align-items:center;margin:7px 0;font-size:11px}
+.track{height:6px;background:#354752;border-radius:6px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#80bec1,#e2b68d)}
+.diag{padding:12px;margin-top:15px;background:#101e29;border:1px solid #465660;border-radius:10px}
+.diaggrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font:11px monospace}
+.diaggrid b{color:var(--gold);font-weight:normal}
+.futures{margin-top:22px}
+.future-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:10px}
+.future{min-width:0;background:#11222d;border:1px solid var(--line);padding:10px;border-radius:10px}
+.future canvas{aspect-ratio:2/1;height:auto;background:#091721}
+.future p{font-size:11px;color:var(--muted)}
+.footer{font-size:12px;color:var(--muted);margin-top:18px}
+.overlay{display:none;position:fixed;inset:0;z-index:9;align-items:center;justify-content:center;background:#03070ce6;padding:14px}
+.overlay.open{display:flex}
+.receipt{width:min(380px,100%);background:#eae2d5;color:#24343d;text-align:center;border-radius:13px;padding:18px}
+.receipt svg{max-width:100%;width:250px;height:auto}
+.receipt .actions{justify-content:center}
+@media(max-width:850px){
+.layout{grid-template-columns:1fr}
+.wrap{padding:13px 10px}
+.panel{padding:12px}
+}
+@media(max-width:530px){
+.future-grid{grid-template-columns:1fr}
+#ascii{font-size:6px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<span class="eyebrow">TRACES BETWEEN / A MEMORY WITHOUT AN OWNER</span>
+<span class="pill">MPE 0.8 · CHANGING GHOSTS</span>
+</header>
+<h1>The memory remains. The image changes.</h1>
+<p class="lead">Photographic ghosts · Resonance · Waiting · Wandering</p>
+<div class="layout">
+<section class="panel">
+<div class="tabs">
+<button class="active" data-view="living">Living Memory</button>
+<button data-view="constellation">Constellation</button>
+<button data-view="ascii">Living ASCII</button>
+<button data-view="poem">Visual Haiku</button>
+</div>
+<div class="stage">
+<canvas id="art"></canvas>
+<pre id="ascii" hidden></pre>
+<div id="poem" hidden></div>
+</div>
+<div class="stats">
+<div class="stat"><b id="offers">0</b><small>Offerings</small></div>
+<div class="stat"><b id="active">0</b><small>Visible</small></div>
+<div class="stat"><b id="waiting">0</b><small>Waiting</small></div>
+<div class="stat"><b id="anchors">0</b><small>Anchors</small></div>
+<div class="stat"><b id="merged">0</b><small>Assimilations</small></div>
+<div class="stat"><b id="forgotten">0</b><small>Forgotten</small></div>
+</div>
+<div class="note">
+The memory is persistent. The photograph is only a changing way to see it.
+</div>
+<div class="futures">
+<div class="future-head">
+<div>
+<h2 style="margin:0">Three possible futures</h2>
+<span class="muted">Same memory, different chance histories, five simulated years.</span>
+</div>
+<button id="futures">Imagine three futures</button>
+</div>
+<div class="future-grid" id="futureGrid">
+<div class="future">Future I · not yet imagined</div>
+<div class="future">Future II · not yet imagined</div>
+<div class="future">Future III · not yet imagined</div>
+</div>
+</div>
+</section>
+<aside class="panel">
+<h2>Memory Processing Engine</h2>
+<div class="weather">
+<strong id="weather">Stillness</strong>
+<span class="pill" id="epoch">EPOCH 1</span>
+<div class="muted" id="weatherText">The memory gathers itself.</div>
+</div>
+<div class="block">
+<h3>01 / Leave a Trace</h3>
+<p class="muted">Text is transformed locally. Original text is not stored.</p>
+<textarea id="entry" maxlength="200" placeholder="A word, a thought, or a silence..."></textarea>
+<div class="actions">
+<button class="primary" id="send">Transform &amp; offer</button>
+<button id="silence">Offer silence ∅</button>
+</div>
+<p class="muted" id="status">The Moment exists only once.</p>
+</div>
+<div class="block">
+<h3>02 / Observe &amp; Experiment</h3>
+<div class="actions">
+<button id="add10">+10 simulated</button>
+<button id="add100">+100 simulated</button>
+<button id="year">+1 year</button>
+<button id="anchor">Add anchor</button>
+</div>
+<label><input id="time" type="checkbox" checked> Time passes while page is open</label>
+<label><input id="motion" type="checkbox" checked> Animate visual presentation</label>
+<label><input id="wander" type="checkbox" checked> Show wandering point</label>
+<label><input id="ghost" type="checkbox" checked> Show ghost photo</label>
+<div class="actions">
+<button id="nextGhost">Change Ghost Image</button>
+</div>
+<p class="muted" id="photoStatus">Selecting photograph…</p>
+<label><input id="diagnostic" type="checkbox"> Show research diagnostics</label>
+<div class="actions">
+<button id="export">Export memory JSON</button>
+<button id="reset">Start new memory</button>
+</div>
+<p class="muted">1 real minute ≈ 1 simulated day. Reloading catches up elapsed time (up to 10 years).</p>
+</div>
+<div>
+<h3>03 / Collective State</h3>
+<div id="meters"></div>
+<p class="muted" id="clock"></p>
+<p class="muted" id="layers"></p>
+</div>
+<div class="diag" id="diagPanel" hidden>
+<h3>Research diagnostics</h3>
+<div class="diaggrid" id="diagData"></div>
+</div>
+</aside>
+</div>
+<p class="footer">
+Independent local demo · seven curated photographs in the same GitHub folder · no external dependencies. Memory is saved in this browser; ghost image selection is not saved and does not change MPE state.
+</p>
+</main>
+<div class="overlay" id="overlay">
+<div class="receipt">
+<h2>The Moment</h2>
+<div id="receiptArt"></div>
+<p>Your trace has been accepted.<br>Its moment is yet to come.</p>
+<p class="muted" style="color:#53636d">Not stored. Save it now or let it go.</p>
+<div class="actions">
+<button id="saveReceipt">Save SVG</button>
+<button id="dismiss">Let it go</button>
+</div>
+</div>
+</div>
+<script>
+(()=>{'use strict';
+
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const KEY='mpe-v08-changing-ghosts';
+const OLD='mpe-v07-ghost-image';
+
+const PHOTOS=[
+'IMG_6484.jpeg',
+'R0011164.jpeg',
+'R0011165.jpeg',
+'R0012243.jpeg',
+'R0012371.jpeg',
+'R0015191.jpeg',
+'R0015290.jpeg'
+];
+
+const NAMES=['Stillness','Bloom','Turbulence','Dissolve','Dream'];
+const LABELS=['Energy','Density','Rhythm','Contrast','Affinity','Drift','Complexity','Silence'];
+const BASE=[.31,.44,.39,.60,.40,.50,.35,.65];
+
+function randomSeed(){
+const a=new Uint32Array(1);
+if(globalThis.crypto?.getRandomValues)crypto.getRandomValues(a);
+else a[0]=Math.floor(Math.random()*2**32);
+return a[0]||123456;
+}
+
+function rnd(s){
+s.rng=(s.rng+0x6D2B79F5)>>>0;
+let t=s.rng;
+t=Math.imul(t^(t>>>15),t|1);
+t^=t+Math.imul(t^(t>>>7),t|61);
+return((t^(t>>>14))>>>0)/4294967296;
+}
+
+const copy=s=>JSON.parse(JSON.stringify(s));
+
+function fresh(){
+const s={
+version:8,rng:randomSeed(),last:Date.now(),
+days:0,offers:0,merged:0,forgotten:0,
+expired:0,capacity:0,
+field:BASE.slice(),residue:Array(8).fill(0),
+history:[.24,.68,.39],layers:[],
+weather:0,epoch:1,weatherAge:0,
+wander:{x:.48,y:.46,angle:1.3,path:[]},
+nodes:[]
+};
+for(let i=0;i<3;i++)
+s.nodes.push({
+x:[.18,.7,.5][i],y:[.34,.27,.75][i],
+vx:0,vy:0,str:1,per:1,age:0,delay:0,
+hue:[32,183,275][i],phase:i*2.3,anchor:true
+});
+return s;
+}
+
+function migrate(s){
+s.version=8;
+s.last=Date.now();
+s.expired??=0;
+s.capacity??=0;
+s.layers??=[];
+s.residue??=Array(8).fill(0);
+s.history??=[.24,.68,.39];
+s.wander??={x:.48,y:.46,angle:1.3,path:[]};
+return s;
+}
+
+let mem,view='living',frame=0,receipt=null;
+
+try{
+mem=JSON.parse(localStorage.getItem(KEY));
+if(mem?.version!==8||!Array.isArray(mem.nodes))throw Error();
+}catch{
+try{
+const prior=JSON.parse(localStorage.getItem(OLD));
+mem=prior?.version===7&&Array.isArray(prior.nodes)
+?migrate(prior):fresh();
+}catch{mem=fresh();}
+}
+
+function save(){
+try{localStorage.setItem(KEY,JSON.stringify(mem));}
+catch{$('status').textContent='Storage unavailable. Export JSON for backup.';}
+}
+
+// GHOST PHOTOGRAPHS
+// Photo selection never changes the memory's random seed.
+
+let photoIndex=-1,photo=null,photoStatus='loading';
+let pixelCache=null,photoTicket=0;
+
+function choosePhoto(){
+const old=photoIndex;
+let i=Math.floor(Math.random()*PHOTOS.length);
+if(PHOTOS.length>1&&i===old)
+i=(i+1+Math.floor(Math.random()*(PHOTOS.length-1)))%PHOTOS.length;
+photoIndex=i;
+loadPhoto(i);
+}
+
+function loadPhoto(i){
+const ticket=++photoTicket;
+const img=new Image();
+photo=null;
+pixelCache=null;
+photoStatus='loading';
+$('photoStatus').textContent='Loading '+PHOTOS[i]+' …';
+
+img.onload=()=>{
+if(ticket!==photoTicket)return;
+photo=img;
+photoStatus='loaded';
+pixelCache=null;
+$('photoStatus').textContent='Ghost: '+PHOTOS[i];
+refresh();
+};
+img.onerror=()=>{
+if(ticket!==photoTicket)return;
+photoStatus='missing';
+$('photoStatus').textContent='Missing: '+PHOTOS[i]+' (memory still works)';
+refresh();
+};
+img.src=PHOTOS[i];
+}
+
+function ghostBackground(ctx,w,h){
+if(!$('ghost').checked||!photo)return;
+const cw=Math.max(22,Math.round(w/19));
+const ch=Math.max(12,Math.round(h/19));
+
+if(!pixelCache||pixelCache.width!==cw||pixelCache.height!==ch){
+const c=document.createElement('canvas');
+c.width=cw;
+c.height=ch;
+const g=c.getContext('2d');
+const scale=Math.max(cw/photo.width,ch/photo.height);
+const iw=photo.width*scale;
+const ih=photo.height*scale;
+
+g.drawImage(photo,(cw-iw)/2,(ch-ih)/2,iw,ih);
+
+const im=g.getImageData(0,0,cw,ch);
+for(let p=0;p<im.data.length;p+=4){
+const l=(im.data[p]*.299+im.data[p+1]*.587+im.data[p+2]*.114)*.18;
+im.data[p]=l*.60;
+im.data[p+1]=l*.83;
+im.data[p+2]=l;
+}
+g.putImageData(im,0,0);
+pixelCache=c;
+}
+
+ctx.save();
+ctx.imageSmoothingEnabled=false;
+ctx.globalAlpha=.50;
+ctx.drawImage(pixelCache,0,0,w,h);
+ctx.restore();
+}
+
+// INPUT AND MEMORY PROCESSING
+
+function features(s,text){
+let n=0,spaces=0,marks=0,diff=0,last=0;
+for(const c of text){
+const v=c.codePointAt(0);
+n++;
+if(/\s/u.test(c))spaces++;
+if(/[.,!?;:]/u.test(c))marks++;
+diff+=Math.min(1,Math.abs(v-last)/100);
+last=v;
+}
+return[
+n?clamp(n/95):rnd(s),
+n?clamp(spaces/n*5):rnd(s),
+n?clamp(marks/n*9):rnd(s),
+n?clamp(diff/n):rnd(s),
+rnd(s),rnd(s),rnd(s),rnd(s)
+];
+}
+
+function deposit(s,n){
+const k=Math.floor((((n.hue||0)%360)+360)%360/45)%8;
+s.residue[k]=clamp(s.residue[k]+n.str*.009);
+s.history[k%3]=clamp(s.history[k%3]+.003*((n.per||.3)-.3));
+}
+
+function compact(s){
+const fixed=s.nodes.filter(n=>n.anchor);
+const rest=s.nodes.filter(n=>!n.anchor)
+.sort((a,b)=>(b.str+b.per*.25)-(a.str+a.per*.25));
+const gone=rest.splice(470);
+gone.forEach(n=>deposit(s,n));
+s.capacity+=gone.length;
+s.forgotten+=gone.length;
+s.nodes=fixed.concat(rest);
+}
+
+function add(s,text=''){
+const f=features(s,text);
+const anchors=s.nodes.filter(n=>n.anchor);
+const a=anchors[Math.floor(rnd(s)*anchors.length)];
+const roam=rnd(s)<.52;
+const x=roam?.05+.9*rnd(s):clamp(a.x+(rnd(s)-.5)*.31,.03,.97);
+const y=roam?.05+.9*rnd(s):clamp(a.y+(rnd(s)-.5)*.31,.03,.97);
+const n={
+x,y,vx:0,vy:0,
+str:.5+.42*rnd(s),per:.13+.52*rnd(s),
+age:0,delay:.2+3*rnd(s),
+hue:(f[0]*170+rnd(s)*190)%360,
+phase:rnd(s)*6.28,anchor:false
+};
+
+s.nodes.push(n);
+s.offers++;
+
+for(let k=0;k<8;k++)
+s.field[k]=clamp(s.field[k]+(f[k]-.5)*.009,.08,.92);
+
+for(const o of s.nodes){
+if(o===n)continue;
+const d=Math.hypot(n.x-o.x,n.y-o.y);
+if(d<.17){
+o.str=clamp(o.str+.009*(1-d/.17));
+n.per=clamp(n.per+.007);
+}
+}
+if(s.nodes.length>520)compact(s);
+}
+
+function recordLayer(s){
+s.layers.push({day:s.days,field:s.field.slice(),weather:s.weather});
+if(s.layers.length>18){
+const old=s.layers.shift();
+for(let i=0;i<8;i++)
+s.history[i%3]=clamp(s.history[i%3]*.997+old.field[i]*.003);
+}
+}
+
+function evolve(s,dt){
+s.days+=dt;
+s.weatherAge+=dt;
+
+const old=s.field.slice();
+const layer=s.layers.at(-1)?.field||BASE;
+const cycle=Math.sin(s.days*.011+s.history[0]*5)
++.65*Math.sin(s.days*.005+s.history[1]*3);
+const activity=.45*old[0]+.3*old[6]+.13*cycle+.12*layer[2];
+
+const nextWeather=activity>.73?2:
+activity>.57?1:
+old[7]>.71?0:
+cycle<-.55?3:4;
+
+if(s.weatherAge>11&&
+(nextWeather!==s.weather||s.weatherAge>80)&&
+rnd(s)<Math.min(1,dt*.14)){
+s.weather=nextWeather;
+s.weatherAge=0;
+s.epoch++;
+recordLayer(s);
+}
+
+for(let i=0;i<8;i++){
+const phase=s.days*(.0045+.00075*i)
++s.history[i%3]*7+layer[i]*3;
+const target=.49+.17*Math.sin(phase)
++.11*Math.sin(phase*.39+2*i)
++.09*(layer[i]-.5);
+const coupling=.003*(old[(i+1)%8]-old[(i+4)%8]);
+const push=[0,.012,-.015,-.007,.007][s.weather]*(i%2?1:-1);
+s.field[i]=clamp(old[i]+dt*(.038*(target-old[i])+coupling+push),.08,.92);
+}
+
+// Wandering point
+const w=s.wander;
+const anchors=s.nodes.filter(n=>n.anchor);
+const a=anchors[Math.floor(s.days/21)%anchors.length];
+const direction=Math.atan2(a.y-w.y,a.x-w.x);
+const delta=Math.atan2(Math.sin(direction-w.angle),Math.cos(direction-w.angle));
+w.angle+=clamp(delta,-.12,.12)*dt*.18
++(rnd(s)-.5)*.1*Math.sqrt(dt);
+const speed=.0012*(.65+s.field[0]+s.field[5]);
+w.x=clamp(w.x+Math.cos(w.angle)*speed*dt,.02,.98);
+w.y=clamp(w.y+Math.sin(w.angle)*speed*dt,.02,.98);
+w.path.push([w.x,w.y]);
+if(w.path.length>120)w.path.shift();
+
+const survivors=[];
+const weatherSpeed=[.6,1.2,1.8,.75,1][s.weather];
+const decay=[.8,.8,1.05,1.4,.85][s.weather];
+
+for(const n of s.nodes){
+n.age+=dt;
+if(n.anchor){survivors.push(n);continue;}
+if(n.delay>0){
+n.delay=Math.max(0,n.delay-dt);
+survivors.push(n);
+continue;
+}
+
+n.phase+=dt*.015*(.5+s.field[2]);
+const move=dt*.00028*weatherSpeed*(.3+s.field[5]);
+n.vx=clamp(n.vx*.94+Math.sin(n.phase+n.y*9)*move,-.006,.006);
+n.vy=clamp(n.vy*.94+Math.cos(n.phase+n.x*9)*move,-.006,.006);
+n.x=clamp(n.x+n.vx,.02,.98);
+n.y=clamp(n.y+n.vy,.02,.98);
+
+for(const fixed of anchors){
+const d=Math.hypot(n.x-fixed.x,n.y-fixed.y);
+if(d<.16){
+n.str=clamp(n.str+.0005*dt*(1-d/.16));
+n.per=clamp(n.per+.00008*dt);
+}
+}
+
+n.str*=Math.exp(-dt*.003*decay*(1-.67*n.per));
+if(n.str<.035){
+deposit(s,n);
+s.expired++;
+s.forgotten++;
+}else survivors.push(n);
+}
+s.nodes=survivors;
+
+// Assimilation
+const tries=Math.min(20,Math.floor(s.nodes.length/8));
+
+for(let k=0;k<tries;k++){
+const i=Math.floor(rnd(s)*s.nodes.length);
+const j=Math.floor(rnd(s)*s.nodes.length);
+const a=s.nodes[i],b=s.nodes[j];
+if(!a||!b||a===b||a.anchor||b.anchor||a.delay||b.delay)continue;
+const d=Math.hypot(a.x-b.x,a.y-b.y);
+if(d>.052||rnd(s)>.065*dt*weatherSpeed)continue;
+
+const total=a.str+b.str;
+const child={
+x:(a.x*a.str+b.x*b.str)/total,
+y:(a.y*a.str+b.y*b.str)/total,
+vx:(a.vx+b.vx)/2,
+vy:(a.vy+b.vy)/2,
+str:clamp(total*.78),
+per:clamp((a.per+b.per)/2+.06),
+age:Math.max(a.age,b.age),
+delay:0,
+hue:(a.hue+b.hue)/2,
+phase:(a.phase+b.phase)/2,
+anchor:false
+};
+
+s.nodes.splice(Math.max(i,j),1);
+s.nodes.splice(Math.min(i,j),1);
+s.nodes.push(child);
+s.merged++;
+deposit(s,{hue:child.hue,str:.04,per:child.per});
+}
+
+// Autonomous aftereffects
+const sum=s.residue.reduce((a,b)=>a+b,0);
+if(rnd(s)<Math.min(.16,dt*.007*(.7+sum))&&s.nodes.length<490){
+const k=Math.floor(rnd(s)*8);
+s.nodes.push({
+x:.05+.9*rnd(s),y:.05+.9*rnd(s),
+vx:0,vy:0,
+str:.2+.2*s.residue[k],
+per:.2,age:0,delay:0,hue:k*45,
+phase:rnd(s)*6.28,anchor:false
+});
+}
+
+for(let k=0;k<8;k++)
+s.residue[k]*=Math.exp(-dt*.00008);
+
+if(s.nodes.length>520)compact(s);
+}
+
+function advance(s,days){
+let left=Math.max(0,days);
+while(left>.00001){
+const dt=Math.min(2,left);
+evolve(s,dt);
+left-=dt;
+}
+}
+
+function catchUp(){
+const now=Date.now();
+const days=Math.min(3650,Math.max(0,now-(mem.last||now))/60000);
+mem.last=now;
+if(days>.01)advance(mem,days);
+save();
+}
+
+const visible=s=>s.nodes.filter(n=>n.anchor||n.delay<=0);
+const waiting=s=>s.nodes.filter(n=>!n.anchor&&n.delay>0);
+
+function organisms(s){
+const groups=new Map();
+for(const n of visible(s)){
+if(n.anchor)continue;
+const key=`${Math.min(5,Math.floor(n.x*6))}-${Math.min(4,Math.floor(n.y*5))}`;
+if(!groups.has(key))groups.set(key,[]);
+groups.get(key).push(n);
+}
+return[...groups.values()]
+.filter(g=>g.length>=5)
+.map(g=>({
+x:g.reduce((a,n)=>a+n.x,0)/g.length,
+y:g.reduce((a,n)=>a+n.y,0)/g.length,
+r:Math.min(.16,.028+g.length*.002),
+strength:g.reduce((a,n)=>a+n.str,0)/g.length
+}));
+}
+
+// INTERFACE
+
+function refresh(){
+const v=visible(mem);
+const w=waiting(mem);
+
+$('offers').textContent=mem.offers;
+$('active').textContent=v.length;
+$('waiting').textContent=w.length;
+$('anchors').textContent=mem.nodes.filter(n=>n.anchor).length;
+$('merged').textContent=mem.merged;
+$('forgotten').textContent=mem.forgotten;
+$('weather').textContent=NAMES[mem.weather];
+$('epoch').textContent='EPOCH '+mem.epoch;
+
+$('weatherText').textContent=[
+'The memory gathers itself.',
+'Connections begin to bloom.',
+'The memory becomes restless.',
+'Old forms surrender their edges.',
+'The memory wanders through itself.'
+][mem.weather];
+
+$('meters').innerHTML=LABELS.map((n,i)=>`
+<div class="meter">
+<span>${n}</span>
+<div class="track">
+<div class="fill" style="width:${mem.field[i]*100}%"></div>
+</div>
+<span>${mem.field[i].toFixed(2)}</span>
+</div>
+`).join('');
+
+$('clock').textContent=
+`Age: ${mem.days.toFixed(1)} simulated days · Organisms: ${organisms(mem).length}`;
+$('layers').textContent=
+`Historical layers: ${mem.layers.length} · Wanderer: ${mem.wander.path.length} steps`;
+
+$('diagData').innerHTML=[
+['Waiting',w.length],
+['Visible',v.length],
+['Time decay',mem.expired],
+['Capacity loss',mem.capacity],
+['Assimilations',mem.merged],
+['Ghost',PHOTOS[photoIndex]||'none'],
+['Photo status',photoStatus]
+].map(([k,n])=>`<span>${k}: <b>${n}</b></span>`).join('');
+
+if(view==='ascii')ascii();
+if(view==='poem')poem();
+}
+
+function setView(v){
+view=v;
+document.querySelectorAll('[data-view]')
+.forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+$('art').hidden=v==='ascii'||v==='poem';
+$('ascii').hidden=v!=='ascii';
+$('poem').hidden=v!=='poem';
+refresh();
+}
+
+// VISUAL RENDERING
+
+function canvasSetup(canvas){
+const box=canvas.getBoundingClientRect();
+const w=box.width||350,h=box.height||175;
+const dpr=Math.min(devicePixelRatio||1,2);
+const ctx=canvas.getContext('2d');
+
+if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
+canvas.width=Math.round(w*dpr);
+canvas.height=Math.round(h*dpr);
+}
+ctx.setTransform(dpr,0,0,dpr,0,0);
+ctx.fillStyle='#091721';
+ctx.fillRect(0,0,w,h);
+return{ctx,w,h};
+}
+
+function scene(canvas,s,mode='living',simple=false,t=0){
+const{ctx,w,h}=canvasSetup(canvas);
+if(!simple)ghostBackground(ctx,w,h);
+
+const org=organisms(s),nodes=visible(s);
+const breath=.5+.5*Math.sin(s.days*.017+t*.35);
+
+// Quiet residual field
+for(let i=0;i<85;i++){
+const x=((Math.sin(i*23.71+s.history[i%3]*37)*143.7)%1+1)%1;
+const y=((Math.cos(i*11.41+s.history[(i+1)%3]*29)*93.3)%1+1)%1;
+ctx.fillStyle=`rgba(151,200,203,${(.03+.09*s.field[i%8])*(.35+.65*breath)})`;
+ctx.beginPath();
+ctx.arc(x*w,y*h,.5+i%3*.35,0,6.283);
+ctx.fill();
+}
+
+// Memory organisms
+for(let j=0;j<org.length;j++){
+const o=org[j];
+const cx=o.x*w,cy=o.y*h;
+const r=o.r*Math.min(w,h)*2.2;
+ctx.beginPath();
+
+for(let k=0;k<=40;k++){
+const a=k*Math.PI/20;
+const dr=1+.14*Math.sin(a*5+j*4+t*.06)
++.07*Math.cos(a*3+s.days*.02);
+const x=cx+Math.cos(a)*r*dr;
+const y=cy+Math.sin(a)*r*.82*dr;
+if(k)ctx.lineTo(x,y);
+else ctx.moveTo(x,y);
+}
+ctx.closePath();
+ctx.fillStyle=`rgba(${s.weather===2?'192,131,144':'130,172,171'},${.025+o.strength*.06})`;
+ctx.fill();
+
+if(!simple&&mode==='living'){
+ctx.strokeStyle='rgba(157,192,188,.12)';
+ctx.stroke();
+}
+}
+
+// Points and connections
+const pts=nodes.map(n=>({
+n,
+x:(n.x+Math.sin(t*.42+n.phase)*.004*s.field[5])*w,
+y:(n.y+Math.cos(t*.32+n.phase)*.004*s.field[5])*h
+}));
+
+for(let i=0;i<pts.length;i++){
+const a=pts[i];
+
+for(let j=Math.max(0,i-(simple?8:20));j<i;j++){
+const b=pts[j];
+const d=Math.hypot(a.x-b.x,a.y-b.y);
+const limit=Math.min(w,h)*(.11+.19*s.field[4]);
+
+if(d<limit){
+ctx.beginPath();
+ctx.moveTo(a.x,a.y);
+ctx.lineTo(b.x,b.y);
+ctx.strokeStyle=`rgba(160,205,210,${(.05+.14*s.field[4])*(1-d/limit)*a.n.str})`;
+ctx.lineWidth=.7;
+ctx.stroke();
+}
+}
+
+const n=a.n;
+ctx.beginPath();
+ctx.arc(
+a.x,a.y,
+n.anchor?(simple?2.7:4):(simple?1:1.5+n.str*1.3),
+0,6.283
+);
+ctx.fillStyle=n.anchor?'#e8b892':
+`hsla(${160+n.hue*.24},50%,78%,${clamp(.25+n.str*.85)})`;
+ctx.fill();
+
+if(n.anchor&&!simple){
+ctx.beginPath();
+ctx.arc(a.x,a.y,7,0,6.283);
+ctx.strokeStyle='rgba(232,184,146,.35)';
+ctx.stroke();
+}
+
+if(mode==='living'&&!simple&&!n.anchor&&i%7===0){
+ctx.fillStyle=`rgba(193,211,207,${.17+n.str*.36})`;
+ctx.font='12px Georgia';
+ctx.fillText(
+['∴','~','⌁','·','+','◌'][(i+Math.floor(s.days/17))%6],
+a.x+6,a.y-4
+);
+}
+}
+
+// The Wanderer
+if(!simple&&$('wander').checked){
+ctx.beginPath();
+s.wander.path.forEach(([x,y],i)=>
+i?ctx.lineTo(x*w,y*h):ctx.moveTo(x*w,y*h));
+ctx.strokeStyle='rgba(242,215,160,.28)';
+ctx.lineWidth=.8;
+ctx.stroke();
+
+ctx.beginPath();
+ctx.arc(
+(s.wander.x+Math.sin(t*.34)*.004)*w,
+(s.wander.y+Math.cos(t*.29)*.004)*h,
+3,0,6.283
+);
+ctx.fillStyle='#f3deb6';
+ctx.fill();
+}
+}
+
+function ascii(){
+const e=$('ascii');
+const w=Math.min(90,Math.max(24,Math.floor((e.clientWidth-18)/6.6)));
+const h=Math.min(43,Math.max(10,Math.floor((e.clientHeight-15)/10)));
+const nodes=visible(mem).slice(-400);
+const org=organisms(mem);
+const chars='  .,:;+=*#%@';
+let out='';
+
+for(let y=0;y<h;y++){
+for(let x=0;x<w;x++){
+const xx=x/w,yy=y/h;
+let v=.08+.09*Math.sin(xx*18+mem.days*.02)
+*Math.cos(yy*14-mem.days*.014);
+
+for(const n of nodes)
+v+=n.str*.45*Math.exp(-((xx-n.x)**2+(yy-n.y)**2)*130);
+
+for(const o of org)
+v+=.14*Math.exp(-((xx-o.x)**2+(yy-o.y)**2)/(o.r*o.r));
+
+out+=chars[Math.min(chars.length-1,Math.floor(clamp(v)*chars.length))];
+}
+out+='\n';
+}
+e.textContent=out;
+}
+
+function poem(){
+let seed=(Math.floor(mem.days/4)+mem.offers*17
++mem.merged*71+mem.forgotten*23
++Math.floor(mem.field.reduce((a,v,i)=>a+v*(i+1)*10000,0)))>>>0;
+
+const next=()=>{
+seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+return seed/4294967296;
+};
+const pick=a=>a[Math.floor(next()*a.length)];
+
+const adj=['tender','unwritten','distant','patient','restless','silver','quiet','forgotten'];
+const noun=['silence','river','threshold','echo','afternoon','horizon','garden','shadow','distance','rain'];
+const verb=['unfolds','drifts','remains','awakens','dissolves','returns','wanders'];
+
+$('poem').replaceChildren();
+for(const line of [
+pick(['∴','⌁','◌','∿','⋯']),
+`a ${pick(adj)} ${pick(noun)}`,
+`between ${pick(noun)} and ${pick(noun)}`,
+`something ${pick(verb)}`
+]){
+const el=document.createElement('div');
+el.textContent=line;
+if(line.length<3)el.className='symbol';
+$('poem').append(el);
+}
+}
+
+function future(){
+const grid=$('futureGrid');
+grid.replaceChildren();
+
+for(let i=0;i<3;i++){
+const s=copy(mem);
+s.rng=(s.rng+Math.imul(i+1,0x9E3779B9))>>>0;
+advance(s,365*5);
+
+const card=document.createElement('div');
+const title=document.createElement('strong');
+const c=document.createElement('canvas');
+const p=document.createElement('p');
+
+card.className='future';
+title.textContent='Future '+['I','II','III'][i];
+p.textContent=`${visible(s).length} forms · ${NAMES[s.weather]} · ${s.forgotten} forgotten`;
+card.append(title,c,p);
+grid.append(card);
+requestAnimationFrame(()=>scene(c,s,'constellation',true));
+}
+}
+
+// THE MOMENT
+
+function receiptSVG(date){
+const r={rng:randomSeed()},h=Math.floor(rnd(r)*360);
+let shapes=`<rect width="520" height="610" fill="hsl(${h},33%,15%)"/><text x="260" y="43" font-family="monospace" font-size="13" text-anchor="middle" fill="#eee4d4">A MEMORY WITHOUT AN OWNER</text>`;
+
+for(let i=0;i<35;i++){
+const a=i*2.399,d=10+i*5;
+const cx=260+Math.cos(a)*d;
+const cy=290+Math.sin(a)*d;
+shapes+=`<ellipse cx="${cx}" cy="${cy}" rx="${10+rnd(r)*38}" ry="${13+rnd(r)*27}" fill="none" stroke="hsl(${(h+i*17)%360},70%,75%)" opacity=".6" transform="rotate(${Math.round(rnd(r)*360)} ${cx} ${cy})"/>`;
+}
+
+shapes+=`<text x="260" y="501" font-family="Georgia" font-size="32" text-anchor="middle" fill="#f2e1d0">You were here.</text><text x="260" y="542" font-family="monospace" font-size="14" text-anchor="middle" fill="#b4d0d0">${date.toISOString()}</text>`;
+
+return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 610">${shapes}</svg>`;
+}
+
+function showReceipt(){
+receipt=receiptSVG(new Date());
+$('receiptArt').innerHTML=receipt;
+$('overlay').classList.add('open');
+}
+
+function download(text,name,type){
+const url=URL.createObjectURL(new Blob([text],{type}));
+const a=document.createElement('a');
+a.href=url;
+a.download=name;
+a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1700);
+}
+
+// CONTROLS
+
+$('send').onclick=()=>{
+const text=$('entry').value;
+if(!text.trim())
+return $('status').textContent='Write something or choose Offer silence.';
+add(mem,text);
+$('entry').value='';
+mem.last=Date.now();
+save();
+refresh();
+showReceipt();
+$('status').textContent='Transformed locally.';
+};
+
+$('silence').onclick=()=>{
+add(mem,'');
+mem.last=Date.now();
+save();
+refresh();
+showReceipt();
+};
+
+$('add10').onclick=()=>{
+for(let i=0;i<10;i++)add(mem);
+save();refresh();
+};
+
+$('add100').onclick=()=>{
+for(let i=0;i<100;i++)add(mem);
+save();refresh();
+};
+
+$('year').onclick=()=>{
+advance(mem,365);
+mem.last=Date.now();
+save();refresh();
+};
+
+$('anchor').onclick=()=>{
+mem.nodes.push({
+x:.05+.9*rnd(mem),y:.05+.9*rnd(mem),
+vx:0,vy:0,str:1,per:1,age:0,delay:0,
+hue:rnd(mem)*360,phase:rnd(mem)*6.28,anchor:true
+});
+save();refresh();
+};
+
+$('reset').onclick=()=>{
+if(!confirm('Start a new local test8 memory?'))return;
+mem=fresh();
+save();refresh();
+};
+
+$('export').onclick=()=>download(
+JSON.stringify(mem,null,2),
+'mpe_memory_test8.json','application/json'
+);
+
+$('futures').onclick=future;
+$('nextGhost').onclick=choosePhoto;
+
+$('saveReceipt').onclick=()=>{
+if(receipt)
+download(receipt,'The_Moment_'+Date.now()+'.svg','image/svg+xml');
+};
+
+$('dismiss').onclick=()=>{
+receipt=null;
+$('receiptArt').replaceChildren();
+$('overlay').classList.remove('open');
+};
+
+$('diagnostic').onchange=()=>
+$('diagPanel').hidden=!$('diagnostic').checked;
+
+document.querySelectorAll('[data-view]')
+.forEach(b=>b.onclick=()=>setView(b.dataset.view));
+
+function draw(){
+requestAnimationFrame(draw);
+frame++;
+if(view==='living'||view==='constellation')
+scene($('art'),mem,view,false,$('motion').checked?frame*.017:0);
+}
+
+catchUp();
+choosePhoto();
+refresh();
+requestAnimationFrame(draw);
+
+let lastTick=Date.now();
+setInterval(()=>{
+const now=Date.now(),elapsed=Math.max(0,now-lastTick);
+lastTick=now;
+
+if($('time').checked&&!$('overlay').classList.contains('open')){
+advance(mem,Math.min(.06,elapsed/60000));
+mem.last=now;
+save();refresh();
+}else{
+mem.last=now;
+save();
+}
+if(view==='ascii')ascii();
+},1200);
+
+window.addEventListener('pagehide',()=>{
+mem.last=Date.now();
+save();
+});
+
+})();
+</script>
+</body>
+</html>
