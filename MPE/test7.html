@@ -1,0 +1,1587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPE 0.7 — Ghost Image</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#091019;
+  --panel:#16222e;
+  --line:#344755;
+  --ink:#eee8df;
+  --muted:#a5b5bf;
+  --gold:#e4bc92;
+  --ice:#9ac9cf;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:14px/1.55 system-ui,sans-serif;
+}
+button,textarea{font:inherit}
+button{
+  cursor:pointer;
+  padding:9px 12px;
+  border:1px solid #516978;
+  background:#283a47;
+  color:var(--ink);
+  border-radius:9px;
+}
+button:hover{background:#36505c}
+button.active{
+  background:#3a626a;
+  border-color:#9ec8c8;
+}
+button.primary{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:#1a2730;
+  font-weight:700;
+}
+button:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--ice);
+  outline-offset:2px;
+}
+.wrap{
+  max-width:1320px;
+  margin:auto;
+  padding:22px 16px 48px;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.eyebrow{
+  font:11px monospace;
+  letter-spacing:.18em;
+  color:#a4c9cc;
+}
+.pill{
+  border:1px solid #56717d;
+  border-radius:999px;
+  padding:5px 12px;
+  font:11px monospace;
+  color:#b1d1d4;
+}
+h1{
+  font:normal clamp(34px,5vw,60px) Georgia,serif;
+  margin:18px 0 0;
+}
+.lead{
+  font:italic 17px Georgia,serif;
+  color:var(--gold);
+  margin:2px 0 22px;
+}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.75fr) minmax(310px,.9fr);
+  gap:18px;
+}
+.panel{
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:16px;
+  padding:17px;
+  min-width:0;
+}
+h2{
+  font:normal 25px Georgia,serif;
+  margin:0 0 14px;
+}
+h3{
+  margin:0 0 8px;
+  font-size:14px;
+}
+.tabs,.actions,.stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.tabs{margin-bottom:12px}
+.stage{
+  position:relative;
+  height:clamp(340px,45vw,520px);
+  background:#071520;
+  border:1px solid #324654;
+  border-radius:12px;
+  overflow:hidden;
+}
+canvas{
+  display:block;
+  width:100%;
+  height:100%;
+}
+#ascii,#poem{
+  position:absolute;
+  inset:0;
+  margin:0;
+}
+#ascii{
+  padding:10px;
+  white-space:pre;
+  overflow:hidden;
+  font:10px/1.12 monospace;
+  color:#c0d4d3;
+}
+#poem{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  gap:18px;
+  padding:18px;
+  background:radial-gradient(ellipse,#243842,#081520);
+  font:italic clamp(22px,3vw,36px) Georgia,serif;
+}
+.symbol{
+  font:normal 58px Georgia,serif;
+  color:var(--ice);
+}
+[hidden]{display:none!important}
+.stats{
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+  gap:18px;
+}
+.stat b{
+  display:block;
+  font:26px Georgia,serif;
+  color:var(--gold);
+}
+.stat small,.muted{
+  color:var(--muted);
+  font-size:12px;
+}
+.note{
+  margin-top:12px;
+  padding:10px 12px;
+  background:#19303a;
+  border-left:2px solid #a8c5be;
+  font-size:12px;
+}
+.weather{
+  background:#213745;
+  border:1px solid #456f7d;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:20px;
+}
+.weather strong{font-size:16px}
+.block{
+  margin-bottom:18px;
+  padding-bottom:17px;
+  border-bottom:1px solid var(--line);
+}
+textarea{
+  width:100%;
+  min-height:85px;
+  resize:vertical;
+  border-radius:9px;
+  border:1px solid #536b78;
+  background:#0b1822;
+  color:var(--ink);
+  padding:10px;
+}
+.actions{margin-top:9px}
+label{
+  display:block;
+  margin:10px 0;
+  font-size:12px;
+  color:var(--muted);
+}
+.meter{
+  display:grid;
+  grid-template-columns:85px 1fr 34px;
+  gap:8px;
+  align-items:center;
+  margin:7px 0;
+  font-size:11px;
+}
+.track{
+  height:6px;
+  border-radius:9px;
+  overflow:hidden;
+  background:#334651;
+}
+.fill{
+  height:100%;
+  background:linear-gradient(90deg,#84bec2,#e2b38d);
+}
+.diag{
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #445762;
+  background:#101e29;
+}
+.diaggrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:7px 12px;
+  font:12px monospace;
+  color:#bfcdd1;
+}
+.diaggrid b{
+  color:var(--gold);
+  font-weight:normal;
+}
+.futures{
+  margin-top:22px;
+}
+.future-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.future-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.future{
+  background:#12222d;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+}
+.future canvas{
+  height:110px;
+  border-radius:6px;
+  background:#08151f;
+}
+.future p{
+  margin:6px 0 0;
+  font-size:11px;
+  color:var(--muted);
+}
+.footer{
+  margin-top:20px;
+  color:var(--muted);
+  font-size:12px;
+}
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:#03070ce6;
+  z-index:10;
+}
+.overlay.open{display:flex}
+.receipt{
+  width:min(390px,100%);
+  padding:18px;
+  border-radius:13px;
+  background:#ebe2d6;
+  color:#26353d;
+  text-align:center;
+}
+.receipt svg{
+  width:min(100%,270px);
+  height:auto;
+}
+.receipt p{
+  font:italic 16px Georgia,serif;
+}
+.receipt .actions{
+  justify-content:center;
+}
+.receipt button{
+  background:#263d49;
+}
+@media(max-width:850px){
+  .layout{grid-template-columns:1fr}
+  .wrap{padding:14px 11px 40px}
+  .stage{height:390px}
+  .future canvas{height:90px}
+}
+@media(max-width:500px){
+  .future-grid{grid-template-columns:1fr}
+  .future canvas{height:110px}
+}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+<header>
+  <span class="eyebrow">TRACES BETWEEN / A MEMORY WITHOUT AN OWNER</span>
+  <span class="pill">MPE 0.7 · GHOST IMAGE</span>
+</header>
+
+<h1>The image remembers in secret.</h1>
+<p class="lead">Ghost image · Fields · Resonance · Waiting · Wandering</p>
+
+<div class="layout">
+
+<section class="panel">
+  <div class="tabs">
+    <button class="active" data-view="living">Living Memory</button>
+    <button data-view="constellation">Constellation</button>
+    <button data-view="ascii">Living ASCII</button>
+    <button data-view="poem">Visual Haiku</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="art"></canvas>
+    <pre id="ascii" hidden></pre>
+    <div id="poem" hidden></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="offerings">0</b><small>Offerings</small></div>
+    <div class="stat"><b id="living">0</b><small>Visible forms</small></div>
+    <div class="stat"><b id="waiting">0</b><small>Waiting</small></div>
+    <div class="stat"><b id="anchors">0</b><small>Anchors</small></div>
+    <div class="stat"><b id="merged">0</b><small>Assimilations</small></div>
+    <div class="stat"><b id="forgotten">0</b><small>Forgotten</small></div>
+  </div>
+
+  <div class="note" id="message">
+    The memory may become obscure, but it never becomes empty.
+  </div>
+
+  <section class="futures">
+    <div class="future-head">
+      <div>
+        <h2 style="margin:0">Three possible futures</h2>
+        <div class="muted">
+          Same present, three different chance histories, five simulated years.
+        </div>
+      </div>
+      <button id="futures">Imagine three futures</button>
+    </div>
+    <div class="future-grid" id="futureGrid">
+      <div class="future">Future I · awaiting imagination</div>
+      <div class="future">Future II · awaiting imagination</div>
+      <div class="future">Future III · awaiting imagination</div>
+    </div>
+  </section>
+</section>
+
+<aside class="panel">
+  <h2>Memory Processing Engine</h2>
+
+  <div class="weather">
+    <strong id="weather">Stillness</strong>
+    <span class="pill" id="epoch">EPOCH 1</span>
+    <div class="muted" id="weatherText">The memory gathers itself.</div>
+  </div>
+
+  <div class="block">
+    <h3>01 / Leave a Trace</h3>
+    <p class="muted">
+      Text is transformed in your browser. The original text is never saved.
+    </p>
+    <textarea id="entry" maxlength="200" placeholder="A word, a thought, or a silence..."></textarea>
+    <div class="actions">
+      <button class="primary" id="send">Transform &amp; offer</button>
+      <button id="silence">Offer silence ∅</button>
+    </div>
+    <p class="muted" id="status">The Moment appears only once.</p>
+  </div>
+
+  <div class="block">
+    <h3>02 / Observe &amp; Experiment</h3>
+    <div class="actions">
+      <button id="add10">+10 simulated</button>
+      <button id="add100">+100 simulated</button>
+      <button id="year">+1 year</button>
+      <button id="anchor">Add anchor</button>
+    </div>
+
+    <label><input type="checkbox" id="time" checked> Time passes while the page is open</label>
+    <label><input type="checkbox" id="motion" checked> Animate visual presentation</label>
+    <label><input type="checkbox" id="wander" checked> Show the wandering memory point</label>
+    <label><input type="checkbox" id="ghost" checked> Show ghost photo background</label>
+    <label><input type="checkbox" id="diagnostic"> Show research diagnostics</label>
+
+    <div class="actions">
+      <button id="export">Export memory JSON</button>
+      <button id="reset">Start new memory</button>
+    </div>
+
+    <p class="muted">
+      1 real minute ≈ 1 simulated day.
+      On reopening, elapsed time is processed (up to 10 years).
+    </p>
+  </div>
+
+  <div>
+    <h3>03 / Collective State</h3>
+    <div id="meters"></div>
+    <p class="muted" id="clock"></p>
+    <p class="muted" id="layers"></p>
+  </div>
+
+  <div class="diag" id="diagPanel" hidden>
+    <h3>Research diagnostics (admin concept)</h3>
+    <div class="diaggrid" id="diagData"></div>
+    <p class="muted">
+      Counts describe the simulation, not individual participants.
+      Time decay and capacity loss are tracked separately.
+    </p>
+  </div>
+</aside>
+
+</div>
+
+<p class="footer">
+  Local research demo · no account · no shared server · no external libraries.
+  Optional ghost image is loaded from <code>IMG_6484.jpeg</code> in the same folder.
+  If the image is missing, the work still functions.
+</p>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="The Moment">
+  <div class="receipt">
+    <h2 style="font:normal 28px Georgia,serif">The Moment</h2>
+    <div id="receiptArt"></div>
+    <p>Your trace has been accepted.<br>Its moment is yet to come.</p>
+    <p class="muted" style="color:#55656d">Not stored. Save it now if you wish to keep it.</p>
+    <div class="actions">
+      <button id="saveReceipt">Save SVG</button>
+      <button id="dismiss">Let it go</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+
+const $ = id => document.getElementById(id);
+const clamp = (v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const KEY = 'mpe-v07-ghost-image';
+const OLD = 'mpe-v06-breathing';
+
+const LABELS = [
+  'Energy','Density','Rhythm','Contrast',
+  'Affinity','Drift','Complexity','Silence'
+];
+
+const NAMES = [
+  'Stillness','Bloom','Turbulence','Dissolve','Dream'
+];
+
+const DESCS = [
+  'The memory gathers itself.',
+  'Connections begin to bloom.',
+  'The memory becomes restless.',
+  'Old forms surrender their edges.',
+  'The memory wanders through itself.'
+];
+
+const BASE = [.31,.44,.39,.60,.40,.50,.35,.65];
+
+function newSeed(){
+  const a = new Uint32Array(1);
+  if(globalThis.crypto?.getRandomValues) crypto.getRandomValues(a);
+  else a[0] = Math.floor(Math.random()*2**32);
+  return a[0] || 1234567;
+}
+
+function rnd(s){
+  s.rng = (s.rng + 0x6D2B79F5) >>> 0;
+  let x = s.rng;
+  x = Math.imul(x ^ (x>>>15), x|1);
+  x ^= x + Math.imul(x ^ (x>>>7), x|61);
+  return ((x ^ (x>>>14))>>>0)/4294967296;
+}
+
+const clone = x => JSON.parse(JSON.stringify(x));
+
+function fresh(){
+  const s = {
+    version:7,
+    rng:newSeed(),
+    last:Date.now(),
+    days:0,
+    offers:0,
+    merged:0,
+    forgotten:0,
+    expired:0,
+    capacity:0,
+    field:BASE.slice(),
+    residue:Array(8).fill(0),
+    weather:0,
+    epoch:1,
+    weatherAge:0,
+    history:[.24,.68,.39],
+    layers:[],
+    wander:{x:.48,y:.46,angle:1.3,path:[]},
+    nodes:[]
+  };
+
+  for(let i=0;i<3;i++){
+    s.nodes.push({
+      x:[.18,.70,.5][i],
+      y:[.34,.27,.75][i],
+      vx:0,vy:0,
+      str:1,per:1,
+      age:0,delay:0,
+      hue:[32,183,275][i],
+      phase:i*2.3,
+      anchor:true
+    });
+  }
+  return s;
+}
+
+function migrate(s){
+  s.version = 7;
+  s.last = Date.now();
+  s.expired = typeof s.expired === 'number' ? s.expired : 0;
+  s.capacity = typeof s.capacity === 'number' ? s.capacity : 0;
+  s.layers = Array.isArray(s.layers) ? s.layers : [];
+  s.residue = Array.isArray(s.residue) ? s.residue : Array(8).fill(0);
+  s.history = Array.isArray(s.history) ? s.history : [.24,.68,.39];
+  s.wander = s.wander || {x:.48,y:.46,angle:1.3,path:[]};
+  s.wander.path = Array.isArray(s.wander.path) ? s.wander.path : [];
+  return s;
+}
+
+let mem, view='living', frame=0, receipt=null;
+
+try{
+  mem = JSON.parse(localStorage.getItem(KEY));
+  if(mem?.version!==7 || !Array.isArray(mem.nodes)) throw Error();
+}catch{
+  try{
+    const old = JSON.parse(localStorage.getItem(OLD));
+    mem = old?.version===6 && Array.isArray(old.nodes) ? migrate(old) : fresh();
+  }catch{
+    mem = fresh();
+  }
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(mem));
+  }catch{
+    $('status').textContent = 'Storage unavailable. Export memory JSON.';
+  }
+}
+
+// ---------- ghost image ----------
+const ghostImage = new Image();
+let ghostLoaded = false;
+let ghostFailed = false;
+let ghostCache = null;
+let ghostCacheMeta = {w:0,h:0};
+
+ghostImage.onload = ()=>{
+  ghostLoaded = true;
+  ghostFailed = false;
+  ghostCache = null;
+};
+ghostImage.onerror = ()=>{
+  ghostFailed = true;
+  ghostLoaded = false;
+};
+ghostImage.src = 'IMG_6484.jpeg';
+
+function drawCover(ctx,img,w,h){
+  const ir = img.width / img.height;
+  const cr = w / h;
+  let dw,dh,dx,dy;
+
+  if(ir > cr){
+    dh = h;
+    dw = h * ir;
+    dx = (w - dw)/2;
+    dy = 0;
+  }else{
+    dw = w;
+    dh = w / ir;
+    dx = 0;
+    dy = (h - dh)/2;
+  }
+  ctx.drawImage(img,dx,dy,dw,dh);
+}
+
+function buildGhostCache(w,h){
+  if(!ghostLoaded) return;
+
+  const pixW = Math.max(28,Math.floor(w/18));
+  const pixH = Math.max(22,Math.floor(h/18));
+
+  if(
+    ghostCache &&
+    ghostCacheMeta.w===pixW &&
+    ghostCacheMeta.h===pixH
+  ) return;
+
+  ghostCache = document.createElement('canvas');
+  ghostCache.width = pixW;
+  ghostCache.height = pixH;
+  ghostCacheMeta.w = pixW;
+  ghostCacheMeta.h = pixH;
+
+  const g = ghostCache.getContext('2d');
+  g.fillStyle = '#000';
+  g.fillRect(0,0,pixW,pixH);
+
+  g.save();
+  g.filter = 'grayscale(100%) contrast(90%) brightness(32%)';
+  drawCover(g,ghostImage,pixW,pixH);
+  g.restore();
+
+  const imgData = g.getImageData(0,0,pixW,pixH);
+  const d = imgData.data;
+
+  for(let i=0;i<d.length;i+=4){
+    const lum = (d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114);
+    const dark = lum * .55;
+    d[i]   = dark * .62;
+    d[i+1] = dark * .75;
+    d[i+2] = dark * .82;
+    d[i+3] = Math.min(255, d[i+3] * .95);
+  }
+  g.putImageData(imgData,0,0);
+}
+
+function renderGhostBackground(ctx,w,h){
+  if(!$('ghost').checked || !ghostLoaded || ghostFailed) return;
+
+  buildGhostCache(w,h);
+  if(!ghostCache) return;
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.globalAlpha = .23;
+  ctx.drawImage(ghostCache,0,0,ghostCache.width,ghostCache.height,0,0,w,h);
+
+  ctx.globalAlpha = .40;
+  ctx.fillStyle = '#08131c';
+  ctx.fillRect(0,0,w,h);
+
+  ctx.globalAlpha = .13;
+  ctx.strokeStyle = 'rgba(180,210,210,.35)';
+  for(let x=0;x<w;x+=16){
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,h);
+    ctx.stroke();
+  }
+  for(let y=0;y<h;y+=16){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ---------- memory logic ----------
+function features(s,text){
+  let n=0,spaces=0,marks=0,change=0,prev=0;
+  for(const ch of text){
+    const c = ch.codePointAt(0);
+    n++;
+    if(/\s/u.test(ch)) spaces++;
+    if(/[.,!?;:]/u.test(ch)) marks++;
+    change += Math.min(1,Math.abs(c-prev)/100);
+    prev=c;
+  }
+  return [
+    n ? clamp(n/95) : rnd(s),
+    n ? clamp(spaces/n*5) : rnd(s),
+    n ? clamp(marks/n*9) : rnd(s),
+    n ? clamp(change/n) : rnd(s),
+    rnd(s),rnd(s),rnd(s),rnd(s)
+  ];
+}
+
+function deposit(s,n){
+  const k = Math.floor((((n.hue||0)%360)+360)%360/45)%8;
+  s.residue[k] = clamp(s.residue[k] + n.str*.009);
+  s.history[k%3] = clamp(s.history[k%3] + .003*((n.per||.3)-.3));
+}
+
+function compact(s){
+  const fixed = s.nodes.filter(n=>n.anchor);
+  const others = s.nodes
+    .filter(n=>!n.anchor)
+    .sort((a,b)=>(b.str+b.per*.25)-(a.str+a.per*.25));
+
+  const dropped = others.splice(470);
+  for(const n of dropped) deposit(s,n);
+
+  s.capacity += dropped.length;
+  s.forgotten += dropped.length;
+  s.nodes = fixed.concat(others);
+}
+
+function add(s,text=''){
+  const f = features(s,text);
+  const anchors = s.nodes.filter(n=>n.anchor);
+  const near = anchors[Math.floor(rnd(s)*anchors.length)];
+  const roam = rnd(s)<.52;
+
+  const x = roam ? .05+.9*rnd(s) : clamp(near.x+(rnd(s)-.5)*.31,.03,.97);
+  const y = roam ? .05+.9*rnd(s) : clamp(near.y+(rnd(s)-.5)*.31,.03,.97);
+
+  const n = {
+    x,y,
+    vx:0,vy:0,
+    str:.5+.42*rnd(s),
+    per:.13+.52*rnd(s),
+    age:0,
+    delay:.2+3*rnd(s),
+    hue:(f[0]*170+rnd(s)*190)%360,
+    phase:rnd(s)*Math.PI*2,
+    anchor:false
+  };
+
+  s.nodes.push(n);
+  s.offers++;
+
+  for(let k=0;k<8;k++){
+    s.field[k] = clamp(s.field[k] + (f[k]-.5)*.009, .08, .92);
+  }
+
+  for(const o of s.nodes){
+    if(o===n) continue;
+    const d = Math.hypot(n.x-o.x,n.y-o.y);
+    if(d<.17){
+      o.str = clamp(o.str + .009*(1-d/.17));
+      n.per = clamp(n.per + .007);
+    }
+  }
+
+  if(s.nodes.length>520) compact(s);
+}
+
+function recordLayer(s){
+  s.layers.push({
+    day:s.days,
+    field:s.field.map(v=>+v.toFixed(4)),
+    residue:s.residue.map(v=>+v.toFixed(4)),
+    weather:s.weather
+  });
+
+  if(s.layers.length>18){
+    const old = s.layers.shift();
+    for(let k=0;k<8;k++){
+      s.history[k%3] = clamp(s.history[k%3]*.997 + old.field[k]*.003);
+    }
+  }
+}
+
+function updateWeather(s,dt){
+  s.weatherAge += dt;
+  const f = s.field;
+  const oldLayer = s.layers.length ? s.layers[s.layers.length-1].field : BASE;
+
+  const cyc =
+    Math.sin(s.days*.011+s.history[0]*5)+
+    .65*Math.sin(s.days*.005+s.history[1]*3);
+
+  const activity = .45*f[0]+.3*f[6]+.13*cyc+.12*oldLayer[2];
+
+  const proposed =
+    activity>.73 ? 2 :
+    activity>.57 ? 1 :
+    f[7]>.71 ? 0 :
+    cyc<-.55 ? 3 : 4;
+
+  if(
+    s.weatherAge>11 &&
+    (proposed!==s.weather || s.weatherAge>80) &&
+    rnd(s)<Math.min(1,dt*.14)
+  ){
+    s.weather = proposed;
+    s.weatherAge = 0;
+    s.epoch++;
+    recordLayer(s);
+  }
+
+  const old = f.slice();
+  for(let i=0;i<8;i++){
+    const phase =
+      s.days*(.0045+.00075*i)+
+      s.history[i%3]*7+
+      oldLayer[i]*3;
+
+    const target =
+      .49+
+      .17*Math.sin(phase)+
+      .11*Math.sin(phase*.39+2*i)+
+      .09*(oldLayer[i]-.5);
+
+    const opposite = old[(i+4)%8];
+    const coupling = .003*(old[(i+1)%8]-opposite);
+    const weatherPush = [0,.012,-.015,-.007,.007][s.weather]*(i%2?1:-1);
+
+    const boundary =
+      .09/(.1+Math.exp((old[i]-.1)*13)) -
+      .09/(.1+Math.exp((.9-old[i])*13));
+
+    f[i] = clamp(
+      old[i]+dt*(.038*(target-old[i])+coupling+weatherPush+boundary),
+      .08,.92
+    );
+  }
+}
+
+function wander(s,dt){
+  const w = s.wander;
+  const anchors = s.nodes.filter(n=>n.anchor);
+  let tx=.5,ty=.5;
+
+  if(anchors.length){
+    const q = anchors[Math.floor(s.days/21)%anchors.length];
+    tx=q.x; ty=q.y;
+  }
+
+  const heading = Math.atan2(ty-w.y,tx-w.x);
+  const delta = Math.atan2(Math.sin(heading-w.angle),Math.cos(heading-w.angle));
+
+  w.angle += clamp(delta,-.12,.12)*dt*.18 + (rnd(s)-.5)*.10*Math.sqrt(dt);
+
+  const speed = .0012*(.65+s.field[0]+s.field[5]);
+  w.x = clamp(w.x + Math.cos(w.angle)*speed*dt,.02,.98);
+  w.y = clamp(w.y + Math.sin(w.angle)*speed*dt,.02,.98);
+
+  w.path.push([w.x,w.y]);
+  if(w.path.length>120) w.path.splice(0,w.path.length-120);
+}
+
+function evolve(s,dt){
+  if(dt<=0) return;
+
+  s.days += dt;
+  updateWeather(s,dt);
+  wander(s,dt);
+
+  const next = [];
+  const speed = [.6,1.2,1.8,.75,1][s.weather];
+  const decay = [.8,.8,1.05,1.4,.85][s.weather];
+  const anchors = s.nodes.filter(n=>n.anchor);
+
+  for(const n of s.nodes){
+    n.age += dt;
+
+    if(n.anchor){
+      next.push(n);
+      continue;
+    }
+
+    if(n.delay>0){
+      n.delay = Math.max(0,n.delay-dt);
+      next.push(n);
+      continue;
+    }
+
+    n.phase += dt*.015*(.5+s.field[2]);
+    const d = dt*.00028*speed*(.3+s.field[5]);
+
+    n.vx = clamp(n.vx*.94 + Math.sin(n.phase+n.y*9)*d,-.006,.006);
+    n.vy = clamp(n.vy*.94 + Math.cos(n.phase+n.x*9)*d,-.006,.006);
+
+    n.x = clamp(n.x+n.vx,.02,.98);
+    n.y = clamp(n.y+n.vy,.02,.98);
+
+    for(const a of anchors){
+      const dist = Math.hypot(n.x-a.x,n.y-a.y);
+      if(dist<.16){
+        n.str = clamp(n.str + .0005*dt*(1-dist/.16));
+        n.per = clamp(n.per + .00008*dt);
+      }
+    }
+
+    n.str *= Math.exp(-dt*.003*decay*(1-.67*n.per));
+
+    if(n.str<.035){
+      deposit(s,n);
+      s.expired++;
+      s.forgotten++;
+    }else{
+      next.push(n);
+    }
+  }
+
+  s.nodes = next;
+
+  const attempts = Math.min(20,Math.floor(s.nodes.length/8));
+  for(let k=0;k<attempts;k++){
+    if(s.nodes.length<5) break;
+
+    const i = Math.floor(rnd(s)*s.nodes.length);
+    const j = Math.floor(rnd(s)*s.nodes.length);
+    const a = s.nodes[i], b = s.nodes[j];
+
+    if(!a || !b || a===b || a.anchor || b.anchor || a.delay || b.delay) continue;
+
+    const dist = Math.hypot(a.x-b.x,a.y-b.y);
+    if(dist>.052 || rnd(s)>.065*dt*speed) continue;
+
+    const total = a.str+b.str;
+    const child = {
+      x:(a.x*a.str+b.x*b.str)/total,
+      y:(a.y*a.str+b.y*b.str)/total,
+      vx:(a.vx+b.vx)/2,
+      vy:(a.vy+b.vy)/2,
+      str:clamp(total*.78),
+      per:clamp((a.per+b.per)/2+.06),
+      age:Math.max(a.age,b.age),
+      delay:0,
+      hue:(a.hue+b.hue)/2,
+      phase:(a.phase+b.phase)/2,
+      anchor:false
+    };
+
+    s.nodes.splice(Math.max(i,j),1);
+    s.nodes.splice(Math.min(i,j),1);
+    s.nodes.push(child);
+    s.merged++;
+
+    deposit(s,{hue:child.hue,str:.04,per:child.per});
+  }
+
+  const sum = s.residue.reduce((a,b)=>a+b,0);
+  const chance = Math.min(.16,dt*.007*(.7+sum));
+
+  if(rnd(s)<chance && s.nodes.length<490){
+    const k = Math.floor(rnd(s)*8);
+    s.nodes.push({
+      x:.05+.9*rnd(s),
+      y:.05+.9*rnd(s),
+      vx:0,vy:0,
+      str:.2+.2*s.residue[k],
+      per:.2,
+      age:0,
+      delay:0,
+      hue:k*45,
+      phase:rnd(s)*6.28,
+      anchor:false
+    });
+  }
+
+  for(let k=0;k<8;k++){
+    s.residue[k] *= Math.exp(-dt*.00008);
+  }
+
+  if(s.nodes.length>520) compact(s);
+}
+
+function advance(s,days){
+  let remaining = Math.max(0,days);
+  while(remaining>0){
+    const step = Math.min(2,remaining);
+    evolve(s,step);
+    remaining -= step;
+  }
+}
+
+function catchUp(){
+  const now = Date.now();
+  const days = Math.min(3650,Math.max(0,now-(mem.last||now))/60000);
+  mem.last = now;
+
+  if(days>.01){
+    advance(mem,days);
+    $('message').textContent =
+      `The memory changed through ${days.toFixed(1)} simulated days while you were away.`;
+  }
+  save();
+}
+
+const visible = s => s.nodes.filter(n=>n.anchor || n.delay<=0);
+const waiting = s => s.nodes.filter(n=>!n.anchor && n.delay>0);
+
+function organisms(s){
+  const groups = new Map();
+
+  for(const n of visible(s)){
+    if(n.anchor) continue;
+    const key =
+      `${Math.min(5,Math.floor(n.x*6))}-${Math.min(4,Math.floor(n.y*5))}`;
+
+    if(!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(n);
+  }
+
+  return [...groups.values()]
+    .filter(g=>g.length>=5)
+    .map(g=>({
+      x:g.reduce((v,n)=>v+n.x,0)/g.length,
+      y:g.reduce((v,n)=>v+n.y,0)/g.length,
+      r:Math.min(.16,.028+g.length*.002),
+      weight:g.reduce((v,n)=>v+n.str,0)/g.length
+    }));
+}
+
+function anchor(){
+  mem.nodes.push({
+    x:.05+.9*rnd(mem),
+    y:.05+.9*rnd(mem),
+    vx:0,vy:0,
+    str:1,per:1,
+    age:0,delay:0,
+    hue:Math.floor(rnd(mem)*360),
+    phase:rnd(mem)*6.28,
+    anchor:true
+  });
+
+  save();
+  refresh();
+}
+
+// ---------- interface ----------
+function refresh(){
+  const v = visible(mem);
+  const w = waiting(mem);
+  const org = organisms(mem);
+
+  $('offerings').textContent = mem.offers;
+  $('living').textContent = v.length;
+  $('waiting').textContent = w.length;
+  $('anchors').textContent = mem.nodes.filter(n=>n.anchor).length;
+  $('merged').textContent = mem.merged;
+  $('forgotten').textContent = mem.forgotten;
+
+  $('weather').textContent = NAMES[mem.weather];
+  $('weatherText').textContent = DESCS[mem.weather];
+  $('epoch').textContent = 'EPOCH '+mem.epoch;
+
+  $('clock').textContent =
+    `Age: ${mem.days.toFixed(1)} simulated days · Organisms: ${org.length}`;
+
+  $('layers').textContent =
+    `Historical layers: ${mem.layers.length} · Wanderer path: ${mem.wander.path.length} points`;
+
+  $('meters').innerHTML = LABELS.map((label,i)=>`
+    <div class="meter">
+      <span>${label}</span>
+      <div class="track">
+        <div class="fill" style="width:${(mem.field[i]*100).toFixed(1)}%"></div>
+      </div>
+      <span>${mem.field[i].toFixed(2)}</span>
+    </div>
+  `).join('');
+
+  const diag = [
+    ['Waiting',w.length],
+    ['Visible',v.length],
+    ['Time decay',mem.expired],
+    ['Capacity loss',mem.capacity],
+    ['Assimilations',mem.merged],
+    ['Anchors',mem.nodes.filter(n=>n.anchor).length],
+    ['Memory epochs',mem.epoch],
+    ['Aftereffect energy',mem.residue.reduce((a,b)=>a+b,0).toFixed(3)],
+    ['Ghost image',ghostLoaded ? 'loaded' : (ghostFailed ? 'missing' : 'loading')]
+  ];
+
+  $('diagData').innerHTML = diag.map(([k,v])=>`
+    <span>${k}: <b>${v}</b></span>
+  `).join('');
+
+  if(view==='ascii') ascii();
+  if(view==='poem') poem();
+}
+
+function setView(v){
+  view = v;
+
+  document.querySelectorAll('[data-view]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.view===v);
+  });
+
+  $('art').hidden = v==='ascii' || v==='poem';
+  $('ascii').hidden = v!=='ascii';
+  $('poem').hidden = v!=='poem';
+
+  refresh();
+}
+
+// ---------- rendering ----------
+function setupCanvas(canvas){
+  const box = canvas.getBoundingClientRect();
+  const w = box.width || 300;
+  const h = box.height || 150;
+  const dpr = Math.min(devicePixelRatio||1,2);
+  const ctx = canvas.getContext('2d');
+
+  if(
+    canvas.width !== Math.round(w*dpr) ||
+    canvas.height !== Math.round(h*dpr)
+  ){
+    canvas.width = Math.round(w*dpr);
+    canvas.height = Math.round(h*dpr);
+  }
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#071520';
+  ctx.fillRect(0,0,w,h);
+
+  return {ctx,w,h};
+}
+
+function drawNoise(ctx,w,h,s,t){
+  const breath = .5 + .5*Math.sin(s.days*.017 + t*.33);
+
+  for(let k=0;k<90;k++){
+    const hx = Math.sin(k*23.71+s.history[k%3]*37)*143.7;
+    const hy = Math.cos(k*11.41+s.history[(k+1)%3]*29)*93.3;
+    const x = ((hx%1)+1)%1;
+    const y = ((hy%1)+1)%1;
+    const energy = .05 + .18*(s.residue[k%8] + s.field[(k+2)%8])*.5;
+
+    ctx.fillStyle = `rgba(150,198,202,${energy*(.25+.65*breath)})`;
+    ctx.beginPath();
+    ctx.arc(x*w,y*h,.45+(k%3)*.38,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function scene(canvas,s,mode='living',simple=false,t=0){
+  const {ctx,w,h} = setupCanvas(canvas);
+
+  if(!simple) renderGhostBackground(ctx,w,h);
+
+  drawNoise(ctx,w,h,s,t);
+
+  const org = organisms(s);
+  const nodes = visible(s);
+
+  // memory fields / blobs
+  for(let j=0;j<org.length;j++){
+    const o = org[j];
+    const cx = o.x*w;
+    const cy = o.y*h;
+    const r = o.r*Math.min(w,h)*2.05;
+
+    ctx.beginPath();
+    for(let k=0;k<=40;k++){
+      const a = k*Math.PI*2/40;
+      const dr =
+        1 +
+        .14*Math.sin(a*5+j*4+t*.06) +
+        .06*Math.cos(a*3+s.days*.02);
+
+      const x = cx + Math.cos(a)*r*dr;
+      const y = cy + Math.sin(a)*r*.82*dr;
+
+      if(k===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+
+    ctx.fillStyle =
+      `rgba(${s.weather===2 ? '191,131,144' : '130,171,170'},${.028+o.weight*.06})`;
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(150,190,188,.08)';
+    ctx.stroke();
+  }
+
+  // visible points
+  const pts = nodes.map(n=>({
+    n,
+    x:(n.x + Math.sin(t*.42+n.phase)*.004*s.field[5])*w,
+    y:(n.y + Math.cos(t*.32+n.phase)*.004*s.field[5])*h
+  }));
+
+  // resonance lines
+  for(let i=0;i<pts.length;i++){
+    const a = pts[i];
+
+    for(let j=Math.max(0,i-(simple?8:18)); j<i; j++){
+      const b = pts[j];
+      const d = Math.hypot(a.x-b.x,a.y-b.y);
+      const cutoff = Math.min(w,h)*(.09+.18*s.field[4]);
+
+      if(d<cutoff){
+        const strength = (1-d/cutoff) * ((a.n.str+b.n.str)/2);
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle = `rgba(165,205,210,${(.04+.12*s.field[4])*strength})`;
+        ctx.lineWidth = simple ? .55 : .7;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // points
+  for(let i=0;i<pts.length;i++){
+    const p = pts[i];
+    const n = p.n;
+
+    ctx.beginPath();
+    ctx.arc(
+      p.x,p.y,
+      n.anchor ? (simple?2.7:4.1) : (simple?1.1:1.45+n.str*1.35),
+      0,Math.PI*2
+    );
+
+    ctx.fillStyle = n.anchor
+      ? '#e7b88f'
+      : `hsla(${165+n.hue*.23},56%,80%,${clamp(.2+n.str*.95)})`;
+
+    ctx.fill();
+
+    if(!simple && !n.anchor){
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,2.4+n.str*1.5,0,Math.PI*2);
+      ctx.strokeStyle = `rgba(190,221,223,${.08+n.str*.15})`;
+      ctx.stroke();
+    }
+
+    if(n.anchor && !simple){
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,7.3,0,Math.PI*2);
+      ctx.strokeStyle = 'rgba(232,184,146,.36)';
+      ctx.stroke();
+    }
+
+    if(mode==='living' && !simple && !n.anchor && i%7===0){
+      ctx.fillStyle = `rgba(193,211,207,${.16+n.str*.36})`;
+      ctx.font = `${10+Math.round(n.str*5)}px Georgia`;
+      const marks = ['∴','~','⌁','·','+','◌'];
+      ctx.fillText(marks[(i+Math.floor(s.days/17))%marks.length],p.x+6,p.y-4);
+    }
+  }
+
+  // subtle veil to keep the image mysterious
+  if(!simple){
+    const veil = .06 + .05*(1-s.field[0]);
+    ctx.fillStyle = `rgba(6,15,22,${veil})`;
+    ctx.fillRect(0,0,w,h);
+  }
+
+  // wanderer
+  if(!simple && $('wander').checked){
+    const path = s.wander.path;
+    if(path.length){
+      ctx.beginPath();
+      path.forEach(([x,y],i)=>{
+        if(i===0) ctx.moveTo(x*w,y*h);
+        else ctx.lineTo(x*w,y*h);
+      });
+      ctx.strokeStyle = 'rgba(242,215,160,.25)';
+      ctx.lineWidth = .8;
+      ctx.stroke();
+    }
+
+    const x = (s.wander.x + Math.sin(t*.34)*.004)*w;
+    const y = (s.wander.y + Math.cos(t*.29)*.004)*h;
+
+    ctx.beginPath();
+    ctx.arc(x,y,3.2,0,Math.PI*2);
+    ctx.fillStyle = '#f3deb6';
+    ctx.fill();
+  }
+
+  // no ghost info message
+  if(!simple && ghostFailed && $('ghost').checked){
+    ctx.fillStyle = 'rgba(230,230,230,.35)';
+    ctx.font = '12px monospace';
+    ctx.fillText('ghost image not found: IMG_6484.jpeg',16,h-16);
+  }
+}
+
+// ---------- ASCII ----------
+function ascii(){
+  const el = $('ascii');
+
+  const w = Math.min(85,Math.max(26,Math.floor((el.clientWidth-16)/7.5)));
+  const h = Math.min(40,Math.max(16,Math.floor((el.clientHeight-16)/11.5)));
+
+  const chars = '  .,:;+=*#%@';
+  const nodes = visible(mem).slice(-420);
+  const org = organisms(mem);
+
+  let out = '';
+
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const xx = x/w, yy = y/h;
+      let v = .08 + .09*Math.sin(xx*18+mem.days*.02)*Math.cos(yy*14-mem.days*.014);
+
+      for(const n of nodes){
+        const d = (xx-n.x)**2 + (yy-n.y)**2;
+        v += n.str*.46*Math.exp(-d*125);
+      }
+
+      for(const o of org){
+        const d = (xx-o.x)**2 + (yy-o.y)**2;
+        v += .14*Math.exp(-d/(o.r*o.r));
+      }
+
+      v += mem.residue[Math.min(7,Math.floor(xx*8))]*.28;
+      out += chars[Math.min(chars.length-1,Math.floor(clamp(v)*chars.length))];
+    }
+    out += '\n';
+  }
+  el.textContent = out;
+}
+
+// ---------- visual haiku ----------
+function poem(){
+  let seed = (
+    Math.floor(mem.days/4) +
+    mem.offers*17 +
+    mem.merged*71 +
+    mem.forgotten*23 +
+    Math.floor(mem.field.reduce((a,v,i)=>a+v*(i+1)*10000,0))
+  )>>>0;
+
+  const next = ()=>{
+    seed = (Math.imul(seed,1664525)+1013904223)>>>0;
+    return seed/4294967296;
+  };
+
+  const pick = a => a[Math.floor(next()*a.length)];
+
+  const adj = ['tender','unwritten','distant','patient','restless','silver','quiet','forgotten','hollow','weightless'];
+  const noun = ['silence','river','threshold','echo','afternoon','horizon','garden','shadow','distance','rain','image'];
+  const verb = ['unfolds','drifts','remains','awakens','dissolves','returns','wanders'];
+
+  $('poem').replaceChildren();
+
+  const lines = [
+    pick(['∴','⌁','◌','∿','⋯']),
+    `a ${pick(adj)} ${pick(noun)}`,
+    `between ${pick(noun)} and ${pick(noun)}`,
+    `something ${pick(verb)}`
+  ];
+
+  for(const text of lines){
+    const div = document.createElement('div');
+    div.textContent = text;
+    if(text.length<3) div.className = 'symbol';
+    $('poem').append(div);
+  }
+}
+
+// ---------- futures ----------
+function future(){
+  const grid = $('futureGrid');
+  grid.replaceChildren();
+
+  for(let k=0;k<3;k++){
+    const s = clone(mem);
+    s.rng = (s.rng + Math.imul(k+1,0x9E3779B9))>>>0;
+    advance(s,365*5);
+
+    const card = document.createElement('div');
+    card.className = 'future';
+
+    const title = document.createElement('strong');
+    title.textContent = `Future ${['I','II','III'][k]}`;
+
+    const canvas = document.createElement('canvas');
+    const p = document.createElement('p');
+
+    p.textContent =
+      `${visible(s).length} forms · ${organisms(s).length} organisms · ${NAMES[s.weather]} · ${s.forgotten} forgotten`;
+
+    card.append(title,canvas,p);
+    grid.append(card);
+
+    requestAnimationFrame(()=>scene(canvas,s,'constellation',true,0));
+  }
+}
+
+// ---------- receipt ----------
+function receiptArt(date){
+  const r = {rng:newSeed()};
+  const h = Math.floor(rnd(r)*360);
+  const stamp = date.toISOString();
+
+  let body = `
+    <rect width="520" height="610" fill="hsl(${h},33%,15%)"/>
+    <text x="260" y="43" font-family="monospace" font-size="13" text-anchor="middle" letter-spacing="2" fill="#eee4d4">A MEMORY WITHOUT AN OWNER</text>
+  `;
+
+  for(let i=0;i<38;i++){
+    const a = i*2.399;
+    const d = 10+i*4.8;
+    const cx = 260+Math.cos(a)*d;
+    const cy = 290+Math.sin(a)*d;
+
+    body += `
+      <ellipse
+        cx="${cx}" cy="${cy}"
+        rx="${10+rnd(r)*38}" ry="${13+rnd(r)*27}"
+        fill="none"
+        stroke="hsl(${(h+i*17)%360},70%,75%)"
+        stroke-width="1.2"
+        opacity=".6"
+        transform="rotate(${Math.round(rnd(r)*360)} ${cx} ${cy})"
+      />
+    `;
+  }
+
+  body += `
+    <text x="260" y="501" font-family="Georgia,serif" font-size="32" text-anchor="middle" fill="#f2e1d0">You were here.</text>
+    <text x="260" y="542" font-family="monospace" font-size="14" text-anchor="middle" fill="#b4d0d0">${stamp}</text>
+    <text x="260" y="579" font-family="monospace" font-size="11" text-anchor="middle" fill="#b4c6c4">THE MOMENT EXISTS ONLY ONCE</text>
+  `;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 610">${body}</svg>`;
+}
+
+function showReceipt(){
+  receipt = receiptArt(new Date());
+  $('receiptArt').innerHTML = receipt;
+  $('overlay').classList.add('open');
+}
+
+function dismissReceipt(){
+  receipt = null;
+  $('receiptArt').replaceChildren();
+  $('overlay').classList.remove('open');
+}
+
+function download(data,name,type){
+  const url = URL.createObjectURL(new Blob([data],{type}));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1600);
+}
+
+// ---------- controls ----------
+$('send').onclick = ()=>{
+  const raw = $('entry').value;
+  if(!raw.trim()){
+    $('status').textContent = 'Write something or choose Offer silence.';
+    return;
+  }
+  add(mem,raw);
+  $('entry').value = '';
+  mem.last = Date.now();
+  save();
+  refresh();
+  showReceipt();
+  $('status').textContent = 'Transformed locally.';
+};
+
+$('silence').onclick = ()=>{
+  add(mem,'');
+  mem.last = Date.now();
+  save();
+  refresh();
+  showReceipt();
+};
+
+$('add10').onclick = ()=>{
+  for(let i=0;i<10;i++) add(mem,'');
+  save();
+  refresh();
+};
+
+$('add100').onclick = ()=>{
+  for(let i=0;i<100;i++) add(mem,'');
+  save();
+  refresh();
+};
+
+$('year').onclick = ()=>{
+  advance(mem,365);
+  mem.last = Date.now();
+  save();
+  refresh();
+};
+
+$('anchor').onclick = anchor;
+
+$('reset').onclick = ()=>{
+  if(!confirm('Start a new local test7 memory?')) return;
+  mem = fresh();
+  save();
+  refresh();
+  $('futureGrid').textContent = 'Run the preview to explore three futures.';
+};
+
+$('export').onclick = ()=>{
+  download(JSON.stringify(mem,null,2),'mpe_memory_test7.json','application/json');
+};
+
+$('futures').onclick = future;
+
+$('saveReceipt').onclick = ()=>{
+  if(receipt){
+    download(receipt,'The_Moment_'+Date.now()+'.svg','image/svg+xml');
+  }
+};
+
+$('dismiss').onclick = dismissReceipt;
+
+$('diagnostic').onchange = ()=>{
+  $('diagPanel').hidden = !$('diagnostic').checked;
+};
+
+document.querySelectorAll('[data-view]').forEach(b=>{
+  b.onclick = ()=>setView(b.dataset.view);
+});
+
+// ---------- engine ----------
+function draw(){
+  requestAnimationFrame(draw);
+  frame++;
+
+  if(view==='living' || view==='constellation'){
+    scene(
+      $('art'),
+      mem,
+      view,
+      false,
+      $('motion').checked ? frame*.017 : 0
+    );
+  }
+}
+
+catchUp();
+refresh();
+requestAnimationFrame(draw);
+
+let lastTick = Date.now();
+
+setInterval(()=>{
+  const now = Date.now();
+  const elapsed = Math.max(0,now-lastTick);
+  lastTick = now;
+
+  if(
+    $('time').checked &&
+    !$('overlay').classList.contains('open')
+  ){
+    advance(mem,Math.min(.06,elapsed/60000));
+    mem.last = now;
+    save();
+    refresh();
+  }else{
+    mem.last = now;
+    save();
+  }
+
+  if(view==='ascii') ascii();
+},1200);
+
+window.addEventListener('pagehide',()=>{
+  mem.last = Date.now();
+  save();
+});
+})();
+</script>
+</body>
+</html>
