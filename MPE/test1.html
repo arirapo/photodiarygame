@@ -1,0 +1,990 @@
+
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPE — Day Zero</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #101319;
+  --card: #1a202a;
+  --line: #343b48;
+  --text: #eceae6;
+  --muted: #a6acb8;
+  --gold: #e8bf93;
+  --sea: #8bc0c1;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 system-ui, sans-serif;
+}
+button, textarea { font: inherit; }
+button { cursor: pointer; }
+.wrap {
+  max-width: 1230px;
+  margin: auto;
+  padding: 27px 24px 60px;
+}
+.top, .buttons, .tabs, .statline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+}
+.top { justify-content: space-between; }
+.eyebrow {
+  color: var(--sea);
+  font: 11px monospace;
+  letter-spacing: 2px;
+}
+.pill {
+  border: 1px solid #546c6e;
+  border-radius: 30px;
+  padding: 5px 12px;
+  font: 11px monospace;
+  color: #b4d2d2;
+}
+h1 {
+  font: normal clamp(31px,5vw,59px) Georgia,serif;
+  letter-spacing: -1px;
+  margin: 15px 0 6px;
+}
+h2 {
+  font: normal 25px Georgia,serif;
+  margin: 0 0 16px;
+}
+.sub {
+  font: italic 17px Georgia,serif;
+  color: var(--gold);
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.75fr) minmax(290px,.95fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  padding: 20px;
+}
+.visual {
+  height: clamp(295px,42vw,490px);
+  position: relative;
+  background: #0d151d;
+  border: 1px solid #303e48;
+  border-radius: 12px;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#ascii {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 10px;
+  white-space: pre;
+  overflow: hidden;
+  font: 10px/1.1 monospace;
+  color: #a6cccb;
+  background: #0c151b;
+}
+#haiku {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  padding: 30px;
+  text-align: center;
+  background: radial-gradient(circle,#25343d,#0b151c);
+  font: italic clamp(22px,3vw,39px)/1.4 Georgia,serif;
+  color: #dfd2bd;
+}
+.haiku-symbol {
+  font: normal 66px Georgia,serif;
+  color: #9bbfc0;
+}
+.tabs { margin-bottom: 12px; }
+.btn, .tab {
+  background: #252e39;
+  border: 1px solid #4b5663;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px 12px;
+}
+.btn:hover, .tab:hover { background: #344250; }
+.primary {
+  background: #e1bb94;
+  color: #1e252b;
+  border-color: #e1bb94;
+  font-weight: bold;
+}
+.tab[aria-selected="true"] {
+  background: #385259;
+  border-color: #78a2a6;
+}
+.section { margin-bottom: 24px; }
+.section-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.muted {
+  font-size: 12px;
+  color: var(--muted);
+}
+textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  padding: 10px;
+  background: #101821;
+  border: 1px solid #596170;
+  color: var(--text);
+  border-radius: 9px;
+}
+.buttons { margin-top: 10px; }
+.statline {
+  border-top: 1px solid var(--line);
+  margin-top: 15px;
+  padding-top: 14px;
+  gap: 22px;
+}
+.stat b {
+  display: block;
+  font: 26px Georgia,serif;
+  color: #e4c29e;
+}
+.stat span { font-size: 11px; color: var(--muted); }
+.barrow {
+  display: grid;
+  grid-template-columns: 100px 1fr 35px;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 12px;
+}
+.track {
+  height: 6px;
+  background: #303b45;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg,#609da5,#d8b18c);
+}
+.note {
+  margin-top: 12px;
+  padding: 12px;
+  background: #1b2931;
+  border-left: 2px solid #9db7ae;
+  font-size: 12px;
+}
+.foot {
+  margin-top: 18px;
+  padding: 17px;
+  background: #141b24;
+  border: 1px solid #313d48;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #c8cbd0;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: #06090dcc;
+  z-index: 5;
+  padding: 15px;
+}
+.overlay.show { display: flex; }
+.receipt {
+  width: min(390px,100%);
+  padding: 24px;
+  background: #eae4d8;
+  color: #20262c;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 16px 100px #0008;
+}
+.receipt h2 { color: #20262c; }
+.receipt svg { max-width: 100%; height: auto; }
+.receipt .btn { background: #263941; color: white; }
+.receipt-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+@media(max-width:800px) {
+  .grid { grid-template-columns: 1fr; }
+  .wrap { padding: 18px 13px; }
+  .panel { padding: 14px; }
+  .visual { height: 355px; }
+}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <div class="top">
+    <span class="eyebrow">
+      TRACES BETWEEN / A MEMORY WITHOUT AN OWNER
+    </span>
+    <span class="pill">MPE 0.1 · DAY ZERO · OFFLINE</span>
+  </div>
+
+  <h1>The memory begins.</h1>
+  <div class="sub">
+    Built with mathematics. Changed by strangers. Allowed to forget.
+  </div>
+
+  <div class="grid">
+
+    <section class="panel">
+      <div class="tabs">
+        <button class="tab" data-view="constellation"
+          aria-selected="true">Constellation</button>
+        <button class="tab" data-view="ascii"
+          aria-selected="false">ASCII Memory</button>
+        <button class="tab" data-view="haiku"
+          aria-selected="false">Visual Haiku</button>
+      </div>
+
+      <div class="visual">
+        <canvas id="art"></canvas>
+        <pre id="ascii" hidden></pre>
+        <div id="haiku" hidden></div>
+      </div>
+
+      <div class="statline">
+        <div class="stat"><b id="events">0</b><span>Jälkiä yhteensä</span></div>
+        <div class="stat"><b id="living">0</b><span>Eläviä solmuja</span></div>
+        <div class="stat"><b id="anchors">3</b><span>Pysyviä ankkureita</span></div>
+        <div class="stat"><b id="age">0</b><span>Simuloituja päiviä</span></div>
+      </div>
+
+      <div class="note">
+        Muistin kolme ensimmäistä ankkuria säilyvät.
+        Muut jäljet voivat hiipua, sulautua ja unohtua.
+        Niiden vaikutus yhteiseen muistiin kuitenkin jatkuu.
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h2>Memory Processing Engine</h2>
+
+      <div class="section">
+        <div class="section-title">01 / Leave a Trace</div>
+        <div class="muted">
+          Kirjoita lyhyt oma teksti. Alkuperäistä ei tallenneta.
+        </div>
+        <textarea id="entry" maxlength="200"
+          placeholder="A word, a fleeting thought, a memory..."></textarea>
+        <div class="buttons">
+          <button id="submitText" class="btn primary">
+            Muunna ja jätä jälki
+          </button>
+          <button id="blank" class="btn">
+            Jätä tyhjä jälki ∅
+          </button>
+        </div>
+        <div id="status" class="muted" style="margin-top:10px">
+          Osallistumisen jälkeen saat katoavan The Moment -muistoesineen.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">02 / Test the Memory</div>
+        <div class="buttons">
+          <button id="plus10" class="btn">+10 jälkeä</button>
+          <button id="plus100" class="btn">+100 jälkeä</button>
+          <button id="advance" class="btn">+1 vuosi</button>
+        </div>
+        <label class="muted" style="display:block;margin-top:12px">
+          <input type="checkbox" id="flow" checked>
+          Anna ajan kulua automaattisesti
+        </label>
+        <div class="buttons">
+          <button id="anchor" class="btn">Lisää pysyvä ankkuri</button>
+          <button id="reset" class="btn">Aloita uusi muisti</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">03 / Collective State</div>
+        <div id="bars"></div>
+        <p class="muted">
+          Kahdeksan numeerista ominaisuutta kuvaa
+          kollektiivisen muistin nykyistä tilaa.
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <strong>Independent research demo.</strong>
+    Ei palvelinta, kirjautumista tai ulkoisia kirjastoja.
+    Alkuperäistä tekstiä ei tallenneta.
+    Muunnettu muisti säilytetään tämän selaimen localStoragessa.
+    The Moment -kuitti katoaa suljettaessa, ellei sitä tallenneta.
+    QR-koodi ja varsinainen yhteisöllinen palvelin tulevat myöhemmin.
+  </div>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="receipt">
+    <div style="font:11px monospace;letter-spacing:2px">
+      A MEMORY WITHOUT AN OWNER
+    </div>
+    <h2 style="margin-top:15px">The Moment</h2>
+    <div id="receiptArt"></div>
+    <p id="receiptTime" style="font:13px monospace"></p>
+    <p style="font:italic 17px Georgia,serif">
+      Your trace has been accepted.<br>
+      Its moment is yet to come.
+    </p>
+    <p style="font-size:12px">
+      This moment will not be stored.<br>
+      Save it now if you wish to keep it.
+    </p>
+    <div class="receipt-actions">
+      <button id="saveReceipt" class="btn">Tallenna SVG</button>
+      <button id="closeReceipt" class="btn">Päästä irti</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const KEY = "mpe-day-zero-v01";
+const $ = id => document.getElementById(id);
+const clamp = (v, a=0, b=1) => Math.max(a, Math.min(b,v));
+
+const names = [
+  "Energy", "Density", "Rhythm", "Contrast",
+  "Affinity", "Drift", "Complexity", "Silence"
+];
+
+function initial() {
+  return {
+    version: 1,
+    day: 0,
+    total: 0,
+    field: [.32,.46,.26,.52,.38,.35,.49,.62],
+    nodes: [
+      {x:.24,y:.44,h:36,s:1,p:1,a:1,b:0},
+      {x:.71,y:.27,h:177,s:1,p:1,a:1,b:0},
+      {x:.55,y:.77,h:292,s:1,p:1,a:1,b:0}
+    ],
+    changes: 0
+  };
+}
+
+let state;
+
+try {
+  state = JSON.parse(localStorage.getItem(KEY)) || initial();
+  if (state.version !== 1 || !Array.isArray(state.nodes)) {
+    state = initial();
+  }
+} catch {
+  state = initial();
+}
+
+let view = "constellation";
+let frame = 0;
+let receiptSVG = null;
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  } catch {}
+}
+
+function random() {
+  const a = new Uint32Array(1);
+  if (globalThis.crypto?.getRandomValues) {
+    crypto.getRandomValues(a);
+    return a[0] / 4294967296;
+  }
+  return Math.random();
+}
+
+function seedRandom(seed) {
+  let n = seed >>> 0;
+  return () => {
+    n += 0x6D2B79F5;
+    let t = n;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// =====================================================
+// INPUT TRANSFORMER + TRACE GENERATOR
+// =====================================================
+
+function ingest(raw, withReceipt=false) {
+  const now = new Date();
+  const meta = (navigator.language || "") +
+    (screen.width || "") + now.getUTCHours();
+
+  const v = raw ? Math.min(1,raw.length/200) : 0;
+  let complexity = 0;
+
+  for (let i=0; i<raw.length; i++) {
+    complexity += (raw.charCodeAt(i)%13)/13;
+  }
+
+  complexity = raw.length
+    ? complexity/raw.length
+    : random();
+
+  const x = clamp(.08+.84*(.65*random()+.35*state.field[5]));
+  const y = clamp(.08+.84*(.55*random()+.45*state.field[1]));
+
+  const feature = [
+    v,
+    complexity,
+    now.getSeconds()/59,
+    raw.length
+      ? Math.min(1,(raw.match(/[.,!?;:]/g)||[]).length/15)
+      : random(),
+    random(),
+    (meta.length%19)/19,
+    random(),
+    raw.length ? 1-v : random()
+  ];
+
+  const node = {
+    x, y,
+    h: Math.floor(random()*360),
+    s: .36+.6*random(),
+    p: .12+.42*random(),
+    a: 0,
+    b: state.day+1+Math.floor(random()*14)
+  };
+
+  state.nodes.push(node);
+  state.total++;
+
+  for (let i=0; i<8; i++) {
+    const delta = (feature[i]-.5)*(.025+.045*random());
+    state.field[i] = clamp(
+      state.field[i]*.991 + delta + .004*random()
+    );
+  }
+
+  state.changes++;
+
+  if (state.nodes.length > 900) compress();
+
+  save();
+  refresh();
+
+  if (withReceipt) makeReceipt(now);
+}
+
+// =====================================================
+// COLLECTIVE MEMORY + FORGETTING
+// =====================================================
+
+function compress() {
+  const anchors = state.nodes.filter(n => n.a);
+  const rest = state.nodes
+    .filter(n => !n.a)
+    .sort((a,b) => b.s-a.s);
+
+  const removed = rest.splice(650);
+
+  if (removed.length) {
+    const avg = removed.reduce((v,n)=>v+n.s,0)/removed.length;
+    state.field[6] = clamp(state.field[6]*.9+avg*.1);
+    state.field[7] = clamp(state.field[7]*.96+.04);
+  }
+
+  state.nodes = anchors.concat(rest);
+}
+
+function tick(days=1) {
+  state.day += days;
+  const survived = [];
+
+  for (const n of state.nodes) {
+    if (n.a || n.b > state.day) {
+      survived.push(n);
+      continue;
+    }
+
+    const resonance = clamp(
+      state.field[4]*.5 + n.p*.4
+    );
+
+    n.s *= Math.exp(
+      -days*(.0046-n.p*.002-resonance*.0008)
+    );
+
+    if (n.s > .033) {
+      survived.push(n);
+    } else {
+      // Unohtaminenkin muuttaa muistin tilaa.
+      state.field[6] = clamp(
+        state.field[6]*.997+.003*n.h/360
+      );
+      state.field[7] = clamp(
+        state.field[7]*.998+.002
+      );
+      state.changes++;
+    }
+  }
+
+  state.nodes = survived;
+
+  for (let i=0; i<8; i++) {
+    state.field[i] = clamp(
+      state.field[i]*.9998 +
+      .0002*(i%2 ? .42 : .58)
+    );
+  }
+
+  save();
+  refresh();
+}
+
+function anchor() {
+  state.nodes.push({
+    x:.12+.76*random(),
+    y:.12+.76*random(),
+    h:Math.floor(random()*360),
+    s:1, p:1, a:1,
+    b:state.day
+  });
+
+  state.field[4] = clamp(state.field[4]+.018);
+  save();
+  refresh();
+}
+
+// =====================================================
+// INTERFACE
+// =====================================================
+
+function refresh() {
+  $("events").textContent = state.total;
+  $("living").textContent = state.nodes.filter(
+    n => n.a || n.b <= state.day
+  ).length;
+  $("anchors").textContent = state.nodes.filter(n=>n.a).length;
+  $("age").textContent = Math.floor(state.day);
+
+  $("bars").innerHTML = names.map((name,i) => `
+    <div class="barrow">
+      <span>${name}</span>
+      <div class="track">
+        <div class="fill"
+          style="width:${state.field[i]*100}%"></div>
+      </div>
+      <span>${state.field[i].toFixed(2)}</span>
+    </div>
+  `).join("");
+
+  if (view==="ascii") renderASCII();
+  if (view==="haiku") renderHaiku();
+}
+
+function setView(next) {
+  view = next;
+
+  document.querySelectorAll("[data-view]").forEach(el => {
+    el.setAttribute(
+      "aria-selected",
+      String(el.dataset.view===view)
+    );
+  });
+
+  $("art").hidden = view!=="constellation";
+  $("ascii").hidden = view!=="ascii";
+  $("haiku").hidden = view!=="haiku";
+
+  refresh();
+}
+
+// =====================================================
+// ASCII MEMORY
+// =====================================================
+
+function renderASCII() {
+  const w = Math.min(68,Math.max(35,
+    Math.floor(($("ascii").clientWidth-16)/7)
+  ));
+  const h = Math.min(34,Math.max(18,
+    Math.floor(($("ascii").clientHeight-20)/11)
+  ));
+
+  const chars = "  .,:;+=*#%@";
+  let out = "";
+  const t = state.day*.01;
+
+  for (let y=0; y<h; y++) {
+    for (let x=0; x<w; x++) {
+      const xx=x/w, yy=y/h;
+      let a=0;
+
+      for (const n of state.nodes) {
+        if (n.b>state.day) continue;
+        const dx=xx-n.x;
+        const dy=(yy-n.y)*1.4;
+        const d=Math.hypot(dx,dy);
+        a += .6*n.s*Math.exp(-d*d*95);
+      }
+
+      const waves =
+        Math.sin(xx*17+yy*11+t) *
+        Math.sin(yy*15-xx*8+t*.7);
+
+      const v=clamp(
+        (a*.62+waves*.12+.18) *
+        (.72+state.field[1]*.8)
+      );
+
+      out += chars[Math.min(
+        chars.length-1,
+        Math.floor(v*chars.length)
+      )];
+    }
+    out += "\n";
+  }
+
+  $("ascii").textContent = out;
+}
+
+// =====================================================
+// VISUAL HAIKU
+// =====================================================
+
+function renderHaiku() {
+  const nouns = [
+    "morning","echo","shadow","silence","river",
+    "absence","window","distance","afterglow",
+    "memory","threshold","horizon","dust",
+    "rain","garden","night"
+  ];
+
+  const adjs = [
+    "unwritten","distant","forgotten","quiet",
+    "restless","tender","unseen","hollow",
+    "patient","fading","silver","weightless"
+  ];
+
+  const verbs = [
+    "returns","unfolds","remains","drifts",
+    "waits","dissolves","awakens","wanders"
+  ];
+
+  const seed = Math.floor(
+    state.field.reduce(
+      (a,v,i)=>a+v*100000*(i+1),0
+    ) + state.total*19 + Math.floor(state.day/7)
+  );
+
+  const rnd = seedRandom(seed);
+  const pick = arr => arr[Math.floor(rnd()*arr.length)];
+
+  $("haiku").replaceChildren();
+
+  const symbol=document.createElement("div");
+  symbol.className="haiku-symbol";
+  symbol.textContent=["∴","◌","∿","⌁","⋯"][
+    Math.floor(rnd()*5)
+  ];
+  $("haiku").append(symbol);
+
+  const lines = [
+    `a ${pick(adjs)} ${pick(nouns)}`,
+    `between ${pick(nouns)} and ${pick(nouns)}`,
+    `something ${pick(verbs)}`
+  ];
+
+  for (const line of lines) {
+    const el=document.createElement("div");
+    el.textContent=line;
+    $("haiku").append(el);
+  }
+}
+
+// =====================================================
+// CONSTELLATION
+// =====================================================
+
+function draw() {
+  requestAnimationFrame(draw);
+  if (view!=="constellation") return;
+
+  const canvas=$("art");
+  const ctx=canvas.getContext("2d");
+  const dpr=Math.min(devicePixelRatio||1,2);
+  const rect=canvas.getBoundingClientRect();
+  const W=Math.max(1,rect.width);
+  const H=Math.max(1,rect.height);
+
+  if (
+    canvas.width!==Math.round(W*dpr) ||
+    canvas.height!==Math.round(H*dpr)
+  ) {
+    canvas.width=Math.round(W*dpr);
+    canvas.height=Math.round(H*dpr);
+  }
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle="#0d151d";
+  ctx.fillRect(0,0,W,H);
+
+  const t=frame++/65;
+  const nodes=state.nodes.filter(
+    n=>n.a || n.b<=state.day
+  );
+
+  for (let i=0; i<nodes.length; i++) {
+    const n=nodes[i];
+
+    const x=n.x*W+
+      Math.sin(t*.35+i*2.1) *
+      Math.min(11,W*.02)*state.field[5];
+
+    const y=n.y*H+
+      Math.cos(t*.31+i) *
+      Math.min(9,H*.03)*state.field[5];
+
+    if (i<180) {
+      for (let j=Math.max(0,i-14); j<i; j++) {
+        const m=nodes[j];
+        const xx=m.x*W;
+        const yy=m.y*H;
+        const d=Math.hypot(x-xx,y-yy);
+
+        if (d<Math.min(W,H)*(.12+state.field[4]*.16)) {
+          ctx.beginPath();
+          ctx.moveTo(x,y);
+          ctx.lineTo(xx,yy);
+          ctx.strokeStyle=
+            `rgba(129,185,190,${Math.max(0,.12-d/1300)*n.s})`;
+          ctx.lineWidth=.6;
+          ctx.stroke();
+        }
+      }
+    }
+
+    ctx.beginPath();
+    ctx.arc(
+      x,y,
+      (n.a?4.1:1.2+state.field[0]*1.5) *
+        Math.max(.3,n.s),
+      0,Math.PI*2
+    );
+
+    ctx.fillStyle = n.a
+      ? "#eec394"
+      : `hsla(${Math.round(160+n.h*.25)},45%,75%,${clamp(n.s)})`;
+
+    ctx.fill();
+
+    if (n.a) {
+      ctx.beginPath();
+      ctx.arc(x,y,8+Math.sin(t+i)*2,0,Math.PI*2);
+      ctx.strokeStyle="rgba(238,195,148,.22)";
+      ctx.stroke();
+    }
+  }
+}
+
+// =====================================================
+// THE MOMENT — EPHEMERAL RECEIPT
+// =====================================================
+
+function makeReceipt(date) {
+  const n=10+Math.floor(random()*14);
+  const r=random();
+  const hue=Math.floor(random()*360);
+  const stamp=date.toISOString();
+  const parts=[];
+
+  parts.push(
+    `<rect width="600" height="690"
+      fill="hsl(${hue},27%,14%)"/>`
+  );
+
+  parts.push(
+    `<text x="300" y="56"
+      font-family="monospace"
+      letter-spacing="4"
+      text-anchor="middle"
+      fill="#d8d3c6"
+      font-size="16">
+      A MEMORY WITHOUT AN OWNER
+    </text>`
+  );
+
+  for (let i=0; i<n; i++) {
+    const a=i*2.399+r*6.28;
+    const rr=30+i*11;
+    const cx=300+Math.cos(a)*rr;
+    const cy=325+Math.sin(a)*rr;
+    const rx=35+i%6*7;
+    const ry=20+i%5*8;
+
+    parts.push(`
+      <ellipse
+        cx="${cx.toFixed(2)}"
+        cy="${cy.toFixed(2)}"
+        rx="${rx}" ry="${ry}"
+        transform="rotate(${(i*27)%360} ${cx} ${cy})"
+        fill="none"
+        stroke="hsl(${(hue+i*13)%360},70%,72%)"
+        stroke-width="${1+i%3}"
+        opacity=".55"
+      />
+    `);
+  }
+
+  parts.push(`
+    <circle cx="300" cy="325" r="13" fill="#ead1b3"/>
+    <text x="300" y="525" text-anchor="middle"
+      fill="#f1dfca" font-family="Georgia,serif"
+      font-size="38">You were here.</text>
+    <text x="300" y="566" text-anchor="middle"
+      fill="#c2d1cf" font-family="monospace"
+      font-size="17">
+      ${stamp.replace("T"," ").replace("Z"," UTC")}
+    </text>
+    <text x="300" y="632" text-anchor="middle"
+      fill="#a9b9b8" font-family="monospace"
+      font-size="13">THE MOMENT EXISTS ONLY ONCE</text>
+  `);
+
+  receiptSVG=`
+    <svg xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 600 690" width="600" height="690">
+      ${parts.join("")}
+    </svg>
+  `;
+
+  $("receiptArt").innerHTML=receiptSVG;
+  $("receiptTime").textContent=stamp.replace("T"," · ");
+  $("overlay").classList.add("show");
+}
+
+function closeReceipt() {
+  receiptSVG=null;
+  $("receiptArt").replaceChildren();
+  $("overlay").classList.remove("show");
+}
+
+// =====================================================
+// EVENTS
+// =====================================================
+
+$("submitText").onclick=()=>{
+  const raw=$("entry").value;
+
+  if (!raw.trim()) {
+    $("status").textContent=
+      "Kirjoita jotakin tai valitse tyhjä jälki.";
+    return;
+  }
+
+  ingest(raw,true);
+  $("entry").value="";
+  $("status").textContent=
+    "Jälki muunnettu. Alkuperäinen teksti ei tallentunut.";
+};
+
+$("blank").onclick=()=>{
+  ingest("",true);
+  $("status").textContent="Tyhjä jälki vastaanotettu.";
+};
+
+$("plus10").onclick=()=>{
+  for (let i=0;i<10;i++) ingest("",false);
+};
+
+$("plus100").onclick=()=>{
+  for (let i=0;i<100;i++) ingest("",false);
+};
+
+$("advance").onclick=()=>tick(365);
+$("anchor").onclick=anchor;
+
+$("reset").onclick=()=>{
+  if (confirm("Aloitetaanko uusi paikallinen muisti?")) {
+    state=initial();
+    save();
+    refresh();
+  }
+};
+
+$("saveReceipt").onclick=()=>{
+  if (!receiptSVG) return;
+
+  const blob=new Blob([receiptSVG],{
+    type:"image/svg+xml;charset=utf-8"
+  });
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+
+  a.href=url;
+  a.download="The_Moment_"+Date.now()+".svg";
+  a.click();
+
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+};
+
+$("closeReceipt").onclick=closeReceipt;
+
+document.querySelectorAll("[data-view]").forEach(el=>{
+  el.onclick=()=>setView(el.dataset.view);
+});
+
+// Simuloitu muistin ajan kuluminen
+setInterval(()=>{
+  if (
+    $("flow").checked &&
+    !$("overlay").classList.contains("show")
+  ) {
+    tick(.16);
+  }
+},2100);
+
+// ASCII-näkymän päivitys
+setInterval(()=>{
+  if (view==="ascii") renderASCII();
+},850);
+
+// Käynnistys
+refresh();
+draw();
+
+})();
+</script>
+</body>
+</html>
