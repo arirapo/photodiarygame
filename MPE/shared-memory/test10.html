@@ -1,0 +1,911 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPE 1.0 — Shared Visual Memory</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0b1119;
+  --panel:#17222e;
+  --line:#344754;
+  --ink:#eee8df;
+  --muted:#a5b6bf;
+  --gold:#e6be94;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 system-ui,sans-serif;
+}
+.wrap{max-width:1330px;margin:auto;padding:20px 16px 44px}
+header,.tabs,.buttons,.counts{
+  display:flex;gap:9px;flex-wrap:wrap;align-items:center;
+}
+header{justify-content:space-between}
+header span{
+  color:#a6c9cd;font:11px monospace;letter-spacing:.12em;
+}
+.pill{
+  padding:5px 10px;border:1px solid #52707d;border-radius:20px;
+}
+h1{
+  font:normal clamp(31px,5vw,58px) Georgia,serif;
+  margin:18px 0 1px;
+}
+.lead{
+  color:var(--gold);font:italic 17px Georgia,serif;
+  margin:0 0 20px;
+}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.8fr) minmax(285px,.85fr);
+  gap:17px;
+}
+.panel{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:15px;padding:16px;min-width:0;
+}
+h2{font:normal 24px Georgia,serif;margin:0 0 15px}
+h3{font-size:14px;margin:18px 0 8px}
+button{
+  font:inherit;cursor:pointer;color:var(--ink);
+  background:#293d48;border:1px solid #506b77;
+  border-radius:9px;padding:9px 12px;
+}
+button.active{background:#3c656b;border-color:#9bbdc2}
+button.primary{
+  background:var(--gold);color:#182730;
+  border-color:var(--gold);font-weight:700;
+}
+.tabs{margin-bottom:11px}
+.stage{
+  position:relative;aspect-ratio:2/1;background:#091721;
+  border-radius:11px;overflow:hidden;border:1px solid var(--line);
+}
+canvas{width:100%;height:100%;display:block}
+#ascii,#poem{position:absolute;inset:0;margin:0}
+[hidden]{display:none!important}
+#ascii{
+  padding:10px;white-space:pre;overflow:hidden;
+  font:9px/1.05 monospace;color:#bbd2d3;
+}
+#poem{
+  display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;gap:14px;
+  background:radial-gradient(ellipse,#273e48,#091721);
+  font:italic clamp(18px,2.8vw,32px) Georgia,serif;
+}
+.symbol{font:normal 46px Georgia,serif;color:#a2cacc}
+.counts{
+  margin:15px 0;border-top:1px solid var(--line);
+  padding-top:12px;gap:18px;
+}
+.counts strong{
+  display:block;color:var(--gold);font:27px Georgia,serif;
+}
+.counts small,.muted{font-size:12px;color:var(--muted)}
+textarea{
+  width:100%;min-height:90px;padding:10px;
+  background:#0c1924;color:var(--ink);
+  border:1px solid #516b78;border-radius:9px;resize:vertical;
+}
+.buttons{margin-top:10px}
+.status{
+  padding:11px;margin-top:14px;background:#1c3039;
+  border-left:2px solid #a4c2c0;font-size:12px;
+}
+.field{
+  display:grid;grid-template-columns:78px 1fr 33px;
+  gap:7px;align-items:center;font:11px monospace;margin:8px 0;
+}
+.track{
+  height:5px;background:#304550;border-radius:9px;overflow:hidden;
+}
+.fill{
+  height:100%;background:linear-gradient(90deg,#7ebdc1,#dbb18c);
+}
+.receipt{
+  margin-top:13px;border:1px solid #526b78;
+  border-radius:9px;padding:10px;
+}
+.receipt svg{
+  display:block;width:100%;max-width:260px;
+  height:auto;margin:auto;
+}
+.receipt p{
+  font:italic 15px Georgia,serif;text-align:center;
+}
+footer{margin-top:16px;color:var(--muted);font-size:12px}
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr}
+  .wrap{padding:12px 9px}
+  .panel{padding:12px}
+}
+@media(max-width:500px){
+  #ascii{font-size:6px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+  <span>TRACES BETWEEN / A MEMORY WITHOUT AN OWNER</span>
+  <span class="pill">MPE 1.0 · SHARED VISUAL MEMORY</span>
+</header>
+
+<h1>The memory remains. The image changes.</h1>
+<p class="lead">One memory. Many perceptions.</p>
+
+<div class="layout">
+<section class="panel">
+
+  <div class="tabs">
+    <button class="active" data-view="living">Living Memory</button>
+    <button data-view="constellation">Constellation</button>
+    <button data-view="ascii">Living ASCII</button>
+    <button data-view="poem">Visual Haiku</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="art"></canvas>
+    <pre id="ascii" hidden></pre>
+    <div id="poem" hidden></div>
+  </div>
+
+  <div class="counts">
+    <div><strong id="offers">–</strong><small>Offerings</small></div>
+    <div><strong id="visible">–</strong><small>Visible</small></div>
+    <div><strong id="waiting">–</strong><small>Waiting</small></div>
+    <div><strong id="forgotten">–</strong><small>Forgotten</small></div>
+  </div>
+
+  <div class="status" id="status">
+    Connecting to the shared memory…
+  </div>
+</section>
+
+<aside class="panel">
+  <h2>Memory Processing Engine</h2>
+
+  <h3>01 / Leave a Trace</h3>
+  <p class="muted">
+    Your original text stays in this browser.
+    Only abstract, randomized properties are sent
+    to the shared memory.
+  </p>
+
+  <textarea id="entry" maxlength="180"
+    placeholder="A thought, a word, or a silence…"></textarea>
+
+  <div class="buttons">
+    <button class="primary" id="send">Transform &amp; offer</button>
+    <button id="silence">Offer silence ∅</button>
+  </div>
+
+  <div id="receipt" class="receipt" hidden></div>
+
+  <h3>02 / Changing Perception</h3>
+
+  <div class="buttons">
+    <button id="changePhoto">Change Ghost Image</button>
+    <button id="motion">Pause motion</button>
+  </div>
+
+  <p class="muted" id="photoLabel"></p>
+  <p class="muted">
+    The photograph changes independently of the memory.
+    The trace does not appear immediately.
+  </p>
+
+  <h3>03 / Collective State</h3>
+  <div id="fields"></div>
+  <p class="muted" id="age"></p>
+</aside>
+</div>
+
+<footer>
+  Experimental shared-memory renderer · visual language based
+  on MPE 0.8 · Node.js API on the same origin · 2:1 panoramic
+  canvas · no third-party libraries.
+</footer>
+</main>
+
+<script>
+(()=>{
+'use strict';
+
+const $=id=>document.getElementById(id);
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+
+const photos=[
+  'IMG_6484.jpeg',
+  'R0011164.jpeg',
+  'R0011165.jpeg',
+  'R0012243.jpeg',
+  'R0012371.jpeg',
+  'R0015191.jpeg',
+  'R0015290.jpeg'
+];
+
+const names=[
+  'Energy','Density','Rhythm','Contrast',
+  'Affinity','Drift','Complexity','Silence'
+];
+
+let state=null;
+let view='living';
+let photoName='';
+let photo=null;
+let pixels=null;
+let frame=0;
+let moving=true;
+let receiptMarkup='';
+
+// -------------------------------------------
+// CHANGING GHOSTS
+// -------------------------------------------
+
+function choosePhoto(){
+  const candidates=photos.filter(x=>x!==photoName);
+
+  photoName=candidates[
+    Math.floor(Math.random()*candidates.length)
+  ];
+
+  photo=null;
+  pixels=null;
+
+  const im=new Image();
+
+  im.onload=()=>{
+    photo=im;
+    pixels=null;
+  };
+
+  im.onerror=()=>{
+    $('photoLabel').textContent=
+      'Image unavailable: '+photoName;
+  };
+
+  im.src=photoName;
+  $('photoLabel').textContent='Ghost: '+photoName;
+}
+
+function ghost(ctx,w,h){
+  if(!photo)return;
+
+  const pw=Math.max(20,Math.floor(w/18));
+  const ph=Math.max(10,Math.floor(h/18));
+
+  if(!pixels||pixels.width!==pw||pixels.height!==ph){
+    const c=document.createElement('canvas');
+    c.width=pw;
+    c.height=ph;
+
+    const g=c.getContext('2d');
+    const z=Math.max(
+      pw/photo.width,
+      ph/photo.height
+    );
+
+    g.drawImage(
+      photo,
+      (pw-photo.width*z)/2,
+      (ph-photo.height*z)/2,
+      photo.width*z,
+      photo.height*z
+    );
+
+    const im=g.getImageData(0,0,pw,ph);
+
+    for(let i=0;i<im.data.length;i+=4){
+      const l=(
+        im.data[i]*.299+
+        im.data[i+1]*.587+
+        im.data[i+2]*.114
+      )*.18;
+
+      im.data[i]=l*.60;
+      im.data[i+1]=l*.83;
+      im.data[i+2]=l;
+    }
+
+    g.putImageData(im,0,0);
+    pixels=c;
+  }
+
+  ctx.save();
+  ctx.globalAlpha=.50;
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(pixels,0,0,w,h);
+  ctx.restore();
+}
+
+// -------------------------------------------
+// ABSTRACT MEMORY ORGANISMS
+// -------------------------------------------
+
+function organisms(nodes){
+  const groups=new Map();
+
+  for(const n of nodes){
+    if(n.anchor)continue;
+
+    const key=
+      `${Math.floor(n.x*6)}-${Math.floor(n.y*5)}`;
+
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(n);
+  }
+
+  return [...groups.values()]
+    .filter(g=>g.length>=4)
+    .map(g=>({
+      x:g.reduce((a,n)=>a+n.x,0)/g.length,
+      y:g.reduce((a,n)=>a+n.y,0)/g.length,
+      r:Math.min(.15,.03+g.length*.002),
+      strength:g.reduce((a,n)=>a+n.s,0)/g.length
+    }));
+}
+
+// -------------------------------------------
+// SHARED VISUAL MEMORY
+// -------------------------------------------
+
+function draw(){
+  requestAnimationFrame(draw);
+
+  if(view==='ascii'||view==='poem')return;
+
+  const canvas=$('art');
+  const box=canvas.getBoundingClientRect();
+  const w=box.width;
+  const h=box.height;
+  const dpr=Math.min(devicePixelRatio||1,2);
+
+  if(
+    canvas.width!==Math.round(w*dpr)||
+    canvas.height!==Math.round(h*dpr)
+  ){
+    canvas.width=Math.round(w*dpr);
+    canvas.height=Math.round(h*dpr);
+  }
+
+  const g=canvas.getContext('2d');
+
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle='#091721';
+  g.fillRect(0,0,w,h);
+
+  ghost(g,w,h);
+
+  if(!state)return;
+
+  const t=(moving?++frame:frame)*.012;
+  const nodes=state.nodes||[];
+  const fields=state.field||Array(8).fill(.5);
+  const org=organisms(nodes);
+
+  // Translucent memory fields
+
+  for(let j=0;j<org.length;j++){
+    const o=org[j];
+    const x=o.x*w;
+    const y=o.y*h;
+    const r=o.r*Math.min(w,h)*2.2;
+
+    g.beginPath();
+
+    for(let k=0;k<=44;k++){
+      const angle=k*Math.PI*2/44;
+
+      const distortion=
+        1+
+        .13*Math.sin(angle*5+j*4+t*.08)+
+        .07*Math.cos(angle*3+state.days*.02);
+
+      const px=x+Math.cos(angle)*r*distortion;
+      const py=y+Math.sin(angle)*r*.8*distortion;
+
+      if(k)g.lineTo(px,py);
+      else g.moveTo(px,py);
+    }
+
+    g.closePath();
+
+    g.fillStyle=
+      `rgba(131,174,173,${.025+o.strength*.06})`;
+
+    g.fill();
+    g.strokeStyle='rgba(157,192,188,.10)';
+    g.stroke();
+  }
+
+  // Points and connections
+
+  const points=nodes.map(n=>({
+    n,
+    x:(
+      n.x+Math.sin(t*.5+n.h)*.004*fields[5]
+    )*w,
+    y:(
+      n.y+Math.cos(t*.35+n.h)*.004*fields[5]
+    )*h
+  }));
+
+  for(let i=0;i<points.length;i++){
+    const a=points[i];
+
+    for(let j=Math.max(0,i-22);j<i;j++){
+      const b=points[j];
+
+      const distance=Math.hypot(
+        a.x-b.x,
+        a.y-b.y
+      );
+
+      const limit=Math.min(w,h)*(
+        .1+.18*fields[4]
+      );
+
+      if(distance<limit){
+        g.beginPath();
+        g.moveTo(a.x,a.y);
+        g.lineTo(b.x,b.y);
+
+        g.strokeStyle=
+          `rgba(159,204,211,${
+            (.04+.15*fields[4])*
+            (1-distance/limit)*a.n.s
+          })`;
+
+        g.lineWidth=.65;
+        g.stroke();
+      }
+    }
+
+    g.beginPath();
+
+    g.arc(
+      a.x,a.y,
+      a.n.anchor?4:1.4+a.n.s*1.3,
+      0,Math.PI*2
+    );
+
+    g.fillStyle=a.n.anchor
+      ?'#e9ba90'
+      :`hsla(${162+a.n.h*.24},50%,80%,${
+          clamp(.2+a.n.s*.85)
+        })`;
+
+    g.fill();
+
+    // Typographic fragments
+
+    if(
+      !a.n.anchor&&
+      view==='living'&&
+      i%7===0
+    ){
+      g.fillStyle=
+        `rgba(194,213,209,${.15+a.n.s*.4})`;
+
+      g.font='12px Georgia';
+
+      const marks=['∴','~','⌁','·','+','◌'];
+
+      g.fillText(
+        marks[
+          (i+Math.floor(state.days/17))%6
+        ],
+        a.x+6,a.y-5
+      );
+    }
+  }
+}
+
+// -------------------------------------------
+// ASCII INTERPRETATION
+// -------------------------------------------
+
+function ascii(){
+  if(!state)return;
+
+  const e=$('ascii');
+
+  const w=Math.min(
+    95,Math.max(20,
+      Math.floor((e.clientWidth-15)/7)
+    )
+  );
+
+  const h=Math.min(
+    46,Math.max(10,
+      Math.floor((e.clientHeight-15)/10)
+    )
+  );
+
+  const chars='  .,:;+=*#%@';
+  const nodes=state.nodes||[];
+
+  let output='';
+
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const xx=x/w;
+      const yy=y/h;
+
+      let value=
+        .05+
+        .1*Math.sin(xx*15+state.days*.025)*
+        Math.cos(yy*12-state.days*.014);
+
+      for(const n of nodes){
+        const d=
+          (xx-n.x)**2+
+          (yy-n.y)**2;
+
+        value+=n.s*.45*Math.exp(-d*110);
+      }
+
+      value+=(
+        state.residue[
+          Math.min(7,Math.floor(xx*8))
+        ]||0
+      )*.18;
+
+      output+=chars[
+        Math.min(
+          chars.length-1,
+          Math.floor(clamp(value)*chars.length)
+        )
+      ];
+    }
+
+    output+='\n';
+  }
+
+  e.textContent=output;
+}
+
+// -------------------------------------------
+// GENERATIVE HAIKU
+// -------------------------------------------
+
+function haiku(){
+  if(!state)return;
+
+  let seed=Math.floor(
+    state.days*2+
+    state.offers*17+
+    state.forgotten*13+
+    (state.field||[]).reduce(
+      (a,v,i)=>a+v*10000*(i+1),0
+    )
+  )>>>0;
+
+  const next=()=>{
+    seed=(
+      Math.imul(seed,1664525)+1013904223
+    )>>>0;
+
+    return seed/2**32;
+  };
+
+  const pick=a=>
+    a[Math.floor(next()*a.length)];
+
+  const lines=[
+    pick(['∴','⌁','◌','∿']),
+    `a ${pick([
+      'patient','distant','unwritten',
+      'quiet','tender'
+    ])} ${pick([
+      'morning','shadow','river',
+      'memory','absence'
+    ])}`,
+    `between ${pick([
+      'silence','rain','echo','distance'
+    ])} and ${pick([
+      'stone','night','light','time'
+    ])}`,
+    `something ${pick([
+      'remains','wanders',
+      'dissolves','returns'
+    ])}`
+  ];
+
+  $('poem').replaceChildren();
+
+  for(const line of lines){
+    const e=document.createElement('div');
+    e.textContent=line;
+
+    if(line.length<3)e.className='symbol';
+
+    $('poem').append(e);
+  }
+}
+
+// -------------------------------------------
+// VIEWS
+// -------------------------------------------
+
+function setView(v){
+  view=v;
+
+  document.querySelectorAll('[data-view]')
+    .forEach(b=>b.classList.toggle(
+      'active',
+      b.dataset.view===v
+    ));
+
+  $('art').hidden=v==='ascii'||v==='poem';
+  $('ascii').hidden=v!=='ascii';
+  $('poem').hidden=v!=='poem';
+
+  if(v==='ascii')ascii();
+  if(v==='poem')haiku();
+}
+
+// -------------------------------------------
+// SHARED SERVER API
+// -------------------------------------------
+
+async function refresh(){
+  try{
+    const r=await fetch('/api/state',{
+      cache:'no-store'
+    });
+
+    if(!r.ok)throw Error('HTTP '+r.status);
+
+    state=await r.json();
+
+    $('offers').textContent=state.offers;
+    $('visible').textContent=state.nodes.length;
+    $('waiting').textContent=state.waiting;
+    $('forgotten').textContent=state.forgotten;
+
+    $('age').textContent=
+      `Memory age: ${
+        state.days.toFixed(2)
+      } simulated days`;
+
+    $('fields').innerHTML=names.map((n,i)=>`
+      <div class="field">
+        <span>${n}</span>
+        <div class="track">
+          <div class="fill"
+            style="width:${state.field[i]*100}%">
+          </div>
+        </div>
+        <span>${state.field[i].toFixed(2)}</span>
+      </div>
+    `).join('');
+
+    $('status').textContent=
+      'Connected · shared memory on this server';
+
+    if(view==='ascii')ascii();
+    if(view==='poem')haiku();
+
+  }catch(e){
+    $('status').textContent=
+      'Server connection unavailable: '+e.message;
+  }
+}
+
+// -------------------------------------------
+// BROWSER-SIDE TRANSFORMATION
+// -------------------------------------------
+
+function features(text){
+  let n=0;
+  let spaces=0;
+  let marks=0;
+  let diff=0;
+  let last=0;
+
+  for(const ch of text){
+    const c=ch.codePointAt(0);
+    n++;
+
+    if(/\s/u.test(ch))spaces++;
+    if(/[.,!?;:]/u.test(ch))marks++;
+
+    diff+=Math.min(
+      1,Math.abs(c-last)/100
+    );
+
+    last=c;
+  }
+
+  const raw=[
+    n?clamp(n/95):Math.random(),
+    n?clamp(spaces/n*5):Math.random(),
+    n?clamp(marks/n*9):Math.random(),
+    n?clamp(diff/n):Math.random(),
+    Math.random(),
+    Math.random(),
+    Math.random(),
+    Math.random()
+  ];
+
+  return raw.map(v=>
+    clamp(
+      Math.round(
+        (.35*v+.65*Math.random())*20
+      )/20
+    )
+  );
+}
+
+// -------------------------------------------
+// THE MOMENT
+// -------------------------------------------
+
+function showMoment(){
+  const now=new Date();
+  const seed=Math.floor(Math.random()*360);
+
+  const shapes=Array.from(
+    {length:20},(_,i)=>{
+      const a=i*2.399;
+      const r=7+i*4;
+
+      const x=130+Math.cos(a)*r;
+      const y=140+Math.sin(a)*r;
+
+      return `
+        <ellipse
+          cx="${x}" cy="${y}"
+          rx="${12+i%5*5}"
+          ry="${10+i%4*7}"
+          fill="none"
+          stroke="hsl(${(seed+i*17)%360},65%,72%)"
+          stroke-opacity=".65"
+          transform="rotate(${i*19} ${x} ${y})"
+        />
+      `;
+    }
+  ).join('');
+
+  receiptMarkup=`
+    <svg xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 260 325">
+      <rect width="260" height="325"
+        fill="hsl(${seed},31%,16%)"/>
+      ${shapes}
+      <text x="130" y="270"
+        text-anchor="middle"
+        font-family="Georgia"
+        font-size="21"
+        fill="#eee2d2">You were here.</text>
+      <text x="130" y="298"
+        text-anchor="middle"
+        font-family="monospace"
+        font-size="10"
+        fill="#c6d2d2">${now.toISOString()}</text>
+    </svg>
+  `;
+
+  $('receipt').innerHTML=
+    receiptMarkup+
+    '<p>Your trace has been accepted. '+
+    'Its moment is yet to come.</p>'+
+    '<div class="buttons">'+
+    '<button id="saveMoment">Save SVG</button>'+
+    '<button id="letGo">Let it go</button>'+
+    '</div>';
+
+  $('receipt').hidden=false;
+
+  $('saveMoment').onclick=()=>{
+    const url=URL.createObjectURL(
+      new Blob(
+        [receiptMarkup],
+        {type:'image/svg+xml'}
+      )
+    );
+
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='The_Moment.svg';
+    a.click();
+
+    setTimeout(
+      ()=>URL.revokeObjectURL(url),
+      3000
+    );
+  };
+
+  $('letGo').onclick=()=>{
+    receiptMarkup='';
+    $('receipt').replaceChildren();
+    $('receipt').hidden=true;
+  };
+}
+
+// -------------------------------------------
+// OFFER A TRACE
+// -------------------------------------------
+
+async function offer(text){
+  const values=features(text);
+  $('entry').value='';
+
+  const button=$('send');
+  button.disabled=true;
+
+  try{
+    const r=await fetch('/api/trace',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        features:values
+      })
+    });
+
+    if(!r.ok){
+      throw Error('HTTP '+r.status);
+    }
+
+    await refresh();
+    showMoment();
+
+  }catch(e){
+    $('status').textContent=
+      'Trace not accepted: '+e.message;
+  }finally{
+    button.disabled=false;
+  }
+}
+
+// -------------------------------------------
+// EVENTS
+// -------------------------------------------
+
+$('send').onclick=()=>{
+  if($('entry').value.trim()){
+    offer($('entry').value);
+  }else{
+    $('status').textContent=
+      'Write a thought or choose silence.';
+  }
+};
+
+$('silence').onclick=()=>offer('');
+
+$('changePhoto').onclick=choosePhoto;
+
+$('motion').onclick=()=>{
+  moving=!moving;
+  $('motion').textContent=
+    moving?'Pause motion':'Resume motion';
+};
+
+document.querySelectorAll('[data-view]')
+  .forEach(b=>{
+    b.onclick=()=>setView(b.dataset.view);
+  });
+
+// -------------------------------------------
+// START
+// -------------------------------------------
+
+choosePhoto();
+refresh();
+
+setInterval(refresh,5000);
+requestAnimationFrame(draw);
+
+})();
+</script>
+</body>
+</html>
