@@ -1,0 +1,403 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPE — Research Console</title>
+<style>
+:root { color-scheme:dark; }
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:#0b1119;
+  color:#eee8df;
+  font:15px/1.5 system-ui,sans-serif;
+}
+
+.wrap {
+  max-width:920px;
+  margin:auto;
+  padding:24px 16px;
+}
+
+h1 {
+  font:normal clamp(30px,5vw,54px) Georgia,serif;
+  margin:8px 0;
+}
+
+h2 {
+  font:normal 24px Georgia,serif;
+}
+
+.sub {
+  color:#e6be94;
+  font:italic 17px Georgia,serif;
+}
+
+.card {
+  background:#17222e;
+  border:1px solid #344754;
+  border-radius:14px;
+  padding:18px;
+  margin-top:18px;
+}
+
+.row {
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.muted {
+  color:#a7b8c0;
+  font-size:13px;
+}
+
+input {
+  background:#0b1923;
+  color:#eee8df;
+  border:1px solid #617785;
+  padding:11px;
+  border-radius:8px;
+  max-width:100%;
+  flex:1;
+  min-width:180px;
+}
+
+button {
+  padding:10px 13px;
+  background:#2a434e;
+  border:1px solid #627b84;
+  border-radius:9px;
+  color:#eee8df;
+  font:inherit;
+  cursor:pointer;
+}
+
+button:disabled {
+  opacity:.45;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline:2px solid #b6cfd0;
+  outline-offset:2px;
+}
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+.stat {
+  background:#10202b;
+  padding:12px;
+  border-radius:10px;
+}
+
+.stat b {
+  display:block;
+  color:#e6be94;
+  font:normal 28px Georgia,serif;
+}
+
+.stat small {
+  color:#a7b8c0;
+}
+
+.bar {
+  height:6px;
+  background:#344754;
+  border-radius:5px;
+  overflow:hidden;
+}
+
+.bar i {
+  display:block;
+  height:100%;
+  background:#a3c5c4;
+}
+
+.metric {
+  display:grid;
+  grid-template-columns:92px 1fr 40px;
+  gap:8px;
+  align-items:center;
+  margin:8px 0;
+  font-size:12px;
+}
+
+#status {
+  white-space:pre-wrap;
+  padding:10px;
+  border-left:2px solid #b7c5c1;
+  background:#1c3039;
+  margin-top:15px;
+}
+
+@media(max-width:550px) {
+  .stats {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<div class="muted">
+  A MEMORY WITHOUT AN OWNER / EXPERIMENTAL ADMIN
+</div>
+
+<h1>Research Console</h1>
+<p class="sub">
+  Observe the memory. Disturb its future.
+</p>
+
+<section class="card">
+  <h2>Administrator access</h2>
+
+  <p class="muted">
+    This console controls only memory12.json
+    on port 3002.
+
+    Do not publish the administrator key or
+    expose this test server to the internet.
+  </p>
+
+  <div class="row">
+    <input
+      id="key"
+      type="password"
+      autocomplete="off"
+      placeholder="MPE_ADMIN_KEY">
+    <button id="connect">Connect</button>
+  </div>
+
+  <div id="status" role="status">
+    Not connected
+  </div>
+</section>
+
+<section class="card">
+  <h2>Shared memory diagnostics</h2>
+
+  <div class="stats" id="stats"></div>
+
+  <p id="details" class="muted"></p>
+
+  <div id="fields"></div>
+</section>
+
+<section class="card">
+  <h2>Experiments</h2>
+
+  <p class="muted">
+    These experiments affect only memory12.json.
+    They do not modify memory11.json.
+  </p>
+
+  <div class="row">
+    <button data-count="10" disabled>
+      +10 simulated
+    </button>
+
+    <button data-count="100" disabled>
+      +100 simulated
+    </button>
+
+    <button data-days="30" disabled>
+      +30 days
+    </button>
+
+    <button data-days="365" disabled>
+      +1 year
+    </button>
+  </div>
+
+  <p class="muted">
+    Open test10.html in another tab on port
+    3002 to observe the visual changes.
+  </p>
+</section>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+let key = '';
+let busy = false;
+
+const names = [
+  'Energy','Density','Rhythm','Contrast',
+  'Affinity','Drift','Complexity','Silence'
+];
+
+function draw(m) {
+  const cells = [
+    ['Offerings',m.offers],
+    ['Visible',m.visible],
+    ['Waiting',m.waiting],
+    ['Anchors',m.anchors],
+    ['Assimilations',m.assimilations],
+    ['Forgotten',m.forgotten],
+    ['Time decay',m.expired],
+    ['Capacity loss',m.capacity],
+    ['Epoch',m.epoch]
+  ];
+
+  $('stats').replaceChildren();
+
+  for (const [name,num] of cells) {
+    const e = document.createElement('div');
+    e.className = 'stat';
+
+    const b = document.createElement('b');
+    b.textContent = num;
+
+    const s = document.createElement('small');
+    s.textContent = name;
+
+    e.append(b,s);
+    $('stats').append(e);
+  }
+
+  $('details').textContent =
+    `${m.days} simulated days · ${m.weather} · ` +
+    `${m.layers} historical layers · ` +
+    `aftereffects ${m.aftereffects}`;
+
+  $('fields').replaceChildren();
+
+  m.field.forEach((v,i) => {
+    const e = document.createElement('div');
+    e.className = 'metric';
+
+    const name = document.createElement('span');
+    name.textContent = names[i];
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+
+    const fill = document.createElement('i');
+    fill.style.width = (100*v)+'%';
+    bar.append(fill);
+
+    const value = document.createElement('span');
+    value.textContent = v.toFixed(2);
+
+    e.append(name,bar,value);
+    $('fields').append(e);
+  });
+}
+
+async function request(url,options={}) {
+  const r = await fetch(url,{
+    ...options,
+    cache:'no-store',
+    headers:{
+      'X-MPE-Admin-Key':key,
+      ...options.headers
+    }
+  });
+
+  const data = await r.json();
+
+  if (!r.ok) {
+    throw Error(
+      data.error || ('HTTP '+r.status)
+    );
+  }
+
+  return data;
+}
+
+async function load() {
+  try {
+    const m = await request(
+      '/api/research/diagnostics'
+    );
+
+    draw(m);
+
+    $('status').textContent =
+      'Connected · isolated experiment on port 3002';
+
+    document.querySelectorAll(
+      '[data-count],[data-days]'
+    ).forEach(b => b.disabled=false);
+
+  } catch(e) {
+    $('status').textContent =
+      'Connection failed: '+e.message;
+  }
+}
+
+$('connect').onclick = () => {
+  key = $('key').value;
+  $('key').value = '';
+  load();
+};
+
+const buttons = document.querySelectorAll(
+  '[data-count],[data-days]'
+);
+
+for (const b of buttons) {
+  b.onclick = async () => {
+    if (busy) return;
+
+    busy = true;
+    buttons.forEach(x => x.disabled=true);
+
+    try {
+      const payload = b.hasAttribute('data-count')
+        ? {
+            action:'simulate',
+            count:Number(b.dataset.count)
+          }
+        : {
+            action:'advance',
+            days:Number(b.dataset.days)
+          };
+
+      const data = await request(
+        '/api/research/experiment',
+        {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify(payload)
+        }
+      );
+
+      draw(data.metrics);
+
+      $('status').textContent =
+        'Experiment applied to memory12.json';
+
+    } catch(e) {
+      $('status').textContent =
+        'Error: '+e.message;
+
+    } finally {
+      busy = false;
+      buttons.forEach(x => x.disabled=false);
+    }
+  };
+}
+
+})();
+</script>
+</body>
+</html>
