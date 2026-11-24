@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#070809"><link rel="icon" href="data:,"><title>The Magic Memory of 37 — III · Reimagining</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:radial-gradient(circle at 50% 45%,#24252b 0%,#0b0c0e 48%,#030304 100%);color:#e8d9b7;font-family:system-ui,sans-serif}main{width:100%;height:100%;display:grid;place-items:center}svg{display:block;width:min(96vw,96vh);height:min(96vw,96vh);width:min(96vw,96dvh);height:min(96vw,96dvh);filter:drop-shadow(0 0 24px #d7be8414);user-select:none;cursor:none;touch-action:manipulation}header,footer{position:fixed;left:0;right:0;text-align:center;pointer-events:none;transition:opacity .6s}header{top:20px}h1{font:normal clamp(22px,3.3vw,40px) Georgia,serif;margin:0}p{margin:7px 0;color:#b6aa92;font-size:12px;letter-spacing:.18em;text-transform:uppercase}footer{bottom:20px;color:#9d9584;font-size:11px;letter-spacing:.08em}.clean header,.clean footer{opacity:0}#status{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:12px 18px;background:#090a0ddd;border:1px solid #c7b17c44;border-radius:10px;opacity:0;transition:opacity .4s;pointer-events:none}#status.show{opacity:1}
+</style></head><body><main><svg id="art" viewBox="0 0 1000 1000" role="img" aria-label="Changing mosaic of colored geometric faces formed by 37 chords"></svg></main><header><h1>The Magic Memory of 37</h1><p>III — Reimagining</p></header><footer>tap / click · hide text &nbsp; | &nbsp; P · projection &nbsp; | &nbsp; space · pause &nbsp; | &nbsp; N · new dream</footer><div id="status" role="status"></div>
+<script>
+'use strict';
+const N=37,C=500,R=418,NS='http://www.w3.org/2000/svg',svg=document.getElementById('art');
+const points=Array.from({length:N},(_,i)=>[C+R*Math.cos(2*Math.PI*i/N-Math.PI/2),C+R*Math.sin(2*Math.PI*i/N-Math.PI/2)]);
+const make=(tag,attrs={},parent=svg)=>{const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);parent.appendChild(e);return e;};
+const cross=(a,b,p)=>(b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0]);
+const EPS=1e-6;
+function area(poly){let s=0;for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];s+=a[0]*b[1]-a[1]*b[0];}return Math.abs(s)/2;}
+// Every chord spans the convex 37-gon; splitting convex faces by its line gives the actual planar cells.
+function split(poly,a,b){const pos=[],neg=[];for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length],u=cross(a,b,p),v=cross(a,b,q);if(u>=-EPS)pos.push(p);if(u<=EPS)neg.push(p);if((u>EPS&&v< -EPS)||(u< -EPS&&v>EPS)){const t=u/(u-v),r=[p[0]+t*(q[0]-p[0]),p[1]+t*(q[1]-p[1])];pos.push(r);neg.push(r);}}return pos.length>=3&&neg.length>=3&&area(pos)>1e-5&&area(neg)>1e-5?[pos,neg]:[poly];}
+function geometry(step,shift){const chords=[],seen=new Set();for(let i=0;i<N;i++){const j=(i*step+shift)%N;if(i===j)continue;const key=Math.min(i,j)+':'+Math.max(i,j);if(seen.has(key))continue;seen.add(key);chords.push([points[i],points[j]]);}let faces=[points];for(const [a,b] of chords)faces=faces.flatMap(p=>split(p,a,b));return {chords,faces};}
+function hex(used){let h;do{h='#'+Math.floor(Math.random()*0x1000000).toString(16).padStart(6,'0');}while(used.has(h));used.add(h);return h;}
+const layers=[make('g'),make('g')];
+function paint(layer,step,shift){layer.replaceChildren();const {chords,faces}=geometry(step,shift),used=new Set();for(const face of faces){const color=hex(used);make('polygon',{points:face.map(p=>p.map(n=>n.toFixed(4)).join(',')).join(' '),fill:color,'fill-opacity':.60,stroke:color,'stroke-opacity':.35,'stroke-width':.35},layer);}for(const [a,b] of chords)make('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#e9d9b5','stroke-width':.85,'stroke-opacity':.48},layer);return faces.length;}
+make('circle',{cx:C,cy:C,r:R,fill:'none',stroke:'#c7b17c','stroke-opacity':.38,'stroke-width':1.1});
+const dots=points.map(([cx,cy],i)=>make('circle',{cx,cy,r:i%4===0?3.8:2.7,fill:'#eadbbc','fill-opacity':.88}));
+const center=make('circle',{cx:C,cy:C,r:72,fill:'#08090b','fill-opacity':.84,stroke:'#c7b17c','stroke-opacity':.3});
+const numeral=make('text',{x:C,y:C+12,'text-anchor':'middle','font-family':'Georgia,serif','font-size':36,fill:'#eadbbc','letter-spacing':3});numeral.textContent='37';
+const HOLD=3700,FADE=14800,TOTAL=HOLD+FADE;let front=0,step=11,shift=0,nextStep=17,nextShift=7,elapsed=0,previous=null,paused=false;
+paint(layers[0],step,shift);paint(layers[1],nextStep,nextShift);layers[0].setAttribute('opacity',1);layers[1].setAttribute('opacity',0);
+function next(){front=1-front;step=nextStep;shift=nextShift;do{nextStep=2+Math.floor(Math.random()*34);}while(nextStep===step);nextShift=Math.floor(Math.random()*N);paint(layers[1-front],nextStep,nextShift);layers[front].setAttribute('opacity',1);layers[1-front].setAttribute('opacity',0);elapsed=0;}
+function frame(now){if(previous===null)previous=now;const dt=Math.min(now-previous,100);previous=now;if(!paused){elapsed+=dt;if(elapsed>=TOTAL)next();const t=Math.max(0,Math.min(1,(elapsed-HOLD)/FADE)),f=(1-Math.cos(Math.PI*t))/2;layers[front].setAttribute('opacity',1-f);layers[1-front].setAttribute('opacity',f);const breath=.5+.5*Math.sin(now/3700);center.setAttribute('r',70+breath*5);dots.forEach((d,i)=>d.setAttribute('fill-opacity',.72+.23*Math.sin(now/2300+i*.3)));}requestAnimationFrame(frame);}
+let timer;function flash(text){const s=document.getElementById('status');s.textContent=text;s.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>s.classList.remove('show'),1100);}
+document.addEventListener('click',()=>document.body.classList.toggle('clean'));
+document.addEventListener('keydown',e=>{switch(e.key.toLowerCase()){case 'p':case 'h':document.body.classList.toggle('clean');break;case 'escape':document.body.classList.remove('clean');break;case ' ':e.preventDefault();paused=!paused;flash(paused?'Paused':'Reimagining');break;case 'n':elapsed=HOLD;break;}});
+requestAnimationFrame(frame);
+</script></body></html>
