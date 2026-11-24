@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Magic Memory of 37 — II · Dreaming</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(42, 44, 50, 0.55), rgba(11, 12, 14, 0.96) 45%, #070809 78%, #030304 100%);
+      color: #eadbbc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+    }
+    svg {
+      width: min(96vw, 96vh);
+      height: min(96vw, 96vh);
+      display: block;
+      overflow: visible;
+      filter: drop-shadow(0 0 24px rgba(215, 190, 132, 0.08));
+      cursor: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 24px;
+      opacity: 0.9;
+      transition: opacity 600ms ease;
+    }
+    .overlay.hidden { opacity: 0; }
+    .title {
+      text-align: center;
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+    }
+    .title h1 {
+      margin: 0;
+      font: normal clamp(22px, 3.3vw, 40px) Georgia, "Times New Roman", serif;
+      color: #e8d9b7;
+      text-shadow: 0 0 24px rgba(224, 197, 136, 0.10);
+    }
+    .title p {
+      margin: 6px 0 0;
+      font-size: clamp(12px, 1.2vw, 14px);
+      color: rgba(206, 193, 165, 0.7);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .hint {
+      text-align: center;
+      align-self: center;
+      font-size: 12px;
+      color: rgba(200, 190, 166, 0.48);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .hint strong { color: rgba(230, 218, 188, 0.70); font-weight: 600; }
+    .info {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      min-width: 220px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-align: center;
+      color: rgba(235, 224, 202, 0.82);
+      background: rgba(14, 14, 16, 0.24);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(201, 179, 123, 0.14);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.20);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      opacity: 0.82;
+      transition: opacity 600ms ease;
+      pointer-events: none;
+    }
+    .info.hidden { opacity: 0; }
+    .message {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: rgba(10, 10, 12, 0.46);
+      border: 1px solid rgba(201, 179, 123, 0.12);
+      color: rgba(236, 225, 201, 0.88);
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transition: opacity 500ms ease;
+      pointer-events: none;
+    }
+    .message.show { opacity: 1; }
+    .clean .overlay,
+    .clean .info { opacity: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <svg id="art" viewBox="0 0 1000 1000" role="img" aria-label="Animated network of 37 points"></svg>
+  </main>
+
+  <div class="overlay" id="overlay">
+    <div class="title">
+      <h1>The Magic Memory of 37</h1>
+      <p>II — Dreaming</p>
+    </div>
+    <div class="hint">tap / click = <strong>hide text</strong> &nbsp; · &nbsp; p = <strong>projection</strong> &nbsp; · &nbsp; space = <strong>pause</strong></div>
+  </div>
+
+  <div class="info" id="info">Dreaming between <span id="stateLabel">11 → 14</span></div>
+  <div class="message" id="message"></div>
+
+  <script>
+    'use strict';
+
+    const N = 37;
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('art');
+    const overlay = document.getElementById('overlay');
+    const info = document.getElementById('info');
+    const stateLabel = document.getElementById('stateLabel');
+    const message = document.getElementById('message');
+
+    const CENTER = 500;
+    const RADIUS = 418;
+    const POINT_RADIUS = 3.2;
+    const GOLD = '#d6bc82';
+    const SILVER = '#9fb0b6';
+    const PALE = '#eadbbc';
+
+    let lineLayer;
+    let traceLayer;
+    let pointLayer;
+    let centerRing;
+    let centerText;
+    let halo;
+
+    const lineA = [];
+    const lineB = [];
+    const traces = [];
+    const points = [];
+
+    function gcd(a, b) {
+      while (b !== 0) [a, b] = [b, a % b];
+      return a;
+    }
+
+    const validSteps = [];
+    for (let i = 1; i < N; i++) {
+      if (gcd(i, N) === 1) validSteps.push(i);
+    }
+
+    let currentIndex = validSteps.indexOf(11);
+    if (currentIndex < 0) currentIndex = 0;
+    let nextIndex = (currentIndex + 1) % validSteps.length;
+    let stepA = validSteps[currentIndex];
+    let stepB = validSteps[nextIndex];
+    let shiftA = 0;
+    let shiftB = 7;
+    let phaseStart = performance.now();
+    const PHASE_DURATION = 15000;
+    const HOLD_DURATION = 2200;
+    let paused = false;
+    let lastTimestamp = performance.now();
+    let timeOffset = 0;
+    let showText = true;
+    let messageTimer = null;
+
+    function polar(i, radius = RADIUS) {
+      const angle = Math.PI * -0.5 + (Math.PI * 2 * i / N);
+      return {
+        x: CENTER + Math.cos(angle) * radius,
+        y: CENTER + Math.sin(angle) * radius
+      };
+    }
+
+    function create(tag, attrs, parent = svg) {
+      const el = document.createElementNS(NS, tag);
+      for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+      parent.appendChild(el);
+      return el;
+    }
+
+    function easeInOutSine(t) {
+      return -(Math.cos(Math.PI * t) - 1) / 2;
+    }
+
+    function wave(t) {
+      return 0.5 - 0.5 * Math.cos(Math.PI * 2 * t);
+    }
+
+    function buildScene() {
+      const defs = create('defs');
+
+      const grad = create('radialGradient', { id: 'bgGlow', cx: '50%', cy: '50%', r: '60%' }, defs);
+      create('stop', { offset: '0%', 'stop-color': '#3b3d45', 'stop-opacity': '0.14' }, grad);
+      create('stop', { offset: '65%', 'stop-color': '#16171b', 'stop-opacity': '0.06' }, grad);
+      create('stop', { offset: '100%', 'stop-color': '#000000', 'stop-opacity': '0' }, grad);
+
+      const haloGrad = create('radialGradient', { id: 'haloGrad', cx: '50%', cy: '50%', r: '50%' }, defs);
+      create('stop', { offset: '0%', 'stop-color': '#dfc78e', 'stop-opacity': '0.20' }, haloGrad);
+      create('stop', { offset: '55%', 'stop-color': '#d8bf84', 'stop-opacity': '0.07' }, haloGrad);
+      create('stop', { offset: '100%', 'stop-color': '#d8bf84', 'stop-opacity': '0' }, haloGrad);
+
+      create('circle', { cx: CENTER, cy: CENTER, r: 470, fill: 'url(#bgGlow)' });
+      halo = create('circle', { cx: CENTER, cy: CENTER, r: 170, fill: 'url(#haloGrad)' });
+      create('circle', {
+        cx: CENTER,
+        cy: CENTER,
+        r: RADIUS,
+        fill: 'none',
+        stroke: GOLD,
+        'stroke-opacity': '0.18',
+        'stroke-width': '1.3'
+      });
+      create('circle', {
+        cx: CENTER,
+        cy: CENTER,
+        r: RADIUS - 20,
+        fill: 'none',
+        stroke: SILVER,
+        'stroke-opacity': '0.08',
+        'stroke-width': '1'
+      });
+
+      traceLayer = create('g', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+      lineLayer = create('g', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+      pointLayer = create('g', {});
+
+      for (let i = 0; i < N; i++) {
+        const trace = create('line', {
+          x1: CENTER, y1: CENTER, x2: CENTER, y2: CENTER,
+          stroke: GOLD,
+          'stroke-opacity': '0',
+          'stroke-width': '0.85'
+        }, traceLayer);
+        traces.push(trace);
+      }
+
+      for (let i = 0; i < N; i++) {
+        const a = create('line', {
+          x1: CENTER, y1: CENTER, x2: CENTER, y2: CENTER,
+          stroke: i % 3 === 0 ? GOLD : SILVER,
+          'stroke-opacity': i % 3 === 0 ? '0.32' : '0.22',
+          'stroke-width': i % 5 === 0 ? '1.8' : '1.2'
+        }, lineLayer);
+        lineA.push(a);
+
+        const b = create('line', {
+          x1: CENTER, y1: CENTER, x2: CENTER, y2: CENTER,
+          stroke: i % 2 === 0 ? GOLD : SILVER,
+          'stroke-opacity': '0.00',
+          'stroke-width': i % 7 === 0 ? '2.0' : '1.25'
+        }, lineLayer);
+        lineB.push(b);
+      }
+
+      for (let i = 0; i < N; i++) {
+        const p = polar(i);
+        const point = create('circle', {
+          cx: p.x,
+          cy: p.y,
+          r: i % 4 === 0 ? POINT_RADIUS + 0.8 : POINT_RADIUS,
+          fill: PALE,
+          'fill-opacity': i % 4 === 0 ? '0.94' : '0.80'
+        }, pointLayer);
+        points.push(point);
+      }
+
+      centerRing = create('circle', {
+        cx: CENTER,
+        cy: CENTER,
+        r: 77,
+        fill: 'rgba(8,8,10,0.84)',
+        stroke: GOLD,
+        'stroke-opacity': '0.19',
+        'stroke-width': '1.1'
+      });
+
+      centerText = create('text', {
+        x: CENTER,
+        y: CENTER + 8,
+        'text-anchor': 'middle',
+        'font-family': 'Georgia, serif',
+        'font-size': '34',
+        fill: '#e7d8b5',
+        'fill-opacity': '0.88',
+        'letter-spacing': '0.08em'
+      });
+      centerText.textContent = '37';
+    }
+
+    function targetPoint(i, step, shift) {
+      return polar((i * step + shift) % N);
+    }
+
+    function updateStateLabel() {
+      stateLabel.textContent = `${stepA} → ${stepB}`;
+    }
+
+    function scheduleNextPhase(now) {
+      currentIndex = nextIndex;
+      nextIndex = (nextIndex + 1 + Math.floor(Math.random() * 2)) % validSteps.length;
+      stepA = validSteps[currentIndex];
+      stepB = validSteps[nextIndex];
+      shiftA = shiftB;
+      shiftB = (shiftA + 1 + Math.floor(Math.random() * 11)) % N;
+      phaseStart = now;
+      updateStateLabel();
+    }
+
+    function showMessage(text) {
+      message.textContent = text;
+      message.classList.add('show');
+      clearTimeout(messageTimer);
+      messageTimer = setTimeout(() => message.classList.remove('show'), 1400);
+    }
+
+    function toggleOverlay(force) {
+      showText = typeof force === 'boolean' ? force : !showText;
+      overlay.classList.toggle('hidden', !showText || document.body.classList.contains('clean'));
+      info.classList.toggle('hidden', !showText || document.body.classList.contains('clean'));
+    }
+
+    function toggleProjection(force) {
+      const makeClean = typeof force === 'boolean' ? force : !document.body.classList.contains('clean');
+      document.body.classList.toggle('clean', makeClean);
+      overlay.classList.toggle('hidden', makeClean || !showText);
+      info.classList.toggle('hidden', makeClean || !showText);
+      showMessage(makeClean ? 'Projection mode' : 'Text restored');
+    }
+
+    function animate(now) {
+      if (!paused) {
+        lastTimestamp = now;
+        const elapsed = now - phaseStart;
+        const total = PHASE_DURATION + HOLD_DURATION;
+
+        if (elapsed > total) {
+          scheduleNextPhase(now);
+        }
+
+        const phaseElapsed = Math.min(elapsed, PHASE_DURATION);
+        const t = easeInOutSine(Math.max(0, Math.min(1, phaseElapsed / PHASE_DURATION)));
+        const holdMix = elapsed > PHASE_DURATION ? 1 : t;
+
+        for (let i = 0; i < N; i++) {
+          const start = polar(i);
+          const endA = targetPoint(i, stepA, shiftA);
+          const endB = targetPoint(i, stepB, shiftB);
+
+          const x = endA.x + (endB.x - endA.x) * holdMix;
+          const y = endA.y + (endB.y - endA.y) * holdMix;
+
+          const line1 = lineA[i];
+          line1.setAttribute('x1', start.x);
+          line1.setAttribute('y1', start.y);
+          line1.setAttribute('x2', x);
+          line1.setAttribute('y2', y);
+
+          const echoStep = validSteps[(currentIndex + 5) % validSteps.length];
+          const echoShift = (shiftA + 13) % N;
+          const echoA = targetPoint(i, echoStep, echoShift);
+          const echoB = targetPoint(i, stepB, (shiftB + 3) % N);
+          const wobble = 0.5 + 0.5 * Math.sin((now * 0.00034) + i * 0.62);
+          const xb = echoA.x + (echoB.x - echoA.x) * (0.18 + t * 0.76);
+          const yb = echoA.y + (echoB.y - echoA.y) * (0.18 + t * 0.76);
+
+          const line2 = lineB[i];
+          line2.setAttribute('x1', start.x);
+          line2.setAttribute('y1', start.y);
+          line2.setAttribute('x2', xb);
+          line2.setAttribute('y2', yb);
+          line2.setAttribute('stroke-opacity', (0.06 + wobble * 0.18).toFixed(3));
+
+          const trace = traces[i];
+          trace.setAttribute('x1', start.x);
+          trace.setAttribute('y1', start.y);
+          trace.setAttribute('x2', endA.x);
+          trace.setAttribute('y2', endA.y);
+          const fade = Math.max(0, 0.16 - t * 0.12);
+          trace.setAttribute('stroke-opacity', fade.toFixed(3));
+
+          const pulse = 0.72 + 0.28 * Math.sin(now * 0.0011 + i * 0.28);
+          points[i].setAttribute('fill-opacity', (0.45 + pulse * 0.45).toFixed(3));
+        }
+
+        const breath = wave(now * 0.000045);
+        halo.setAttribute('r', (156 + breath * 42).toFixed(2));
+        halo.setAttribute('opacity', (0.66 + breath * 0.18).toFixed(3));
+        centerRing.setAttribute('r', (72 + breath * 8).toFixed(2));
+        centerRing.setAttribute('stroke-opacity', (0.15 + breath * 0.14).toFixed(3));
+        centerText.setAttribute('fill-opacity', (0.70 + breath * 0.25).toFixed(3));
+      } else {
+        phaseStart += now - lastTimestamp;
+        lastTimestamp = now;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    buildScene();
+    updateStateLabel();
+    requestAnimationFrame(animate);
+
+    document.addEventListener('keydown', (event) => {
+      const key = event.key.toLowerCase();
+      if (key === ' ') {
+        event.preventDefault();
+        paused = !paused;
+        showMessage(paused ? 'Paused' : 'Dreaming');
+      } else if (key === 'p') {
+        toggleProjection();
+      } else if (key === 'escape') {
+        document.body.classList.remove('clean');
+        toggleOverlay(true);
+        showMessage('Text restored');
+      } else if (key === 'h') {
+        toggleOverlay();
+        showMessage(showText ? 'Text visible' : 'Text hidden');
+      }
+    }, { passive: false });
+
+    document.body.addEventListener('click', () => toggleOverlay(), { passive: true });
+    document.body.addEventListener('touchstart', () => toggleOverlay(), { passive: true });
+  </script>
+</body>
+</html>
