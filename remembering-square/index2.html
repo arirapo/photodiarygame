@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Remembering Square — II · Inner Light</title><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090c;color:#e4d3af}canvas{display:block;width:100%;height:100%;touch-action:manipulation}header,footer{position:fixed;left:0;right:0;text-align:center;pointer-events:none;transition:opacity 1s}header{top:4vh}h1{font:normal clamp(22px,4vw,36px) Georgia;margin:0;letter-spacing:.08em}p{font:11px system-ui;letter-spacing:.22em;color:#a59987}footer{bottom:3vh;font:11px system-ui}body.clean header,body.clean footer{opacity:0}body.clean{cursor:none}#error{position:fixed;bottom:0;color:#f6aa92;background:#181010;white-space:pre-wrap;font:13px monospace}</style></head><body class="clean"><canvas id="art" aria-label="Animated luminous Sator cube"></canvas><header><h1>The Remembering Square</h1><p>II — INNER LIGHT</p></header><footer>Space · pause &nbsp; P / tap · projection &nbsp; Esc · restore</footer><div id="error"></div><script>
+'use strict';
+window.addEventListener('error',e=>document.getElementById('error').textContent=e.message);
+const canvas=document.getElementById('art'),ctx=canvas.getContext('2d');
+const words=['SATOR','AREPO','TENET','OPERA','ROTAS'];
+const colors=['#d5aa62','#54b8b9','#a786cf','#cb6683','#6f98cf','#9fbe75','#d58d62'];
+const rand=(a,b)=>a+Math.random()*(b-a), clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), smooth=x=>x*x*(3-2*x);
+const faces=[{n:[0,0,1],u:[1,0,0],v:[0,1,0]},{n:[1,0,0],u:[0,0,-1],v:[0,1,0]},{n:[0,0,-1],u:[-1,0,0],v:[0,1,0]},{n:[-1,0,0],u:[0,0,1],v:[0,1,0]},{n:[0,-1,0],u:[1,0,0],v:[0,0,1]},{n:[0,1,0],u:[1,0,0],v:[0,0,-1]}];
+const poses=[[ -.27,.43],[-.29,-1.14],[-.27,-2.71],[-.29,-4.28],[1.20,-4.71],[-1.20,-4.71]];
+let w,h,scale,dpr,t=0,last=null,paused=false,ax=poses[0][0],ay=poses[0][1],from=poses[0],to=poses[0],turnStart=-10,nextTurn=15,faceIndex=0;
+let route=[],routeIndex=0,nextLetter=0,active=-1,activeFace=0;const glow=Array.from({length:6},()=>new Float64Array(25));
+function newRoute(){const line=Math.floor(rand(0,5)),vertical=Math.random()<.5,rev=Math.random()<.5;route=Array.from({length:5},(_,i)=>{const j=rev?4-i:i;return vertical?j*5+line:line*5+j});routeIndex=0;}
+newRoute();
+const lights=Array.from({length:32},()=>({p:[rand(-.75,.75),rand(-.75,.75),rand(-.75,.75)],q:[rand(-.75,.75),rand(-.75,.75),rand(-.75,.75)],start:rand(-8,0),dur:rand(5,13),color:colors[Math.floor(rand(0,colors.length))],size:rand(.09,.22),phase:rand(0,6.28)}));
+function resize(){dpr=Math.min(2,window.devicePixelRatio||1);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);scale=Math.min(w,h)*.245;}
+window.addEventListener('resize',resize);resize();
+function rotate(p){const [x,y,z]=p,c=Math.cos(ay),s=Math.sin(ay),a=Math.cos(ax),b=Math.sin(ax);const X=c*x+s*z,Z=-s*x+c*z;return [X,a*y-b*Z,b*y+a*Z];}
+function project(p){const r=rotate(p),f=scale*5/(5-r[2]);return [w/2+r[0]*f,h/2+r[1]*f,r[2]];}
+function point(f,u,v){return f.n.map((n,i)=>n+f.u[i]*u+f.v[i]*v);}
+function path(points){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();}
+function tile(f,x,y){const a=-1+x*.4,b=-1+y*.4;return [point(f,a,b),point(f,a+.4,b),point(f,a+.4,b+.4),point(f,a,b+.4)].map(project);}
+function polygon(points,fill,stroke){path(points);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+function update(dt){if(t>=nextTurn){from=[ax,ay];faceIndex=(faceIndex+1)%6;to=poses[faceIndex].slice();while(to[1]-from[1]>Math.PI)to[1]-=2*Math.PI;while(to[1]-from[1]<-Math.PI)to[1]+=2*Math.PI;turnStart=t;nextTurn=t+rand(15,23);}
+const k=smooth(clamp((t-turnStart)/6,0,1));ax=from[0]+(to[0]-from[0])*k;ay=from[1]+(to[1]-from[1])*k;
+for(const g of glow)for(let i=0;i<25;i++)g[i]*=Math.exp(-dt*.65);
+if(t>=nextLetter){activeFace=faces.map((f,i)=>[rotate(f.n)[2],i]).sort((a,b)=>b[0]-a[0])[0][1];if(routeIndex>=5)newRoute();active=route[routeIndex++];glow[activeFace][active]=1;nextLetter=t+rand(.35,1.6)*(1+.35*Math.sin(t*.17))+(routeIndex===5?rand(.4,1.4):0);}}
+function draw(){ctx.clearRect(0,0,w,h);const bg=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.min(w,h)*.65);bg.addColorStop(0,'#1c1b22');bg.addColorStop(.55,'#0d1015');bg.addColorStop(1,'#08090c');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+const sorted=faces.map((f,i)=>({f,i,z:rotate(f.n)[2]})).sort((a,b)=>a.z-b.z);
+// Rear glass faces first, then the moving interior, then the front glass faces.
+function face({f,i,z},front){const corners=[point(f,-1,-1),point(f,1,-1),point(f,1,1),point(f,-1,1)].map(project);ctx.lineWidth=1;polygon(corners,front?'rgba(20,23,29,.25)':'rgba(22,25,30,.12)',front?'rgba(220,192,137,.66)':'rgba(140,145,150,.18)');for(let y=0;y<5;y++)for(let x=0;x<5;x++){const j=y*5+x,g=glow[i][j],p=tile(f,x,y);polygon(p,g>.01?`rgba(218,177,103,${g*.23})`:null,`rgba(204,178,130,${front?.20:.06})`);if(!front)continue;const a=project(point(f,-.8+x*.4,-.8+y*.4)),u=project(point(f,-.4+x*.4,-.8+y*.4)),v=project(point(f,-.8+x*.4,-.4+y*.4));ctx.save();ctx.transform((u[0]-a[0])/.4,(u[1]-a[1])/.4,(v[0]-a[0])/.4,(v[1]-a[1])/.4,a[0],a[1]);ctx.font='.245px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=`rgba(245,224,181,${.32+.68*g})`;ctx.fillText(words[y][x],0,0);ctx.restore();}}
+for(const f of sorted)if(f.z<=0)face(f,false);
+const cubes=[];for(const l of lights){if(t-l.start>=l.dur){l.p=l.q;l.q=[rand(-.75,.75),rand(-.75,.75),rand(-.75,.75)];l.start=t;l.dur=rand(5,13);l.color=colors[Math.floor(rand(0,colors.length))];}const k=smooth(clamp((t-l.start)/l.dur,0,1)),p=l.p.map((x,i)=>x+(l.q[i]-x)*k),s=l.size*(.8+.2*Math.sin(t*.7+l.phase));for(const f of faces){const z=rotate(f.n)[2];if(z<=0)continue;const corners=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([u,v])=>project(point(f,u,v).map((x,i)=>p[i]+x*s)));cubes.push({corners,z:corners.reduce((a,b)=>a+b[2],0)/4,color:l.color,alpha:(.18+.30*(.5+.5*Math.sin(t*.85+l.phase)))*(.65+.35*z)});}}
+cubes.sort((a,b)=>a.z-b.z);for(const c of cubes){ctx.save();ctx.globalAlpha=c.alpha;ctx.lineWidth=.7;polygon(c.corners,c.color,c.color);ctx.restore();}
+for(const f of sorted)if(f.z>0)face(f,true);
+}
+function frame(now){if(last===null)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused){t+=dt;update(dt);draw()}requestAnimationFrame(frame)}
+function toggle(){document.body.classList.toggle('clean')};canvas.addEventListener('click',toggle);document.addEventListener('keydown',e=>{if(e.repeat)return;if(e.code==='Space'){e.preventDefault();paused=!paused}else if(e.key.toLowerCase()==='p')toggle();else if(e.key==='Escape')document.body.classList.remove('clean')});update(0);draw();requestAnimationFrame(frame);
+</script></body></html>
