@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Geometry of Proof — I · Equilibrium</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+    body {
+      background: radial-gradient(circle at 50% 40%, #1a1d24 0%, #0c0d11 42%, #07080b 72%, #040405 100%);
+      color: #e1d3b7;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    main { position: absolute; inset: 0; display: grid; place-items: center; }
+    svg { width: 100%; height: 100%; display: block; touch-action: none; }
+    header, footer {
+      position: fixed; left: 0; right: 0; text-align: center;
+      pointer-events: none; transition: opacity 1.2s ease;
+    }
+    header { top: 4vh; }
+    h1 {
+      margin: 0;
+      font-weight: 400;
+      font-size: clamp(22px, 3vw, 38px);
+      letter-spacing: .08em;
+      text-shadow: 0 0 18px rgba(216, 190, 136, 0.08);
+    }
+    header p, footer p, .hud, .buttons { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header p {
+      margin: 8px 0 0;
+      font-size: 11px;
+      color: #a9997f;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+    }
+    footer { bottom: 3vh; }
+    footer p {
+      margin: 10px 0 0;
+      font-size: 11px;
+      color: #a9997f;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .hud {
+      position: fixed;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      min-width: min(92vw, 560px);
+      text-align: center;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+    .equation {
+      font-size: clamp(22px, 2.7vw, 34px);
+      letter-spacing: .04em;
+      color: #eadcbf;
+      text-shadow: 0 0 18px rgba(216, 190, 136, 0.10);
+      margin-bottom: 12px;
+    }
+    .values {
+      display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+      font-size: 12px; color: #b5a791; letter-spacing: .10em; text-transform: uppercase;
+    }
+    .chip {
+      padding: 8px 12px; border: 1px solid rgba(115, 105, 86, 0.58); border-radius: 999px;
+      background: rgba(13, 14, 17, 0.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
+    .buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; pointer-events: auto; }
+    button {
+      background: none; border: 1px solid #5a5245; color: #cfbfa1; border-radius: 999px;
+      padding: 9px 14px; font-size: 11px; letter-spacing: .11em; text-transform: uppercase; cursor: pointer;
+      transition: background .25s ease, border-color .25s ease, transform .2s ease;
+    }
+    button:hover { background: rgba(207,191,161,0.06); border-color: #87765a; }
+    button:active { transform: scale(.98); }
+    button:focus-visible { outline: 2px solid #e1d3b7; outline-offset: 3px; }
+    body.clean header, body.clean footer, body.clean .hud { opacity: 0; }
+    body.clean { cursor: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <svg id="art" viewBox="-600 -450 1200 900" role="img" aria-label="Interactive geometric proof of the Pythagorean theorem"></svg>
+  </main>
+
+  <header>
+    <h1>The Geometry of Proof</h1>
+    <p>I — Equilibrium</p>
+  </header>
+
+  <div class="hud" id="hud">
+    <div class="equation" id="equation">a² + b² = c²</div>
+    <div class="values" id="values"></div>
+  </div>
+
+  <footer>
+    <div class="buttons">
+      <button id="random">Chance</button>
+      <button id="reset">Reset</button>
+      <button id="projection">Projection</button>
+    </div>
+    <p>Drag the two bright points · Space pause shimmer · P projection · Esc return</p>
+  </footer>
+
+  <script>
+    'use strict';
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('art');
+    const equation = document.getElementById('equation');
+    const values = document.getElementById('values');
+    const randomBtn = document.getElementById('random');
+    const resetBtn = document.getElementById('reset');
+    const projectionBtn = document.getElementById('projection');
+
+    const state = {
+      a: 270,
+      b: 190,
+      targetA: 270,
+      targetB: 190,
+      dragging: null,
+      paused: false,
+      time: 0
+    };
+
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const dist = (p, q) => Math.hypot(q.x - p.x, q.y - p.y);
+
+    function vec(a, b) { return { x: b.x - a.x, y: b.y - a.y }; }
+    function add(a, b) { return { x: a.x + b.x, y: a.y + b.y }; }
+    function mul(v, s) { return { x: v.x * s, y: v.y * s }; }
+    function midpoint(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+
+    function polygonPoints(points) {
+      return points.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
+    }
+
+    function squareOnSegment(p1, p2, ref) {
+      const vx = p2.x - p1.x;
+      const vy = p2.y - p1.y;
+      const len = Math.hypot(vx, vy);
+      const n1 = { x: -vy / len, y: vx / len };
+      const n2 = { x: vy / len, y: -vx / len };
+      const c1 = add(midpoint(p1, p2), mul(n1, len / 2));
+      const c2 = add(midpoint(p1, p2), mul(n2, len / 2));
+      const n = dist(c1, ref) > dist(c2, ref) ? n1 : n2;
+      const q1 = add(p1, mul(n, len));
+      const q2 = add(p2, mul(n, len));
+      return [p1, p2, q2, q1];
+    }
+
+    function make(tag, attrs = {}, parent = svg) {
+      const e = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      parent.appendChild(e);
+      return e;
+    }
+
+    const defs = make('defs');
+    const bgGlow = make('radialGradient', { id: 'bgGlow', cx: '50%', cy: '50%', r: '64%' }, defs);
+    make('stop', { offset: '0%', 'stop-color': '#3c4251', 'stop-opacity': '.16' }, bgGlow);
+    make('stop', { offset: '55%', 'stop-color': '#14171d', 'stop-opacity': '.07' }, bgGlow);
+    make('stop', { offset: '100%', 'stop-color': '#050506', 'stop-opacity': '0' }, bgGlow);
+
+    const fillGold = make('linearGradient', { id: 'fillGold', x1: '0%', y1: '0%', x2: '100%', y2: '100%' }, defs);
+    make('stop', { offset: '0%', 'stop-color': '#caa364', 'stop-opacity': '.22' }, fillGold);
+    make('stop', { offset: '100%', 'stop-color': '#f1dfb4', 'stop-opacity': '.08' }, fillGold);
+
+    const fillSilver = make('linearGradient', { id: 'fillSilver', x1: '0%', y1: '0%', x2: '100%', y2: '100%' }, defs);
+    make('stop', { offset: '0%', 'stop-color': '#8ca0aa', 'stop-opacity': '.22' }, fillSilver);
+    make('stop', { offset: '100%', 'stop-color': '#d7e1e7', 'stop-opacity': '.07' }, fillSilver);
+
+    const fillRose = make('linearGradient', { id: 'fillRose', x1: '0%', y1: '0%', x2: '100%', y2: '100%' }, defs);
+    make('stop', { offset: '0%', 'stop-color': '#d6b277', 'stop-opacity': '.25' }, fillRose);
+    make('stop', { offset: '100%', 'stop-color': '#b0c1c7', 'stop-opacity': '.10' }, fillRose);
+
+    make('circle', { cx: 0, cy: 0, r: 430, fill: 'url(#bgGlow)' });
+
+    const grid = make('g', { opacity: '.14' });
+    for (let x = -520; x <= 520; x += 40) {
+      make('line', { x1: x, y1: -380, x2: x, y2: 380, stroke: '#7d725d', 'stroke-width': '.6', 'stroke-opacity': '.16' }, grid);
+    }
+    for (let y = -380; y <= 380; y += 40) {
+      make('line', { x1: -520, y1: y, x2: 520, y2: y, stroke: '#7d725d', 'stroke-width': '.6', 'stroke-opacity': '.16' }, grid);
+    }
+
+    const squareGroup = make('g');
+    const labelGroup = make('g');
+    const triangleGroup = make('g');
+    const handleGroup = make('g');
+
+    const squareA = make('polygon', { fill: 'url(#fillGold)', stroke: '#cba56a', 'stroke-width': '2.2', 'stroke-linejoin': 'round' }, squareGroup);
+    const squareB = make('polygon', { fill: 'url(#fillSilver)', stroke: '#9fb1b8', 'stroke-width': '2.2', 'stroke-linejoin': 'round' }, squareGroup);
+    const squareC = make('polygon', { fill: 'url(#fillRose)', stroke: '#e3cf9e', 'stroke-width': '2.2', 'stroke-linejoin': 'round' }, squareGroup);
+
+    const diagA = make('line', { stroke: '#cba56a', 'stroke-width': '1.1', 'stroke-dasharray': '6 8', 'stroke-opacity': '.44' }, squareGroup);
+    const diagB = make('line', { stroke: '#9fb1b8', 'stroke-width': '1.1', 'stroke-dasharray': '6 8', 'stroke-opacity': '.44' }, squareGroup);
+    const diagC1 = make('line', { stroke: '#e3cf9e', 'stroke-width': '1.1', 'stroke-dasharray': '6 8', 'stroke-opacity': '.40' }, squareGroup);
+    const diagC2 = make('line', { stroke: '#e3cf9e', 'stroke-width': '1.1', 'stroke-dasharray': '6 8', 'stroke-opacity': '.40' }, squareGroup);
+
+    const triangle = make('polygon', { fill: 'rgba(14, 16, 22, 0.26)', stroke: '#f2e5c4', 'stroke-width': '2.4', 'stroke-linejoin': 'round' }, triangleGroup);
+    const rightMark = make('path', { fill: 'none', stroke: '#f2e5c4', 'stroke-width': '1.6', 'stroke-opacity': '.88' }, triangleGroup);
+
+    const sideA = make('text', { 'text-anchor': 'middle', fill: '#d7c39a', 'font-size': '18', 'font-family': 'Georgia, serif' }, labelGroup);
+    const sideB = make('text', { 'text-anchor': 'middle', fill: '#b9c8ce', 'font-size': '18', 'font-family': 'Georgia, serif' }, labelGroup);
+    const sideC = make('text', { 'text-anchor': 'middle', fill: '#eadbbc', 'font-size': '18', 'font-family': 'Georgia, serif' }, labelGroup);
+
+    const areaA = make('text', { 'text-anchor': 'middle', fill: '#d8c6a1', 'font-size': '20', 'font-family': 'Georgia, serif' }, labelGroup);
+    const areaB = make('text', { 'text-anchor': 'middle', fill: '#c5d1d6', 'font-size': '20', 'font-family': 'Georgia, serif' }, labelGroup);
+    const areaC = make('text', { 'text-anchor': 'middle', fill: '#f0dfb3', 'font-size': '22', 'font-family': 'Georgia, serif' }, labelGroup);
+
+    const pointA = make('circle', { r: '5', fill: '#e7d9bc', opacity: '.7' }, handleGroup);
+    const pointB = make('circle', { r: '9', fill: '#d7b06b', stroke: '#f0ddb5', 'stroke-width': '1.5', cursor: 'ew-resize' }, handleGroup);
+    const pointC = make('circle', { r: '9', fill: '#9fb1b8', stroke: '#eef5f8', 'stroke-width': '1.5', cursor: 'ns-resize' }, handleGroup);
+
+    function setPoint(el, p) {
+      el.setAttribute('cx', p.x.toFixed(2));
+      el.setAttribute('cy', p.y.toFixed(2));
+    }
+
+    function updateGeometry(time) {
+      const pulse = 0.5 + 0.5 * Math.sin(time * 1.6);
+      const A = { x: -190, y: 170 };
+      const B = { x: A.x + state.a, y: A.y };
+      const C = { x: A.x, y: A.y - state.b };
+
+      const sqAB = squareOnSegment(A, B, C);
+      const sqAC = squareOnSegment(A, C, B);
+      const sqBC = squareOnSegment(B, C, A);
+
+      squareA.setAttribute('points', polygonPoints(sqAB));
+      squareB.setAttribute('points', polygonPoints(sqAC));
+      squareC.setAttribute('points', polygonPoints(sqBC));
+
+      squareA.setAttribute('opacity', (0.84 + pulse * 0.10).toFixed(3));
+      squareB.setAttribute('opacity', (0.82 + (1 - pulse) * 0.11).toFixed(3));
+      squareC.setAttribute('opacity', (0.86 + Math.sin(time * 1.1) * 0.05).toFixed(3));
+
+      diagA.setAttribute('x1', sqAB[0].x); diagA.setAttribute('y1', sqAB[0].y);
+      diagA.setAttribute('x2', sqAB[2].x); diagA.setAttribute('y2', sqAB[2].y);
+      diagB.setAttribute('x1', sqAC[0].x); diagB.setAttribute('y1', sqAC[0].y);
+      diagB.setAttribute('x2', sqAC[2].x); diagB.setAttribute('y2', sqAC[2].y);
+      diagC1.setAttribute('x1', sqBC[0].x); diagC1.setAttribute('y1', sqBC[0].y);
+      diagC1.setAttribute('x2', sqBC[2].x); diagC1.setAttribute('y2', sqBC[2].y);
+      diagC2.setAttribute('x1', sqBC[1].x); diagC2.setAttribute('y1', sqBC[1].y);
+      diagC2.setAttribute('x2', sqBC[3].x); diagC2.setAttribute('y2', sqBC[3].y);
+
+      triangle.setAttribute('points', polygonPoints([A, B, C]));
+      rightMark.setAttribute('d', `M ${A.x + 18} ${A.y} L ${A.x + 18} ${A.y - 18} L ${A.x} ${A.y - 18}`);
+
+      const midAB = midpoint(A, B), midAC = midpoint(A, C), midBC = midpoint(B, C);
+      sideA.setAttribute('x', midAB.x); sideA.setAttribute('y', midAB.y + 34); sideA.textContent = 'a';
+      sideB.setAttribute('x', midAC.x - 26); sideB.setAttribute('y', midAC.y); sideB.textContent = 'b';
+      sideC.setAttribute('x', midBC.x + 18); sideC.setAttribute('y', midBC.y - 10); sideC.textContent = 'c';
+
+      const centerAB = midpoint(sqAB[0], sqAB[2]);
+      const centerAC = midpoint(sqAC[0], sqAC[2]);
+      const centerBC = midpoint(sqBC[0], sqBC[2]);
+      areaA.setAttribute('x', centerAB.x); areaA.setAttribute('y', centerAB.y + 7); areaA.textContent = 'a²';
+      areaB.setAttribute('x', centerAC.x); areaB.setAttribute('y', centerAC.y + 7); areaB.textContent = 'b²';
+      areaC.setAttribute('x', centerBC.x); areaC.setAttribute('y', centerBC.y + 7); areaC.textContent = 'c²';
+
+      setPoint(pointA, A); setPoint(pointB, B); setPoint(pointC, C);
+
+      const a2 = state.a * state.a;
+      const b2 = state.b * state.b;
+      const c2 = a2 + b2;
+      const c = Math.sqrt(c2);
+      equation.textContent = `${Math.round(state.a)}² + ${Math.round(state.b)}² = ${c.toFixed(1)}²`;
+      values.innerHTML = [
+        `<span class="chip">a = ${state.a.toFixed(1)}</span>`,
+        `<span class="chip">b = ${state.b.toFixed(1)}</span>`,
+        `<span class="chip">c = ${c.toFixed(2)}</span>`,
+        `<span class="chip">${a2.toFixed(0)} + ${b2.toFixed(0)} = ${c2.toFixed(0)}</span>`
+      ].join('');
+    }
+
+    function clientToSvg(evt) {
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX;
+      pt.y = evt.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function pointerDown(which, evt) {
+      evt.preventDefault();
+      state.dragging = which;
+      svg.setPointerCapture?.(evt.pointerId);
+    }
+
+    pointB.addEventListener('pointerdown', evt => pointerDown('a', evt));
+    pointC.addEventListener('pointerdown', evt => pointerDown('b', evt));
+
+    svg.addEventListener('pointermove', evt => {
+      if (!state.dragging) return;
+      const p = clientToSvg(evt);
+      if (state.dragging === 'a') {
+        state.targetA = clamp(p.x + 190, 90, 420);
+      } else if (state.dragging === 'b') {
+        state.targetB = clamp(170 - p.y, 90, 340);
+      }
+    });
+
+    function stopDrag(evt) {
+      state.dragging = null;
+      if (evt && svg.hasPointerCapture?.(evt.pointerId)) svg.releasePointerCapture(evt.pointerId);
+    }
+    svg.addEventListener('pointerup', stopDrag);
+    svg.addEventListener('pointercancel', stopDrag);
+    svg.addEventListener('pointerleave', evt => { if (!evt.buttons) state.dragging = null; });
+
+    randomBtn.addEventListener('click', () => {
+      state.targetA = 110 + Math.random() * 290;
+      state.targetB = 100 + Math.random() * 220;
+    });
+    resetBtn.addEventListener('click', () => {
+      state.targetA = 270;
+      state.targetB = 190;
+    });
+    projectionBtn.addEventListener('click', () => document.body.classList.toggle('clean'));
+    svg.addEventListener('dblclick', () => document.body.classList.toggle('clean'));
+
+    document.addEventListener('keydown', evt => {
+      if (evt.repeat) return;
+      const key = evt.key.toLowerCase();
+      if (evt.code === 'Space') {
+        evt.preventDefault();
+        state.paused = !state.paused;
+      } else if (key === 'p') {
+        document.body.classList.toggle('clean');
+      } else if (evt.key === 'Escape') {
+        document.body.classList.remove('clean');
+      }
+    }, { passive: false });
+
+    let last = null;
+    function frame(now) {
+      if (last == null) last = now;
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (!state.paused) {
+        state.time += dt;
+        state.a = lerp(state.a, state.targetA, 1 - Math.pow(0.001, dt));
+        state.b = lerp(state.b, state.targetB, 1 - Math.pow(0.001, dt));
+      }
+      updateGeometry(state.time);
+      requestAnimationFrame(frame);
+    }
+
+    updateGeometry(0);
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
